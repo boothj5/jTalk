@@ -33,8 +33,8 @@ import org.jivesoftware.smack.packet.PacketExtension;
 public abstract class PEPItem implements PacketExtension {
     
     String id;
-    abstract String getNode();
-    abstract String getItemDetailsXML();
+    public abstract String getNode();
+    public abstract String getItemDetailsXML();
     
     /**
     * Creates a new PEPItem.

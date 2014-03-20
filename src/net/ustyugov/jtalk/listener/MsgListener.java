@@ -136,18 +136,6 @@ public class MsgListener implements PacketListener {
 			}
 		}
 
-        // Locations
-        LocationExtension geoloc = (LocationExtension) msg.getExtension("http://jabber.org/protocol/geoloc");
-        if (geoloc != null) {
-            service.addLocation(user, geoloc);
-        }
-
-        // Tunes
-        TunesExtension tunes = (TunesExtension) msg.getExtension("http://jabber.org/protocol/tune");
-        if (tunes != null) {
-            service.addTunes(user, tunes);
-        }
-
 		if (body != null && body.length() > 0) {
 	        if (type.equals("groupchat")) { // Group Chat Message
                 processGroupchatMessage(msg);

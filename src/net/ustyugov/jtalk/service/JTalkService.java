@@ -46,12 +46,7 @@ import org.jivesoftware.smack.packet.*;
 import org.jivesoftware.smack.provider.PrivacyProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
-import org.jivesoftware.smackx.ChatState;
-import org.jivesoftware.smackx.GroupChatInvitation;
-import org.jivesoftware.smackx.OfflineMessageManager;
-import org.jivesoftware.smackx.PrivateDataManager;
-import org.jivesoftware.smackx.Receipt;
-import org.jivesoftware.smackx.ServiceDiscoveryManager;
+import org.jivesoftware.smackx.*;
 import org.jivesoftware.smackx.bookmark.BookmarkManager;
 import org.jivesoftware.smackx.bookmark.BookmarkedConference;
 import org.jivesoftware.smackx.commands.AdHocCommandManager;
@@ -112,8 +107,6 @@ public class JTalkService extends Service {
     private Hashtable<String, VCard> vcards = new Hashtable<String, VCard>();
     private Hashtable<String, ConListener> conListeners = new Hashtable<String, ConListener>();
     private Hashtable<String, ConnectionTask> connectionTasks = new Hashtable<String, ConnectionTask>();
-    private Hashtable<String, LocationExtension> locations = new Hashtable<String, LocationExtension>();
-    private Hashtable<String, TunesExtension> tunes = new Hashtable<String, TunesExtension>();
     private Hashtable<String, Timer> pingTimers = new Hashtable<String, Timer>();
     private String currentJid = "me";
     private String sidebarMode = "users";
@@ -145,26 +138,6 @@ public class JTalkService extends Service {
 
     public void addPassword(String account, String password) {
         passHash.put(account, password);
-    }
-
-    public void addLocation(String jid, LocationExtension geoloc) {
-        if (geoloc != null) locations.put(jid, geoloc);
-    }
-
-    public LocationExtension getLocation(String jid) {
-        if (locations.containsKey(jid)) return locations.get(jid);
-        else return null;
-    }
-
-    public void addTunes(String jid, TunesExtension tune) {
-        if (tune != null) {
-            tunes.put(jid, tune);
-        }
-    }
-
-    public TunesExtension getTunes(String jid) {
-        if (tunes.containsKey(jid)) return tunes.get(jid);
-        else return null;
     }
 
     public List<MessageItem> getMessageList(String account, String jid) {
@@ -1295,45 +1268,17 @@ public class JTalkService extends Service {
         Collection<XMPPConnection> collection = connections.values();
         for (XMPPConnection connection : collection) {
             if (connection.isAuthenticated()) {
-                IQ iq = new IQ() {
-                    public String getChildElementXML() {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<pubsub xmlns='http://jabber.org/protocol/pubsub'>");
-                        sb.append("<publish node='http://jabber.org/protocol/tune'>");
-                        sb.append("<item><tune xmlns='http://jabber.org/protocol/tune'>");
-                        if (artist != null) sb.append("<artist>").append(StringUtils.escapeForXML(artist)).append("</artist>");
-                        if (title != null) sb.append("<title>").append(StringUtils.escapeForXML(title)).append("</title>");
-                        if (source != null) sb.append("<source>").append(StringUtils.escapeForXML(source)).append("</source>");
-                        sb.append("</tune></item></publish></pubsub>");
-                        return sb.toString();
-                    }
-                };
+                TuneItem tune = new TuneItem(System.currentTimeMillis()+"");
+                tune.setArtist(StringUtils.escapeForXML(artist));
+                tune.setTitle(StringUtils.escapeForXML(title));
+                tune.setSource(StringUtils.escapeForXML(source));
 
-                iq.setPacketID(System.currentTimeMillis()+"");
-                iq.setType(IQ.Type.SET);
-                iq.setTo(connection.getHost());
-                connection.sendPacket(iq);
+                PEPManager pep = new PEPManager(connection);
+                pep.publish(tune);
             }
         }
     }
 
-    public int getPosition(String mode) {
-  		int pos;
-  		if (mode.equals("available"))
-  			pos = 0;
-  		else if (mode.equals("away"))
-  			pos = 1;
-  		else if (mode.equals("xa"))
-  			pos = 2;
-  		else if (mode.equals("dnd"))
-  			pos = 3;
-  		else if (mode.equals("chat"))
-  			pos = 4;
-  		else 
-  			pos = 0;
-  		return pos;
-  	}
-  	
   	public void setPreference(String name, Object value) {
         if (!started) return;
   		if (prefs == null) prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -1373,12 +1318,6 @@ public class JTalkService extends Service {
 
     public void configure() {
         ProviderManager pm = ProviderManager.getInstance();
-
-        // PEP
-        PEPProvider pep = new PEPProvider();
-        pep.registerPEPParserExtension("http://jabber.org/protocol/tune", new TunesProvider());
-        pep.registerPEPParserExtension("http://jabber.org/protocol/geoloc", new LocationProvider());
-        pm.addExtensionProvider("event", "http://jabber.org/protocol/pubsub#event", pep);
 
         pm.addIQProvider("query","jabber:iq:private", new PrivateDataManager.PrivateDataIQProvider());
         pm.addIQProvider("query", "jabber:iq:version", new VersionProvider());
@@ -1539,14 +1478,11 @@ public class JTalkService extends Service {
                 connection.addFeature("http://jabber.org/protocol/muc");
                 connection.addFeature("http://jabber.org/protocol/chatstates");
                 connection.addFeature("http://jabber.org/protocol/bytestreams");
-                connection.addFeature("http://jabber.org/protocol/chatstates");
-                connection.addFeature("http://jabber.org/protocol/geoloc");
                 connection.addFeature("http://jabber.org/protocol/tune");
                 connection.addFeature("http://jabber.org/protocol/pubsub#event");
                 connection.addFeature("jabber:iq:version");
                 connection.addFeature("urn:xmpp:receipts");
                 connection.addFeature("urn:xmpp:time");
-                connection.addFeature("urn:xmpp:message-correct:0");
                 connection.addFeature(Notes.NAMESPACE);
 
                 try {
@@ -1601,6 +1537,7 @@ public class JTalkService extends Service {
                 new PrivacyListManager(connection);
                 new ServiceDiscoveryManager(connection);
                 new AdHocCommandManager(connection);
+
                 fileTransferManager = new FileTransferManager(connection);
                 fileTransferManager.addFileTransferListener(new IncomingFileListener());
 
