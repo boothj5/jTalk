@@ -73,8 +73,10 @@ public class Avatars {
 							image.setVisibility(View.VISIBLE);
 						} else {
                             if (image != null) {
+                                int value = (int) (42 * activity.getResources().getDisplayMetrics().density);
                                 ViewGroup.LayoutParams lp = image.getLayoutParams();
                                 lp.width = 1;
+                                lp.height = value;
                                 image.setLayoutParams(lp);
                                 image.setVisibility(View.INVISIBLE);
                             }

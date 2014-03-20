@@ -200,15 +200,6 @@ public class VCardActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.view_vcard, menu);
-
-        LocationExtension geoloc = service.getLocation(jid);
-        if (geoloc != null) {
-            lat = geoloc.getLat();
-            lon = geoloc.getLon();
-            if (lat != null && lon != null) {
-                menu.findItem(R.id.map).setVisible(true);
-            }
-        }
         return super.onCreateOptionsMenu(menu);
     }
 	
@@ -221,11 +212,6 @@ public class VCardActivity extends Activity {
 			case R.id.refresh:
                 new LoadTask().execute();
 				break;
-            case R.id.map:
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://maps.google.com/?ll=" + lat + "," + lon));
-                startActivity(intent);
-                break;
             case R.id.copy:
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 clipboard.setText(jid);
@@ -465,18 +451,6 @@ public class VCardActivity extends Activity {
 						t2.setText(strings.get(key));
 						adapter.add(linear);
 					}
-
-                    TunesExtension tunes = service.getTunes(jid);
-                    if (tunes != null) {
-                        LinearLayout linear = (LinearLayout) ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.vcard_item, null);
-
-                        TextView resource = (TextView) linear.findViewById(R.id.resource);
-                        resource.setText("Tunes:");
-
-                        TextView value = (TextView) linear.findViewById(R.id.value);
-                        value.setText(tunes.getArtist() + " - " + tunes.getTitle() + " (" + tunes.getSource() + ")");
-                        adapter.add(linear);
-                    }
 
 					list.refreshDrawableState();
 				    list.setAdapter(adapter);
