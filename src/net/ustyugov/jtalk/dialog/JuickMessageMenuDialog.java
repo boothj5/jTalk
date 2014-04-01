@@ -30,7 +30,7 @@ import com.jtalk2.R;
 public class JuickMessageMenuDialog implements OnClickListener {
 //	private static final String JUICK = "juick@juick.com";
 	private static final String JUBO  = "jubo@nologin.ru";
-	private static final String PSTO  = "psto@psto.net";
+	private static final String PSTO  = "p@point.im";
     private Context context;
     private JTalkService service;
     private String jid;
