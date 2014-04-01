@@ -26,7 +26,7 @@ public final class Constants implements BaseColumns {
 
 	public static final String JUICK = "juick@juick.com";
 	public static final String JUBO  = "jubo@nologin.ru";
-	public static final String PSTO  = "psto@psto.net";
+	public static final String PSTO  = "p@point.im";
 	
 	public static final String PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.jtalk2/cache/";
 	public static final String PATH_SMILES = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.jtalk2/smiles/";
