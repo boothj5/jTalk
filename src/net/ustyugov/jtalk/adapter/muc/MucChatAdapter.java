@@ -280,7 +280,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
     public void onTextLinkClick(View textView, String s) {
         if (s == null || s.length() < 1) return;
         Uri uri = Uri.parse(s);
-        if (uri != null && uri.getScheme() != null && uri.getScheme().contains("http")) {
+        if ((uri != null && uri.getScheme() != null) && (uri.getScheme().contains("http") || uri.getScheme().contains("xmpp"))) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(uri);
             context.startActivity(intent);

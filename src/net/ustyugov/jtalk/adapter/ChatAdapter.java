@@ -266,20 +266,15 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
 	
 	public void onTextLinkClick(View textView, String s) {
 		if (s.length() > 1) {
-			if (s.substring(0, 1).equals("@") || s.substring(0, 1).equals("#")) {
+			if (s.startsWith("@") || s.startsWith("#")) {
 				new JuickMessageMenuDialog(context, s).show();
 			} else {
-				int idx = s.indexOf(":");
-				if (idx > 0) {
-					String scheme = s.substring(0, idx).toLowerCase();
-					String path = s.substring(idx);
-					Uri uri = Uri.parse(scheme + path);
-					if (uri != null) {
-						Intent intent = new Intent(Intent.ACTION_VIEW);
-						intent.setData(uri);
-						context.startActivity(intent);
-					}
-				}
+                Uri uri = Uri.parse(s);
+                if ((uri != null && uri.getScheme() != null) && (uri.getScheme().contains("http") || uri.getScheme().contains("xmpp"))) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(uri);
+                    context.startActivity(intent);
+                }
 			}
 		}
 	}

@@ -26,9 +26,6 @@ import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Build;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,8 +56,7 @@ public class ResourceAdapter extends ArrayAdapter<String> {
 		IconPicker ip = service.getIconPicker();
         View v = convertView;
         String resource = getItem(position);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
-        
+
         if (v == null) {
             LayoutInflater vi = (LayoutInflater) service.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             v = vi.inflate(R.layout.selector, null);
@@ -72,9 +68,7 @@ public class ResourceAdapter extends ArrayAdapter<String> {
        	icon.setImageBitmap(ip.getIconByPresence(presence));
         
        	TextView label = (TextView) v.findViewById(R.id.item);
-       	if (Build.VERSION.SDK_INT >= 11) {
-        	label.setTextColor(Colors.PRIMARY_TEXT);
-        } else label.setTextColor(0xFF000000);
+        label.setTextColor(Colors.PRIMARY_TEXT);
         label.setText(resource);
         return v;
     }

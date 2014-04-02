@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.text.style.ForegroundColorSpan;
+import android.util.Patterns;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.listener.TextLinkClickListener;
 
@@ -26,19 +27,32 @@ public class MyTextView  extends TextView {
 	Pattern juickPattern = Pattern.compile("(#[0-9]+(/[0-9]+)?)");
 	Pattern pstoPattern = Pattern.compile("(#[\\w]+(/[0-9]+)?)");
 	Pattern linkPattern = Pattern.compile("https?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
+    Pattern xmppPattern = Pattern
+            .compile("xmpp\\:(?:(?:["
+                    + Patterns.GOOD_IRI_CHAR
+                    + "\\;\\/\\?\\@\\&\\=\\#\\~\\-\\.\\+\\!\\*\\'\\(\\)\\,\\_])"
+                    + "|(?:\\%[a-fA-F0-9]{2}))+", Pattern.CASE_INSENSITIVE);
 
 	public MyTextView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
 
 	public void setTextWithLinks(SpannableStringBuilder ssb) {
-		ArrayList<Hyperlink> list = new ArrayList<Hyperlink>();
-		getLinks(list, ssb, linkPattern);
+        ArrayList<Hyperlink> linkList = new ArrayList<Hyperlink>();
+        ArrayList<Hyperlink> xmppList = new ArrayList<Hyperlink>();
+        getLinks(linkList, ssb, linkPattern);
+        getLinks(xmppList, ssb, xmppPattern);
 
-		for (Hyperlink link : list) {
+		for (Hyperlink link : linkList) {
 			ssb.setSpan(link.span, link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             ssb.setSpan(new ForegroundColorSpan(Colors.LINK), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
+
+        for (Hyperlink link : xmppList) {
+            ssb.setSpan(link.span, link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(Colors.LINK), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        }
 
 		setText(ssb);
 	}
@@ -57,14 +71,23 @@ public class MyTextView  extends TextView {
             ssb.setSpan(new ForegroundColorSpan(Colors.INBOX_MESSAGE), spec.start, spec.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		
-		ArrayList<Hyperlink> list = new ArrayList<Hyperlink>();
-		getLinks(list, ssb, linkPattern);
+		ArrayList<Hyperlink> linkList = new ArrayList<Hyperlink>();
+        ArrayList<Hyperlink> xmppList = new ArrayList<Hyperlink>();
+		getLinks(linkList, ssb, linkPattern);
+        getLinks(xmppList, ssb, xmppPattern);
 
-		for (Hyperlink link : list) {
+
+		for (Hyperlink link : linkList) {
 			ssb.setSpan(link.span, link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             ssb.setSpan(new ForegroundColorSpan(Colors.LINK), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 		}
+
+        for (Hyperlink link : xmppList) {
+            ssb.setSpan(link.span, link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(Colors.LINK), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        }
 
 		setText(ssb);
 	}
@@ -73,10 +96,12 @@ public class MyTextView  extends TextView {
 		ArrayList<Hyperlink> nameList = new ArrayList<Hyperlink>();
 		ArrayList<Hyperlink> msgList = new ArrayList<Hyperlink>();
 		ArrayList<Hyperlink> linkList = new ArrayList<Hyperlink>();
+        ArrayList<Hyperlink> xmppList = new ArrayList<Hyperlink>();
 		if (mode == Mode.juick) getLinks(msgList, ssb, juickPattern);
 		else getLinks(msgList, ssb, pstoPattern);
 		getLinks(nameList, ssb, namePattern);
 		getLinks(linkList, ssb, linkPattern);
+        getLinks(xmppList, ssb, xmppPattern);
 
 		for (Hyperlink link : nameList) {
 			ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -94,6 +119,12 @@ public class MyTextView  extends TextView {
 			ssb.setSpan(link.span, link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             ssb.setSpan(new ForegroundColorSpan(Colors.LINK), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
+
+        for (Hyperlink link : xmppList) {
+            ssb.setSpan(new StyleSpan(android.graphics.Typeface.SANS_SERIF.getStyle()), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(link.span, link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(Colors.LINK), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
 		setText(ssb);
 	}
 

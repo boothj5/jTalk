@@ -21,7 +21,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
 import android.content.res.AssetManager;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,6 +43,7 @@ import net.ustyugov.jtalk.dialog.MucDialogs;
 import net.ustyugov.jtalk.dialog.RosterDialogs;
 import net.ustyugov.jtalk.service.JTalkService;
 
+import net.ustyugov.jtalk.utils.XMPPUri;
 import org.jivesoftware.smack.RosterEntry;
 
 import android.database.Cursor;
@@ -51,10 +54,14 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.jtalk2.R;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.util.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RosterActivity extends Activity implements OnItemClickListener, OnItemLongClickListener {
     private static final int ACTIVITY_PREFERENCES = 10;
@@ -132,6 +139,72 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
 
         if (prefs.getBoolean("BUG", false)) {
             new ErrorDialog(this).show();
+        }
+
+        String action = getIntent().getAction();
+        if (action != null && action.equals(Intent.ACTION_VIEW)) {
+            Uri data = getIntent().getData();
+            if (data != null && data.getScheme().equals("xmpp")) {
+                XMPPUri xmppUri;
+                try {
+                    xmppUri = new XMPPUri(data);
+                } catch (IllegalArgumentException e) {
+                    xmppUri = null;
+                }
+
+                List<String> accounts = new ArrayList<String>();
+                for(XMPPConnection connection : service.getAllConnections()) {
+                    accounts.add(StringUtils.parseBareAddress(connection.getUser()));
+                }
+
+                if (xmppUri != null && !accounts.isEmpty()) {
+                    final String xmppJid = xmppUri.getJid();
+                    final String body = xmppUri.getBody();
+                    String queryType = xmppUri.getQueryType();
+
+                    final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, accounts);
+
+                    if (queryType.equals("roster")) {
+                        RosterDialogs.addDialog(this, xmppUri.getJid());
+                    } else if (queryType.equals("join")) {
+                        if (accounts.size() > 1) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                            builder.setTitle(R.string.Accounts);
+                            builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    String account = adapter.getItem(which);
+                                    MucDialogs.joinDialog(RosterActivity.this, account, xmppJid, null);
+                                }
+                            });
+                            builder.create().show();
+                        } else MucDialogs.joinDialog(RosterActivity.this, accounts.get(0), xmppJid, null);
+                    } else {
+                        service.setText(xmppJid, body);
+                        if (accounts.size() > 1) {
+                            service.setText(xmppJid, body);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                            builder.setTitle(R.string.Accounts);
+                            builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    String account = adapter.getItem(which);
+                                    Intent intent = new Intent(RosterActivity.this, Chat.class);
+                                    intent.putExtra("account", account);
+                                    intent.putExtra("jid", xmppJid);
+                                    startActivity(intent);
+                                }
+                            });
+                            builder.create().show();
+                        } else {
+                            Intent intent = new Intent(RosterActivity.this, Chat.class);
+                            intent.putExtra("account", accounts.get(0));
+                            intent.putExtra("jid", xmppJid);
+                            startActivity(intent);
+                        }
+                    }
+                }
+            }
         }
     }
     
