@@ -28,11 +28,7 @@ import android.content.Intent;
 import com.jtalk2.R;
 
 public class JuickMessageMenuDialog implements OnClickListener {
-//	private static final String JUICK = "juick@juick.com";
-	private static final String JUBO  = "jubo@nologin.ru";
-	private static final String PSTO  = "p@point.im";
     private Context context;
-    private JTalkService service;
     private String jid;
     private String text;
 	private CharSequence[] items = null;
@@ -40,8 +36,7 @@ public class JuickMessageMenuDialog implements OnClickListener {
 
     public JuickMessageMenuDialog(Context context, String text) {
         this.context = context;
-        this.service = JTalkService.getInstance();
-        this.jid = service.getCurrentJid();
+        this.jid = JTalkService.getInstance().getCurrentJid();
         this.text = text;
     }
 
@@ -71,7 +66,7 @@ public class JuickMessageMenuDialog implements OnClickListener {
 
     public void onClick(DialogInterface dialog, int which) { 
     	Intent intent = new Intent(Constants.PASTE_TEXT);
-		if (jid.equals(JUBO)) intent.putExtra("jubo", true);
+		if (jid.equals(Constants.JUBO)) intent.putExtra("jubo", true);
         if (text.startsWith("#")) {
         	String id = null;
     		if (text.indexOf("/") > 0) id = text.substring(0, text.indexOf("/"));
@@ -94,7 +89,7 @@ public class JuickMessageMenuDialog implements OnClickListener {
         			intent.putExtra("text", "U " + id);
         			break;
         		case 5:
-        			intent.putExtra("text", "D " + id);
+        			intent.putExtra("text", "D " + text);
         			break;
         		default:
         			break;
@@ -105,7 +100,7 @@ public class JuickMessageMenuDialog implements OnClickListener {
     				intent.putExtra("text", text);
     				break;
     			case 1:
-    				if (jid.equals(PSTO)) intent.putExtra("text", "P " + text); else intent.putExtra("text", "PM " + text);
+    				if (jid.equals(Constants.POINT)) intent.putExtra("text", "P " + text); else intent.putExtra("text", "PM " + text);
     				break;
     			case 2:
     				intent.putExtra("text", "S " + text);

@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">jTalk</string>
     <string name="version">0.48</string>
-    <string name="build">405</string>
+    <string name="build">406</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>
@@ -270,6 +270,9 @@
     <string name="Privates">Private chats</string>
     <string name="YouJoin">You joined to group</string>
     <string name="YouLeave">You leave from group</string>
+    <string name="Moderators">Moderators:</string>
+    <string name="Participants">Participants:</string>
+    <string name="Visitors">Visitors:</string>
     
     <!--  Files statuses -->
     <string name="Downloading">Downloading</string>

@@ -26,7 +26,7 @@ public final class Constants implements BaseColumns {
 
 	public static final String JUICK = "juick@juick.com";
 	public static final String JUBO  = "jubo@nologin.ru";
-	public static final String PSTO  = "p@point.im";
+	public static final String POINT  = "p@point.im";
 	
 	public static final String PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.jtalk2/cache/";
 	public static final String PATH_SMILES = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.jtalk2/smiles/";
@@ -58,8 +58,4 @@ public final class Constants implements BaseColumns {
 	public static final String NEW_MESSAGE 				= "net.ustyugov.jtalk.NEW_MESSAGE";
 	public static final String ERROR					= "net.ustyugov.jtalk.ERROR";
 	public static final String CHANGE_CHAT				= "net.ustyugov.jtalk.CHANGE_CHAT";
-	
-	// Location
-	public static final long LOCATION_MIN_TIME = 600000;
-	public static final float LOCATION_MIN_DIST = 500;
 }

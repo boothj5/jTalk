@@ -256,8 +256,9 @@ public class RosterDialogs {
 	    	groups.add(rg.getName());
 	    }
 	    
-	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(a, android.R.layout.simple_list_item_1, groups);
-	    
+	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(a, android.R.layout.simple_spinner_dropdown_item, groups);
+
+        if (group.equals(a.getString(R.string.Nogroup))) group = "";
 	    final AutoCompleteTextView groupEdit = (AutoCompleteTextView) layout.findViewById(R.id.group_entry);
 	    groupEdit.setText(group);
 	    groupEdit.setAdapter(adapter);

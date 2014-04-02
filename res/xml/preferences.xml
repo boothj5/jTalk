@@ -246,17 +246,13 @@
                 android:title="@string/Icons"/>
         <PreferenceScreen android:title="@string/Sidebar">
             <CheckBoxPreference
-                    android:key="CompactMode"
-                    android:title="@string/CompactMode"
-                    android:defaultValue="true" />
-            <CheckBoxPreference
                     android:key="ColoredBar"
                     android:title="@string/UseColors"
                     android:defaultValue="true" />
             <CheckBoxPreference
-                    android:key="InMUC"
-                    android:title="@string/OnlyInMUC"
-                    android:defaultValue="false" />
+                    android:key="StatusInBar"
+                    android:title="@string/ShowStatuses"
+                    android:defaultValue="true" />
         </PreferenceScreen>
 
         <CheckBoxPreference
@@ -284,6 +280,10 @@
                 android:key="AUTOSTART"
                 android:defaultValue="false"/>
         <CheckBoxPreference
+                android:title="Auto load avatars"
+                android:key="LoadAllAvatars"
+                android:defaultValue="false"/>
+        <CheckBoxPreference
                 android:title="@string/DeleteHistoryOnExit"
                 android:key="DeleteHistory"
                 android:defaultValue="false"/>
@@ -308,10 +308,6 @@
                 android:summary="Only if 'Show groups' is off"
                 android:defaultValue="1"
                 android:numeric="integer"/>
-        <CheckBoxPreference
-                android:title="Auto load avatars"
-                android:key="LoadAllAvatars"
-                android:defaultValue="false"/>
         <CheckBoxPreference
                 android:title="Ping to server"
                 android:summary="Needed reconnect"

@@ -22,12 +22,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import net.ustyugov.jtalk.Colors;
+import android.text.TextUtils;
+import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.Holders.GroupHolder;
 import net.ustyugov.jtalk.Holders.ItemHolder;
-import net.ustyugov.jtalk.IconPicker;
-import net.ustyugov.jtalk.RosterItem;
-import net.ustyugov.jtalk.SortList;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smack.Roster;
@@ -40,7 +38,6 @@ import org.jivesoftware.smackx.packet.MUCUser;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -56,20 +53,35 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 	private String group;
 	private String account;
 	private Activity activity;
+    private int sidebarSize = 100;
+    private int fontSize = 14;
+    private int statusSize;
+    SharedPreferences prefs;
+
+    enum Mode { nick, status, all }
 	
-	public MucUserAdapter(Activity activity, String account, String group) {
+	public MucUserAdapter(Activity activity, String account, String group, int sidebarSize) {
 		super(activity, R.id.name);
 		this.activity = activity;
 		this.group = group;
 		this.account = account;
-        update();
+        this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+
+        try {
+            this.fontSize = Integer.parseInt(prefs.getString("RosterSize", activity.getResources().getString(R.string.DefaultFontSize)));
+        } catch (NumberFormatException ignored) { }
+        statusSize = fontSize - 4;
+
+        update(sidebarSize);
 	}
 	
 	public void setGroup(String group) {
 		this.group = group;
 	}
 	
-	public void update() {
+	public void update(int sidebarSize) {
+        this.sidebarSize = sidebarSize;
+
 		List<String> mOnline = new ArrayList<String>();
 		List<String> mChat = new ArrayList<String>();
 		List<String> mAway = new ArrayList<String>();
@@ -94,7 +106,6 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 		clear();
 
 		if (group != null && service.getConferencesHash(account).containsKey(group)) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
 			Iterator<Presence> it = service.getRoster(account).getPresences(group);
 			while (it.hasNext()) {
 				Presence p = it.next();
@@ -299,10 +310,15 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+        Mode viewMode = Mode.nick;
+        if (sidebarSize > 3 * (48 * activity.getResources().getDisplayMetrics().density)) {
+            viewMode = Mode.all;
+        } else if (sidebarSize > 2 * (48 * activity.getResources().getDisplayMetrics().density)) {
+            viewMode = Mode.status;
+        }
+
 		JTalkService service = JTalkService.getInstance();
 		IconPicker ip = service.getIconPicker();
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
-		boolean minimal = prefs.getBoolean("CompactMode", true);
 		int fontSize = Integer.parseInt(service.getResources().getString(R.string.DefaultFontSize));
 		try {
 			fontSize = Integer.parseInt(prefs.getString("RosterSize", service.getResources().getString(R.string.DefaultFontSize)));
@@ -317,9 +333,13 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 				
 				holder = new GroupHolder();
 				holder.messageIcon = (ImageView) convertView.findViewById(R.id.msg);
+                holder.messageIcon.setVisibility(View.GONE);
+
 	            holder.text = (TextView) convertView.findViewById(R.id.name);
 	            holder.text.setTextSize(fontSize);
 	            holder.text.setTextColor(Colors.PRIMARY_TEXT);
+                holder.text.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+
 	            holder.state = (ImageView) convertView.findViewById(R.id.state);
 	            holder.state.setVisibility(View.GONE);
 	            convertView.setTag(holder);
@@ -330,16 +350,9 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 	        holder.text.setText(item.getName());
 
             String role = (String) item.getObject();
-            if (role.equals("moderator")) holder.messageIcon.setImageBitmap(ip.getModeratorBitmap());
-            else if (role.equals("participant")) holder.messageIcon.setImageBitmap(ip.getParticipantBitmap());
-            else holder.messageIcon.setImageBitmap(ip.getVisitorBitmap());
-            holder.messageIcon.setVisibility(View.VISIBLE);
-            if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                ViewGroup.LayoutParams params = holder.messageIcon.getLayoutParams();
-                params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-                holder.messageIcon.setLayoutParams(params);
-            }
+            if (role.equals("moderator")) holder.text.setText(activity.getString(R.string.Moderators) + " " + item.getName());
+            else if (role.equals("participant")) holder.text.setText(activity.getString(R.string.Participants) + " " + item.getName());
+            else holder.text.setText(activity.getString(R.string.Visitors) + " " + item.getName());
 
 			return convertView;
 		} else if (item.isEntry()) {
@@ -362,6 +375,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 				holder.name = (TextView) convertView.findViewById(R.id.name);
 				holder.name.setTextSize(fontSize);
 				holder.status = (TextView) convertView.findViewById(R.id.status);
+                holder.status.setTextSize(statusSize);
 				holder.status.setVisibility(View.GONE);
 				holder.counter = (TextView) convertView.findViewById(R.id.msg_counter);
 				holder.counter.setTextSize(fontSize);
@@ -371,9 +385,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 				holder.statusIcon.setPadding(3, 3, 0, 0);
 				holder.statusIcon.setVisibility(View.VISIBLE);
 				holder.avatar = (ImageView) convertView.findViewById(R.id.contactlist_pic);
-				holder.avatar.setVisibility(View.GONE);
 				holder.caps = (ImageView) convertView.findViewById(R.id.caps);
-				holder.caps.setVisibility(View.GONE);
 				convertView.setTag(holder);
 			}
 			
@@ -394,6 +406,13 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 				holder.messageIcon.setVisibility(View.GONE);
 				holder.counter.setVisibility(View.GONE);
 			}
+
+            String statusText = service.getStatus(account, jid);
+            if (service.getComposeList().contains(jid)) statusText = service.getString(R.string.Composes);
+            if (prefs.getBoolean("StatusInBar", true)) {
+                holder.status.setVisibility(statusText.length() > 0 ? View.VISIBLE : View.GONE);
+                holder.status.setText(statusText);
+            } else holder.status.setVisibility(View.GONE);
 	        
 	        if (color) {
 	        	if (type == Presence.Type.available) {
@@ -408,14 +427,30 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 	       			}
 	       		}
 	        }
-	        
-	        if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-				holder.statusIcon.setVisibility(View.INVISIBLE);
-                convertView.setMinimumHeight((int) (28 * activity.getResources().getDisplayMetrics().density));
-			} else {
-				if (ip != null) holder.statusIcon.setImageBitmap(ip.getIconByPresence(presence));
-			}
 
+            if (viewMode == Mode.nick) {
+                holder.statusIcon.setVisibility(View.GONE);
+                holder.caps.setVisibility(View.GONE);
+                holder.avatar.setVisibility(View.GONE);
+            } else {
+                if (ip != null) {
+                    holder.statusIcon.setImageBitmap(ip.getIconByPresence(presence));
+                    holder.statusIcon.setVisibility(View.VISIBLE);
+                }
+                if (viewMode == Mode.all) {
+                    if (prefs.getBoolean("ShowCaps", false)) {
+                        String node = service.getNode(account, jid);
+                        ClientIcons.loadClientIcon(activity, holder.caps, node);
+                    }
+
+                    if (prefs.getBoolean("LoadAvatar", false)) {
+                        Avatars.loadAvatar(activity, jid.replaceAll("/", "%"), holder.avatar);
+                    }
+                } else {
+                    holder.caps.setVisibility(View.GONE);
+                    holder.avatar.setVisibility(View.GONE);
+                }
+            }
 			return convertView;
 		}
         return null;

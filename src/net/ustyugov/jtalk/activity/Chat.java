@@ -120,6 +120,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 
         chatsSpinnerAdapter = new ChatsSpinnerAdapter(this);
+
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
@@ -153,8 +154,38 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         smiles = service.getSmiles(this);
 
         sidebar = (LinearLayout) findViewById(R.id.sidebar);
+        int width = prefs.getInt("SideBarSize", 100);
+        ViewGroup.LayoutParams lp = sidebar.getLayoutParams();
+        lp.width = width;
+        sidebar.setLayoutParams(lp);
 
-        chatsAdapter = new OpenChatsAdapter(this, false);
+        ImageView slider = (ImageView) findViewById(R.id.slider);
+        slider.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_UP:
+                        updateChats();
+                        updateUsers();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        int nowX = (int) event.getX();
+
+                        ViewGroup.LayoutParams lp = sidebar.getLayoutParams();
+                        int lastSize = lp.width;
+                        int newSize = lastSize - nowX;
+                        if (newSize < 5) newSize = 5;
+                        lp.width = newSize;
+                        sidebar.setLayoutParams(lp);
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
+
+        chatsAdapter = new OpenChatsAdapter(this);
         chatsList = (ListView) findViewById(R.id.open_chat_list);
         chatsList.setCacheColorHint(0x00000000);
         chatsList.setDividerHeight(0);
@@ -319,7 +350,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         service.removeUnreadMesage(account, jid);
         service.removeHighlight(account, jid);
 
-        usersAdapter = new MucUserAdapter(this, account, jid);
+        usersAdapter = new MucUserAdapter(this, account, jid, sidebar.getLayoutParams().width);
         nickList.setAdapter(usersAdapter);
         chatsList.setAdapter(chatsAdapter);
 
@@ -413,6 +444,10 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         service.setCurrentJid("me");
         service.setText(jid, messageInput.getText().toString());
         if (!listView.isScroll()) service.addLastPosition(jid, listView.getFirstVisiblePosition());
+
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt("SideBarSize", sidebar.getLayoutParams().width);
+        editor.commit();
     }
 
     @Override
@@ -494,12 +529,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
                 item.setOnActionExpandListener(listener);
 
-                if (prefs.getBoolean("InMUC", false)) menu.removeItem(R.id.sidebar);
-                else {
-                    MenuItem sidebar = menu.findItem(R.id.sidebar);
-                    sidebar.setTitle(prefs.getBoolean("EnabledSidebar", true) ? R.string.HideSidebar : R.string.ShowSidebar);
-                }
-
                 if (!prefs.getBoolean("ShowSmiles", true)) menu.removeItem(R.id.smile);
                 super.onCreateOptionsMenu(menu);
             }
@@ -580,12 +609,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                     }
                 });
                 b.create().show();
-                break;
-            case R.id.sidebar:
-                boolean showSidebar = prefs.getBoolean("EnabledSidebar", true);
-                if (showSidebar) service.setPreference("EnabledSidebar", false);
-                else service.setPreference("EnabledSidebar", true);
-                updateChats();
                 break;
             case R.id.info:
                 Intent infoIntent = new Intent(this, VCardActivity.class);
@@ -719,37 +742,38 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private void updateChats() {
         chatsSpinnerAdapter.update();
         chatsSpinnerAdapter.notifyDataSetChanged();
-
-        if (prefs.getBoolean("InMUC", false) && isMuc) {
-            sidebar.setVisibility(View.VISIBLE);
-            nickList.setVisibility(View.VISIBLE);
-            chatsList.setVisibility(View.GONE);
-        } else if (prefs.getBoolean("InMUC", false) && !isMuc) {
-            sidebar.setVisibility(View.GONE);
-        } else {
-            if (prefs.getBoolean("EnabledSidebar", true)) {
-                sidebar.setVisibility(View.VISIBLE);
-                chatsAdapter.update();
-                chatsAdapter.notifyDataSetChanged();
-
-                if (isMuc && service.getSidebarMode().equals("users")) {
-                    nickList.setVisibility(View.VISIBLE);
-                    chatsList.setVisibility(View.GONE);
-                } else {
-                    nickList.setVisibility(View.GONE);
-                    chatsList.setVisibility(View.VISIBLE);
-                }
-            } else {
-                sidebar.setVisibility(View.GONE);
+        new Thread() {
+            public void run() {
+                Chat.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (isMuc && service.getSidebarMode().equals("users")) {
+                            nickList.setVisibility(View.VISIBLE);
+                            chatsList.setVisibility(View.GONE);
+                        } else {
+                            chatsAdapter.update(sidebar.getLayoutParams().width);
+                            chatsAdapter.notifyDataSetChanged();
+                            chatsList.setVisibility(View.VISIBLE);
+                            nickList.setVisibility(View.GONE);
+                        }
+                    }
+                });
             }
-        }
+        }.start();
     }
 
     private void updateUsers() {
-        if (sidebar.getVisibility() == View.VISIBLE) {
-            usersAdapter.update();
-            usersAdapter.notifyDataSetChanged();
-        }
+        new Thread() {
+            public void run() {
+                Chat.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        usersAdapter.update(sidebar.getLayoutParams().width);
+                        usersAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }.start();
     }
 
     private void updateStatus() {

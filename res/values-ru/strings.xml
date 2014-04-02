@@ -261,7 +261,10 @@
     <string name="Privates">Приватные чаты</string>
     <string name="YouJoin">Вы вошли в комнату</string>
     <string name="YouLeave">Вы вышли из комнаты</string>
-    
+    <string name="Moderators">Модераторы:</string>
+    <string name="Participants">Участники:</string>
+    <string name="Visitors">Гости:</string>
+
     <!--  Files statuses -->
     <string name="Downloading">Загрузка</string>
     <string name="Sending">Отправка</string>

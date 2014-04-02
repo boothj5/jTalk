@@ -19,13 +19,13 @@ import android.view.View;
 import android.widget.TextView;
 
 public class MyTextView  extends TextView {
-	public enum Mode {juick, psto};
+	public enum Mode {juick, point};
 	TextLinkClickListener mListener;
 
 	Pattern namePattern = Pattern.compile("((?<=\\A)|(?<=\\s))@[a-z0-9-]*[^\\s\\n\\.,:\\)]*", Pattern.CASE_INSENSITIVE);
 	Pattern juickPattern = Pattern.compile("(#[0-9]+(/[0-9]+)?)");
 	Pattern pstoPattern = Pattern.compile("(#[\\w]+(/[0-9]+)?)");
-	Pattern linkPattern = Pattern.compile("(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
+	Pattern linkPattern = Pattern.compile("https?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
 
 	public MyTextView(Context context, AttributeSet attrs) {
 		super(context, attrs);

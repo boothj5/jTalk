@@ -20,9 +20,7 @@ package net.ustyugov.jtalk.adapter;
 import java.util.Enumeration;
 
 import android.app.Activity;
-import net.ustyugov.jtalk.Colors;
-import net.ustyugov.jtalk.IconPicker;
-import net.ustyugov.jtalk.RosterItem;
+import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -36,9 +34,7 @@ import org.jivesoftware.smack.util.StringUtils;
 
 import com.jtalk2.R;
 
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
@@ -48,26 +44,35 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import org.jivesoftware.smackx.muc.MultiUserChat;
 
 public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 	private JTalkService service;
-	private boolean isFragment;
     private Activity activity;
     private SharedPreferences prefs;
     private IconPicker ip;
+    private int fontSize = 14;
+    private int statusSize = fontSize - 4;
+    private int sidebarSize = 100;
+
+    enum Mode { nick, status, all }
 	
-	public OpenChatsAdapter(Activity activity, boolean isFragment) {
+	public OpenChatsAdapter(Activity activity) {
 		super(activity, R.id.name);
         this.activity = activity;
         this.service = JTalkService.getInstance();
-        this.isFragment = isFragment;
         this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         this.ip = service.getIconPicker();
+
+        try {
+            this.fontSize = Integer.parseInt(prefs.getString("RosterSize", activity.getResources().getString(R.string.DefaultFontSize)));
+        } catch (NumberFormatException ignored) { }
     }
 	
-	public void update() {
+	public void update(int sidebarSize) {
+        this.sidebarSize = sidebarSize;
 		clear();
-		add(null);
+		add(new RosterItem(null, RosterItem.Type.group, null));
 
 		Cursor cursor = activity.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
 		if (cursor != null && cursor.getCount() > 0) {
@@ -101,98 +106,158 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 	
 	@Override
 	public View getView(int position, View v, ViewGroup parent) {
-		boolean minimal = prefs.getBoolean("CompactMode", true);
-
-        int fontSize = 14;
-		try {
-			fontSize = Integer.parseInt(prefs.getString("RosterSize", activity.getResources().getString(R.string.DefaultFontSize)));
-		} catch (NumberFormatException ignored) { }
-
-        if (v == null) {
-            LayoutInflater vi = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = vi.inflate(R.layout.entry, null);
+        Mode mode = Mode.nick;
+        if (sidebarSize > 3 * (48 * activity.getResources().getDisplayMetrics().density)) {
+            mode = Mode.all;
+        } else if (sidebarSize > 2 * (48 * activity.getResources().getDisplayMetrics().density)) {
+            mode = Mode.status;
         }
 
-        if (position == 0) {
-			TextView counter = (TextView) v.findViewById(R.id.msg_counter);
-			counter.setVisibility(View.GONE);
-			ImageView msg  = (ImageView) v.findViewById(R.id.msg);
-			msg.setVisibility(View.GONE);
+        RosterItem ri = getItem(position);
+        if (ri.isGroup()) {
+            if (v == null || v.findViewById(R.id.state) == null) {
+                LayoutInflater inflater = activity.getLayoutInflater();
+                v = inflater.inflate(R.layout.group, null, false);
+            }
 
-			ImageView icon = (ImageView)v.findViewById(R.id.status_icon);
-	      	if (minimal && activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-	      		icon.setVisibility(View.GONE);
-	      	} else {
-	      		icon.setVisibility(View.VISIBLE);
-	      		icon.setImageBitmap(ip.getMsgBitmap());
-	      	}
+            ImageView messageIcon = (ImageView) v.findViewById(R.id.msg);
+            messageIcon.setVisibility(View.GONE);
 
-			TextView label = (TextView) v.findViewById(R.id.name);
-			label.setTypeface(Typeface.DEFAULT_BOLD);
-	       	label.setTextSize(fontSize);
-	        label.setText(activity.getString(R.string.Chats) + ": " + (getCount()-1));
-            label.setTextColor(Colors.PRIMARY_TEXT);
+            TextView text = (TextView) v.findViewById(R.id.name);
+            text.setTypeface(Typeface.DEFAULT_BOLD);
+            text.setTextSize(fontSize);
+            text.setTextColor(Colors.PRIMARY_TEXT);
+            text.setText(activity.getString(R.string.Chats) + ": " + (getCount() - 1));
+
+            ImageView state = (ImageView) v.findViewById(R.id.state);
+            state.setVisibility(View.GONE);
             v.setBackgroundColor(Colors.GROUP_BACKGROUND);
+            return v;
         } else {
-        	RosterItem ri = getItem(position);
+            if(v == null || v.findViewById(R.id.status) == null) {
+                LayoutInflater inflater = activity.getLayoutInflater();
+                v = inflater.inflate(R.layout.entry, null, false);
+            }
+
+            TextView name = (TextView) v.findViewById(R.id.name);
+            name.setTextColor(Colors.PRIMARY_TEXT);
+            name.setTextSize(fontSize);
+
+            TextView status = (TextView) v.findViewById(R.id.status);
+            status.setTextSize(statusSize);
+            status.setTextColor(Colors.SECONDARY_TEXT);
+
+            TextView counter = (TextView) v.findViewById(R.id.msg_counter);
+            counter.setTextSize(fontSize);
+
+            ImageView messageIcon = (ImageView) v.findViewById(R.id.msg);
+            if (ip != null) messageIcon.setImageBitmap(ip.getMsgBitmap());
+
+            ImageView statusIcon = (ImageView) v.findViewById(R.id.status_icon);
+            statusIcon.setVisibility(View.GONE);
+
+            ImageView avatar = (ImageView) v.findViewById(R.id.contactlist_pic);
+            avatar.setVisibility(View.GONE);
+
+            ImageView caps = (ImageView) v.findViewById(R.id.caps);
+            caps.setVisibility(View.GONE);
+
             String account = ri.getAccount();
             String jid = "";
             if (ri.isEntry() || ri.isSelf()) jid = ri.getEntry().getUser();
             else if (ri.isMuc()) jid = ri.getName();
-            String name = ri.getName();
+            String nick = ri.getName();
 
-        	if (service.getJoinedConferences().containsKey(jid)) {
-            	name = StringUtils.parseName(jid);
+            if (service.getJoinedConferences().containsKey(jid)) {
+                nick = StringUtils.parseName(jid);
             } else if (service.getJoinedConferences().containsKey(StringUtils.parseBareAddress(jid))) {
-            	name = StringUtils.parseResource(jid);
+                nick = StringUtils.parseResource(jid);
             } else {
-            	RosterEntry re = ri.getEntry();
-                if (re != null) name = re.getName();
-                if (name == null || name.equals("")) name = jid;
+                RosterEntry re = ri.getEntry();
+                if (re != null) nick = re.getName();
+                if (nick == null || nick.equals("")) nick = jid;
             }
 
-            TextView label = (TextView) v.findViewById(R.id.name);
-           	label.setTextSize(fontSize);
-            label.setText(name);
-           	if (service.getComposeList().contains(jid)) label.setTextColor(Colors.HIGHLIGHT_TEXT);
-           	else if (service.isHighlight(account, jid)) label.setTextColor(Colors.HIGHLIGHT_TEXT);
-    		else label.setTextColor(Colors.PRIMARY_TEXT);
+            name.setTextSize(fontSize);
+            name.setText(nick);
+            if (service.getComposeList().contains(jid)) name.setTextColor(Colors.HIGHLIGHT_TEXT);
+            else if (service.isHighlight(account, jid)) name.setTextColor(Colors.HIGHLIGHT_TEXT);
+            else name.setTextColor(Colors.PRIMARY_TEXT);
 
-            ImageView icon = (ImageView)v.findViewById(R.id.status_icon);
-            if (minimal && activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT && !isFragment) {
-            	icon.setVisibility(View.GONE);
+            String statusText = "";
+            if (ri.isMuc()) {
+                if (service.getConferencesHash(account).containsKey(name)) {
+                    MultiUserChat muc = service.getConferencesHash(account).get(name);
+                    statusText = muc.getSubject();
+                }
             } else {
-            	icon.setVisibility(View.VISIBLE);
-            	if (service.getJoinedConferences().containsKey(jid)) {
-                	icon.setImageBitmap(ip.getMucBitmap());
+                statusText = service.getStatus(account, jid);
+            }
+            if (statusText == null) statusText = "";
+
+            if (prefs.getBoolean("StatusInBar", true)) {
+                status.setVisibility(statusText.length() > 0 ? View.VISIBLE : View.GONE);
+                status.setText(statusText);
+            } else status.setVisibility(View.GONE);
+
+            if (mode == Mode.nick) {
+                statusIcon.setVisibility(View.GONE);
+                avatar.setVisibility(View.GONE);
+                caps.setVisibility(View.GONE);
+            } else if (mode == Mode.status) {
+                statusIcon.setVisibility(View.VISIBLE);
+                if (service.getJoinedConferences().containsKey(jid)) {
+                    statusIcon.setImageBitmap(ip.getMucBitmap());
                 } else {
-                	Presence presence = service.getPresence(ri.getAccount(), jid);
-                	icon.setImageBitmap(ip.getIconByPresence(presence));
+                    Presence presence = service.getPresence(ri.getAccount(), jid);
+                    statusIcon.setImageBitmap(ip.getIconByPresence(presence));
+                }
+            } else if (mode == Mode.all) {
+                statusIcon.setVisibility(View.VISIBLE);
+                if (service.getJoinedConferences().containsKey(jid)) {
+                    statusIcon.setImageBitmap(ip.getMucBitmap());
+                } else {
+                    Presence presence = service.getPresence(ri.getAccount(), jid);
+                    statusIcon.setImageBitmap(ip.getIconByPresence(presence));
+                }
+
+                if (!ri.isMuc()) {
+                    if (prefs.getBoolean("ShowCaps", false)) {
+                        String node = service.getNode(account, jid);
+                        ClientIcons.loadClientIcon(activity, caps, node);
+                    }
+
+                    if (prefs.getBoolean("LoadAvatar", false)) {
+                        if (service.getJoinedConferences().containsKey(StringUtils.parseBareAddress(jid)))
+                            Avatars.loadAvatar(activity, jid.replaceAll("/", "%"), avatar);
+                        else Avatars.loadAvatar(activity, jid, avatar);
+                    }
                 }
             }
 
-            ImageView msg = (ImageView) v.findViewById(R.id.msg);
-            if (ip != null) msg.setImageBitmap(ip.getMsgBitmap());
-
-            TextView counter = (TextView) v.findViewById(R.id.msg_counter);
-    		counter.setTextSize(fontSize);
+            counter.setTextSize(fontSize);
             int count = service.getMessagesCount(account, jid);
-    		if (count > 0) {
-    			msg.setVisibility(View.VISIBLE);
-    			counter.setVisibility(View.VISIBLE);
-    			counter.setText(count+"");
-    		} else {
-    			msg.setVisibility(View.GONE);
-    			counter.setVisibility(View.GONE);
-    		}
+            if (count > 0) {
+                messageIcon.setVisibility(View.VISIBLE);
+                counter.setVisibility(View.VISIBLE);
+                counter.setText(count+"");
+            } else {
+                messageIcon.setVisibility(View.GONE);
+                counter.setVisibility(View.GONE);
+            }
 
             if (jid.equals(service.getCurrentJid())) {
-            	label.setTypeface(Typeface.DEFAULT_BOLD);
-                label.setTextColor(Colors.PRIMARY_TEXT);
+                name.setTypeface(Typeface.DEFAULT_BOLD);
+                name.setTextColor(Colors.PRIMARY_TEXT);
                 v.setBackgroundColor(Colors.ENTRY_BACKGROUND);
             } else {
-            	label.setTypeface(Typeface.DEFAULT);
-            	v.setBackgroundColor(0x00000000);
+                name.setTypeface(Typeface.DEFAULT);
+                v.setBackgroundColor(0x00000000);
+            }
+
+            if (prefs.getBoolean("ColorLines", false)) {
+                if ((position % 2) != 0) v.setBackgroundColor(Colors.ENTRY_BACKGROUND);
+                else v.setBackgroundColor(0x00000000);
             }
         }
         return v;

@@ -29,7 +29,6 @@ import android.widget.*;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.account.Accounts;
 import net.ustyugov.jtalk.activity.muc.Bookmarks;
-import net.ustyugov.jtalk.activity.muc.Muc;
 import net.ustyugov.jtalk.activity.note.NotesActivity;
 import net.ustyugov.jtalk.adapter.NoGroupsAdapter;
 import net.ustyugov.jtalk.adapter.RosterAdapter;
@@ -224,7 +223,7 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
             menu.clear();
             getMenuInflater().inflate(R.menu.roster, menu);
     		menu.findItem(R.id.add).setEnabled(service.isAuthenticated());
-            menu.findItem(R.id.muc).setEnabled(service.isAuthenticated());
+            menu.findItem(R.id.notes).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.disco).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.offline).setTitle(prefs.getBoolean("hideOffline", false) ? R.string.ShowOfflineContacts : R.string.HideOfflineContacts);
 
@@ -308,10 +307,6 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
   	    		Intent bIntent = new Intent(this, Bookmarks.class);
   	    		startActivity(bIntent);
   	    		break;
-            case R.id.muc:
-                Intent mIntent = new Intent(this, Muc.class);
-                startActivity(mIntent);
-                break;
   	    	case R.id.chats:
   	    		ChangeChatDialog.show(this);
   	    		break;

@@ -8,10 +8,6 @@
           android:showAsAction="ifRoom"
           android:icon="@drawable/ic_menu_cc"
           android:title="@string/ActiveChats"/>
-    <item android:id="@+id/sidebar"
-        android:showAsAction="always"
-        android:icon="@drawable/ic_menu_sidebar"
-        android:title="@string/HideSidebar"/>
     <item android:id="@+id/templates"
           android:title="@string/Templates"
           android:showAsAction="never"/>

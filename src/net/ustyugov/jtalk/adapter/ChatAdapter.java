@@ -248,7 +248,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         }
         
         if (jid.equals(Constants.JUICK) || jid.equals(Constants.JUBO)) textView.setTextWithLinks(ssb, MyTextView.Mode.juick);
-        else if (jid.equals(Constants.PSTO)) textView.setTextWithLinks(ssb, MyTextView.Mode.psto);
+        else if (jid.equals(Constants.POINT)) textView.setTextWithLinks(ssb, MyTextView.Mode.point);
         else textView.setTextWithLinks(ssb);
         
         MovementMethod m = textView.getMovementMethod();

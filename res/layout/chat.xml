@@ -14,19 +14,24 @@
 				android:layout_width="fill_parent"
 				android:layout_height="fill_parent"
 				android:layout_weight="1" />
+
+            <ImageView android:id="@+id/slider"
+                    android:src="@drawable/slider"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"/>
+
 			<LinearLayout android:id="@+id/sidebar"
-			    android:layout_weight="3"
 			    android:orientation="vertical"
-			    android:layout_width="fill_parent"
+			    android:layout_width="100dip"
 			    android:layout_height="fill_parent">
 			    <ListView android:id="@+id/open_chat_list"
 					android:visibility="gone"
 					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"/>
+					android:layout_height="fill_parent"/>
 				<ListView android:id="@+id/muc_user_list"
 					android:visibility="gone"
 					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"/>
+					android:layout_height="fill_parent"/>
 			</LinearLayout>
 	</LinearLayout>
 		
