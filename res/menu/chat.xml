@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/smile"
-        android:icon="@drawable/ic_menu_emoticons"
-          android:title="@string/PasteSmile"
-          android:showAsAction="ifRoom"/>
+    <item android:id="@+id/sidebar"
+        android:icon="@drawable/ic_menu_friendslist"
+          android:title="Show/Hide sidebar"
+          android:showAsAction="always"/>
     <item android:id="@+id/chats"
           android:showAsAction="ifRoom"
           android:icon="@drawable/ic_menu_cc"

@@ -74,7 +74,7 @@ public class JuickMessageMenuDialog implements OnClickListener {
         	
         	switch(which) {
         		case 0:
-        			intent.putExtra("text", text);
+        			intent.putExtra("text", text + " ");
         			break;
         		case 1:
             		intent.putExtra("text", id + "+");

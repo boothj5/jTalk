@@ -125,7 +125,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 
             TextView text = (TextView) v.findViewById(R.id.name);
             text.setTypeface(Typeface.DEFAULT_BOLD);
-            text.setTextSize(fontSize);
+            text.setTextSize(fontSize-2);
             text.setTextColor(Colors.PRIMARY_TEXT);
             text.setText(activity.getString(R.string.Chats) + ": " + (getCount() - 1));
 

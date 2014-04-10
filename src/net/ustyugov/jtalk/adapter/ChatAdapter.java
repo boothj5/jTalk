@@ -270,10 +270,13 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
 				new JuickMessageMenuDialog(context, s).show();
 			} else {
                 Uri uri = Uri.parse(s);
-                if ((uri != null && uri.getScheme() != null) && (uri.getScheme().contains("http") || uri.getScheme().contains("xmpp"))) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(uri);
-                    context.startActivity(intent);
+                if ((uri != null && uri.getScheme() != null)) {
+                    String scheme = uri.getScheme().toLowerCase();
+                    if (scheme.contains("http") || scheme.contains("xmpp")) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(uri);
+                        context.startActivity(intent);
+                    }
                 }
 			}
 		}

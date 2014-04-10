@@ -336,7 +336,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
                 holder.messageIcon.setVisibility(View.GONE);
 
 	            holder.text = (TextView) convertView.findViewById(R.id.name);
-	            holder.text.setTextSize(fontSize);
+	            holder.text.setTextSize(fontSize-2);
 	            holder.text.setTextColor(Colors.PRIMARY_TEXT);
                 holder.text.setEllipsize(TextUtils.TruncateAt.MIDDLE);
 

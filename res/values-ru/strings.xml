@@ -132,6 +132,7 @@
     <string name="hideVersion">Скрывать версию клиента</string>
     <string name="Version">Версия</string>
     <string name="AlwaysVisibleState">Всегда показывать статус</string>
+    <string name="SendOnEnter">Отправка по Enter</string>
     
     <!--  Menus -->
     <string name="Update">Обновить</string>

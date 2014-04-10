@@ -25,7 +25,9 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.*;
 import android.net.Uri;
+import android.text.InputType;
 import android.view.*;
+import android.view.inputmethod.EditorInfo;
 import android.widget.*;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.filetransfer.SendFileActivity;
@@ -76,6 +78,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private Menu menu;
 
     private LinearLayout sidebar;
+    private ImageView slider;
     private ChatAdapter  listAdapter;
     private MucChatAdapter listMucAdapter;
     private OpenChatsAdapter chatsAdapter;
@@ -85,7 +88,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private ListView chatsList;
     private ListView nickList;
     private EditText messageInput;
-    private Button sendButton;
+    private ImageButton sendButton;
 
     private String jid;
     private String account;
@@ -159,7 +162,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         lp.width = width;
         sidebar.setLayoutParams(lp);
 
-        ImageView slider = (ImageView) findViewById(R.id.slider);
+        slider = (ImageView) findViewById(R.id.slider);
         slider.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
@@ -184,6 +187,14 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 return true;
             }
         });
+
+        if (prefs.getBoolean("ShowSidebar", true)) {
+            sidebar.setVisibility(View.VISIBLE);
+            slider.setVisibility(View.VISIBLE);
+        } else {
+            sidebar.setVisibility(View.GONE);
+            slider.setVisibility(View.GONE);
+        }
 
         chatsAdapter = new OpenChatsAdapter(this);
         chatsList = (ListView) findViewById(R.id.open_chat_list);
@@ -278,9 +289,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             }
         });
 
-        messageInput = (EditText)findViewById(R.id.messageInput);
-
-        sendButton  = (Button)findViewById(R.id.SendButton);
+        sendButton  = (ImageButton)findViewById(R.id.SendButton);
         sendButton.setEnabled(false);
         sendButton.setOnClickListener(this);
         sendButton.setOnLongClickListener(new OnLongClickListener() {
@@ -293,6 +302,38 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 return true;
             }
         });
+
+        messageInput = (EditText)findViewById(R.id.messageInput);
+        if (!prefs.getBoolean("NoMaxLines", true)) messageInput.setMaxLines(3);
+        messageInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEND) {
+                    onClick(sendButton);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        ImageView smileImage = (ImageView) findViewById(R.id.smileImage);
+        smileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                smiles.showDialog();
+            }
+        });
+        smileImage.setVisibility(prefs.getBoolean("ShowSmiles", true) ? View.VISIBLE : View.GONE);
+
+        if (prefs.getBoolean("SendOnEnter", false)) {
+            messageInput.setImeOptions(EditorInfo.IME_ACTION_SEND);
+            messageInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+            sendButton.setVisibility(View.GONE);
+        } else {
+            messageInput.setImeOptions(EditorInfo.IME_ACTION_NONE);
+            messageInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+            sendButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -381,7 +422,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
         messageInput.setText(service.getText(jid));
         messageInput.setSelection(messageInput.getText().length());
-        if (!prefs.getBoolean("NoMaxLines", true)) messageInput.setMaxLines(3);
 
         if (service.isAuthenticated()) Notify.updateNotify();
         else Notify.offlineNotify(this, service.getGlobalState());
@@ -538,6 +578,21 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.sidebar:
+                SharedPreferences.Editor editor = prefs.edit();
+                if (sidebar.getVisibility() == View.GONE) {
+                    sidebar.setVisibility(View.VISIBLE);
+                    slider.setVisibility(View.VISIBLE);
+                    editor.putBoolean("ShowSidebar", true);
+                } else {
+                    sidebar.setVisibility(View.GONE);
+                    slider.setVisibility(View.GONE);
+                    editor.putBoolean("ShowSidebar", false);
+                }
+                editor.commit();
+                updateChats();
+                updateUsers();
+                break;
             case R.id.imgur:
                 Intent fIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 fIntent.setType("image/*");
@@ -547,9 +602,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             case android.R.id.home:
                 startActivity(new Intent(this, RosterActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                 finish();
-                break;
-            case R.id.smile:
-                smiles.showDialog();
                 break;
             case R.id.nick:
                 final UsersAdapter adapter = new UsersAdapter(this, account, jid);
@@ -742,6 +794,8 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private void updateChats() {
         chatsSpinnerAdapter.update();
         chatsSpinnerAdapter.notifyDataSetChanged();
+
+        if (sidebar.getVisibility() == View.GONE) return;
         new Thread() {
             public void run() {
                 Chat.this.runOnUiThread(new Runnable() {
@@ -763,6 +817,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     }
 
     private void updateUsers() {
+        if (sidebar.getVisibility() == View.GONE) return;
         new Thread() {
             public void run() {
                 Chat.this.runOnUiThread(new Runnable() {

@@ -113,11 +113,13 @@ public class ImgurUploadTask extends AsyncTask<Void, Void, String> {
 
         JSONObject root = new JSONObject(sb.toString());
         String id = root.getJSONObject("data").getString("id");
-        String deletehash = root.getJSONObject("data").getString("deletehash");
+        String type = root.getJSONObject("data").getString("type");
+        String link = root.getJSONObject("data").getString("link");
+        long size = root.getJSONObject("data").getLong("size");
+        int w = root.getJSONObject("data").getInt("width");
+        int h = root.getJSONObject("data").getInt("height");
 
-        Log.i(TAG, "new imgur url: http://imgur.com/" + id + " (delete hash: " + deletehash + ")");
-
-        String message = "http://imgur.com/" + id;
+        String message = type + " " + w+"x"+h + " ["+humanReadableByteCount(size, true)+"]: " + link;
         if (muc != null && muc.isJoined()) {
             try {
                 muc.sendMessage(message);
@@ -127,6 +129,14 @@ public class ImgurUploadTask extends AsyncTask<Void, Void, String> {
             JTalkService.getInstance().sendMessage(account, jid, message);
         }
         return id;
+    }
+
+    private String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 
 }

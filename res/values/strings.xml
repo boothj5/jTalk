@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">jTalk</string>
     <string name="version">0.48</string>
-    <string name="build">406</string>
+    <string name="build">407</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>
@@ -140,6 +140,7 @@
     <string name="hideVersion">Hide client version</string>
     <string name="Version">Version</string>
     <string name="AlwaysVisibleState">Always visible state</string>
+    <string name="SendOnEnter">Send on Enter</string>
 
     <!--  Menus -->
     <string name="Update">Update</string>

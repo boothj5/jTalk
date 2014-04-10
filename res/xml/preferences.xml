@@ -77,6 +77,10 @@
                 android:title="@string/CollapseBigMessages"
                 android:defaultValue="false" />
         <CheckBoxPreference
+                android:key="SendOnEnter"
+                android:title="@string/SendOnEnter"
+                android:defaultValue="false" />
+        <CheckBoxPreference
                 android:key="HideKeyboard"
                 android:title="@string/HideKeyboard"
                 android:defaultValue="true" />
