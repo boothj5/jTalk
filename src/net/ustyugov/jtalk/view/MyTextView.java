@@ -9,7 +9,6 @@ import android.util.Patterns;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.listener.TextLinkClickListener;
 
-
 import android.content.Context;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -32,12 +31,15 @@ public class MyTextView  extends TextView {
                     + Patterns.GOOD_IRI_CHAR
                     + "\\;\\/\\?\\@\\&\\=\\#\\~\\-\\.\\+\\!\\*\\'\\(\\)\\,\\_])"
                     + "|(?:\\%[a-fA-F0-9]{2}))+", Pattern.CASE_INSENSITIVE);
+    Pattern mdPattern = Pattern.compile("\\[((?!\\[).+?)\\][\\(|\\[](https?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*)[\\)|\\]]", Pattern.CASE_INSENSITIVE);
 
 	public MyTextView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
 
 	public void setTextWithLinks(SpannableStringBuilder ssb) {
+        ssb = parseMdLinks(ssb);
+
         ArrayList<Hyperlink> linkList = new ArrayList<Hyperlink>();
         ArrayList<Hyperlink> xmppList = new ArrayList<Hyperlink>();
         getLinks(linkList, ssb, linkPattern);
@@ -57,7 +59,9 @@ public class MyTextView  extends TextView {
 		setText(ssb);
 	}
 	
-	public void setTextWithLinks(SpannableStringBuilder ssb, String nick) { 
+	public void setTextWithLinks(SpannableStringBuilder ssb, String nick) {
+        ssb = parseMdLinks(ssb);
+
 		int start = ssb.toString().indexOf(nick);
 		if (start >= 0) {
 			int end = start + nick.length();
@@ -93,6 +97,8 @@ public class MyTextView  extends TextView {
 	}
 	
 	public void setTextWithLinks(SpannableStringBuilder ssb, Mode mode) {
+        ssb = parseMdLinks(ssb);
+
 		ArrayList<Hyperlink> nameList = new ArrayList<Hyperlink>();
 		ArrayList<Hyperlink> msgList = new ArrayList<Hyperlink>();
 		ArrayList<Hyperlink> linkList = new ArrayList<Hyperlink>();
@@ -132,7 +138,7 @@ public class MyTextView  extends TextView {
 		mListener = newListener;
 	}
 
-	private final void getLinks(ArrayList<Hyperlink> links, Spannable s, Pattern pattern) {
+	private void getLinks(ArrayList<Hyperlink> links, Spannable s, Pattern pattern) {
 		Matcher m = pattern.matcher(s);
 
 		while (m.find())
@@ -150,6 +156,27 @@ public class MyTextView  extends TextView {
 			links.add(spec);
 		}
 	}
+
+    private SpannableStringBuilder parseMdLinks(SpannableStringBuilder s) {
+        boolean done = false;
+        while (!done) {
+            Matcher m = mdPattern.matcher(s);
+            if (m.find()) {
+                int start = m.start();
+                int end = m.end();
+                CharSequence title = m.group(1);
+                CharSequence link = m.group(2);
+
+                s.replace(start, end, title);
+                s.setSpan(new StyleSpan(android.graphics.Typeface.SANS_SERIF.getStyle()), start, start+title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                s.setSpan(new InternalURLSpan(link.toString()), start, start+title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                s.setSpan(new ForegroundColorSpan(Colors.LINK), start, start+title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                done = true;
+            }
+        }
+        return s;
+    }
 
 	public class InternalURLSpan extends ClickableSpan {
 		private String clickedSpan;
