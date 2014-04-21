@@ -75,13 +75,6 @@ public class NotesActivity extends Activity {
                 ListView list = (ListView) templatePage.findViewById(R.id.list);
                 list.setDividerHeight(1);
                 list.setCacheColorHint(0x00000000);
-//                list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//                    @Override
-//                    public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-//                        list.performLongClick();
-//                    }
-//                });
-
                 list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                     @Override
                     public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {

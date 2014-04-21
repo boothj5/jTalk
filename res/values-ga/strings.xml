@@ -80,8 +80,6 @@
     <string name="ShowGroups">Mostrar grupos</string>
     <string name="ShowStatuses">Mostrar estados</string>
     <string name="AutoJoin">Unirse automaticamente</string>
-    <string name="EnableCollapseMessages">Compactar mensaxes</string>
-    <string name="CollapseBigMessages">Autocompactar mensaxes longas</string>
     <string name="LoadAvatars">Mostrar avatares</string>
     <string name="ShowSmiles">Mostrar emoticonos</string>
     <string name="Autoscroll">Autoscroll</string>

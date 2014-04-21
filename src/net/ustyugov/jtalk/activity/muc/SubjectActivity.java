@@ -21,12 +21,15 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.SpannableStringBuilder;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 import com.jtalk2.R;
 import net.ustyugov.jtalk.Colors;
+import net.ustyugov.jtalk.listener.MyTextLinkClickListener;
 import net.ustyugov.jtalk.service.JTalkService;
+import net.ustyugov.jtalk.view.MyTextView;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
@@ -34,7 +37,7 @@ public class SubjectActivity extends Activity implements View.OnClickListener {
     String account;
     String group;
     String subject;
-    TextView textView;
+    MyTextView textView;
     EditText editText;
     Button okButton;
     Button editButton;
@@ -56,9 +59,10 @@ public class SubjectActivity extends Activity implements View.OnClickListener {
         editText = (EditText) findViewById(R.id.subject_edit);
         editText.setVisibility(View.GONE);
 
-        textView = (TextView) findViewById(R.id.subject_view);
+        textView = (MyTextView) findViewById(R.id.subject_view);
         textView.setVisibility(View.VISIBLE);
         textView.setTextSize(Integer.parseInt(getResources().getString(R.string.DefaultFontSize)));
+        textView.setOnTextLinkClickListener(new MyTextLinkClickListener(this, ""));
         try {
             textView.setTextSize(Integer.parseInt(prefs.getString("RosterSize", getResources().getString(R.string.DefaultFontSize))));
         } catch (NumberFormatException ignored) { }
@@ -85,7 +89,7 @@ public class SubjectActivity extends Activity implements View.OnClickListener {
                 subject = muc.getSubject();
                 if (subject == null) subject = "";
                 editText.setText(subject);
-                textView.setText(subject);
+                textView.setTextWithLinks(new SpannableStringBuilder(subject));
             } else {
                 finish();
             }
@@ -127,7 +131,7 @@ public class SubjectActivity extends Activity implements View.OnClickListener {
                 Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
             }
 
-            textView.setText(subject);
+            textView.setTextWithLinks(new SpannableStringBuilder(subject));
             textView.setVisibility(View.VISIBLE);
             editButton.setVisibility(View.VISIBLE);
             editText.setVisibility(View.GONE);

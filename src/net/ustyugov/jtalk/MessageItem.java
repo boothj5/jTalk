@@ -37,7 +37,6 @@ public class MessageItem {
 	private Type type = Type.message;
 	private boolean edited = false;
 	private boolean received = false;
-	private boolean collapsed = false;
 	private boolean captcha = false;
 	private DataForm form = null;
 	private BobExtension bob = null;
@@ -65,7 +64,6 @@ public class MessageItem {
 	    this.stamp = df.format(d);
         this.edited = false;
 		this.received = false;
-		this.collapsed = false;
 	}
 
     public void setBaseId(String id) { this.baseId = id; }
@@ -83,7 +81,6 @@ public class MessageItem {
     public String getId() { return this.id; }
     public void setJid(String jid) { this.jid = jid; }
     public String getJid() { return jid; }
-	public boolean isCollapsed() { return this.collapsed; }
 	public boolean isReceived() { return this.received; }
 	public boolean isEdited() { return this.edited; }
 	public boolean containsCaptcha() { return this.captcha; }
@@ -92,7 +89,6 @@ public class MessageItem {
 	public DataForm getForm() { return this.form; }
 	public void setBob(BobExtension bob) { this.bob = bob; }
 	public BobExtension getBob() { return this.bob; }
-	public void setCollapsed(boolean collapsed) { this.collapsed = collapsed; }
 	public void setType(Type type) { if (type != null) this.type = type; }
 	public Type getType() { return this.type; }
 	public void setTime(String time) { this.time = time; }

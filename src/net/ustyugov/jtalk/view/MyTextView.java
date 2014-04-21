@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.text.method.LinkMovementMethod;
+import android.text.method.MovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.util.Patterns;
 import net.ustyugov.jtalk.Colors;
@@ -19,7 +21,7 @@ import android.view.View;
 import android.widget.TextView;
 
 public class MyTextView  extends TextView {
-	public enum Mode {juick, point};
+	public enum Mode {juick, point}
 	TextLinkClickListener mListener;
 
 	Pattern namePattern = Pattern.compile("((?<=\\A)|(?<=\\s))@[a-z0-9-]*[^\\s\\n\\.,:\\)]*", Pattern.CASE_INSENSITIVE);
@@ -57,6 +59,7 @@ public class MyTextView  extends TextView {
         }
 
 		setText(ssb);
+        setMovementMethod();
 	}
 	
 	public void setTextWithLinks(SpannableStringBuilder ssb, String nick) {
@@ -94,6 +97,7 @@ public class MyTextView  extends TextView {
         }
 
 		setText(ssb);
+        setMovementMethod();
 	}
 	
 	public void setTextWithLinks(SpannableStringBuilder ssb, Mode mode) {
@@ -132,7 +136,17 @@ public class MyTextView  extends TextView {
             ssb.setSpan(new ForegroundColorSpan(Colors.LINK), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 		setText(ssb);
+        setMovementMethod();
 	}
+
+    private void setMovementMethod() {
+        MovementMethod m = getMovementMethod();
+        if ((m == null) || !(m instanceof LinkMovementMethod)) {
+            if (getLinksClickable()) {
+                setMovementMethod(LinkMovementMethod.getInstance());
+            }
+        }
+    }
 
 	public void setOnTextLinkClickListener(TextLinkClickListener newListener) {
 		mListener = newListener;

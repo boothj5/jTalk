@@ -109,6 +109,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			Iterator<Presence> it = service.getRoster(account).getPresences(group);
 			while (it.hasNext()) {
 				Presence p = it.next();
+                if (p.getType() == Presence.Type.unavailable) continue;
 				Presence.Mode m = p.getMode();
 				if (m == null) m = Presence.Mode.available;
 				String role = "visitor";
@@ -364,6 +365,13 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			Presence presence = service.getPresence(item.getAccount(), jid);
 			Presence.Type type = presence.getType();
 	        Presence.Mode mode = presence.getMode();
+
+            boolean italic = false;
+            MUCUser mucUser = (MUCUser) presence.getExtension("x", "http://jabber.org/protocol/muc#user");
+            if (mucUser != null) {
+                String affiliation = mucUser.getItem().getAffiliation();
+                if (affiliation != null && (affiliation.equals("admin") || affiliation.equals("none"))) italic = true;
+            }
 			
 			int count = service.getMessagesCount(account, jid);
 			
@@ -393,10 +401,14 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			holder.name.setText(name);
 			if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
 			else holder.name.setTextColor(Colors.PRIMARY_TEXT);
-			
+
 			if (service.getActiveChats(account).contains(jid)) {
-				holder.name.setTypeface(Typeface.DEFAULT_BOLD);
-			} else holder.name.setTypeface(Typeface.DEFAULT);
+				if (italic) holder.name.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD_ITALIC));
+                else holder.name.setTypeface(Typeface.DEFAULT_BOLD);
+			} else {
+                if (italic) holder.name.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
+                else holder.name.setTypeface(Typeface.DEFAULT);
+            }
 			
 	        if (count > 0) {
 	        	holder.messageIcon.setVisibility(View.VISIBLE);

@@ -22,6 +22,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
+import android.text.SpannableStringBuilder;
+import android.text.method.LinkMovementMethod;
+import android.text.method.MovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +35,9 @@ import com.jtalk2.R;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.IconPicker;
+import net.ustyugov.jtalk.listener.MyTextLinkClickListener;
 import net.ustyugov.jtalk.service.JTalkService;
+import net.ustyugov.jtalk.view.MyTextView;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smackx.note.Note;
@@ -47,7 +52,7 @@ public class NotesAdapter extends ArrayAdapter<Note> {
     static class ViewHolder {
         protected ImageView icon;
         protected TextView title;
-        protected TextView text;
+        protected MyTextView text;
         protected TextView tag;
     }
 
@@ -99,9 +104,10 @@ public class NotesAdapter extends ArrayAdapter<Note> {
             holder.title.setTextSize(fontSize + 2);
             holder.title.setTypeface(Typeface.DEFAULT_BOLD);
 
-            holder.text = (TextView) convertView.findViewById(R.id.text);
+            holder.text = (MyTextView) convertView.findViewById(R.id.text);
             holder.text.setTextColor(Colors.PRIMARY_TEXT);
             holder.text.setTextSize(fontSize);
+            holder.text.setOnTextLinkClickListener(new MyTextLinkClickListener(context, ""));
 
             holder.tag = (TextView) convertView.findViewById(R.id.tag);
             holder.tag.setTextColor(Colors.SECONDARY_TEXT);
@@ -114,8 +120,9 @@ public class NotesAdapter extends ArrayAdapter<Note> {
 
         Note note = getItem(position);
         holder.title.setText(note.getTittle());
-        holder.text.setText(note.getText());
+        holder.text.setTextWithLinks(new SpannableStringBuilder(note.getText()));
         holder.tag.setText(note.getTag());
+
         return convertView;
     }
 }

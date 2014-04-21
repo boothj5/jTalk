@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">jTalk</string>
     <string name="version">0.48</string>
-    <string name="build">407</string>
+    <string name="build">408</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>
@@ -94,8 +94,6 @@
     <string name="ShowGroups">Show Groups</string>
     <string name="ShowStatuses">Show Statuses</string>
     <string name="AutoJoin">Auto join</string>
-    <string name="EnableCollapseMessages">Enable collapse messages</string>
-    <string name="CollapseBigMessages">Auto collapse big messages</string>
     <string name="LoadAvatars">Show avatars</string>
     <string name="ShowSmiles">Show smiles</string>
     <string name="Autoscroll">Autoscroll</string>

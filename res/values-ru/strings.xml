@@ -86,8 +86,6 @@
     <string name="ShowGroups">Показывать группы</string>
     <string name="ShowStatuses">Показывать статусы</string>
     <string name="AutoJoin">Автовход</string>
-    <string name="EnableCollapseMessages">Разрешить сворачивание сообщений</string>
-    <string name="CollapseBigMessages">Автосворачивание сообщений</string>
     <string name="LoadAvatars">Показывать аватарки</string>
     <string name="ShowSmiles">Показывать смайлики</string>
     <string name="Autoscroll">Автопрокрутка</string>

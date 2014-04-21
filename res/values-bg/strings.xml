@@ -84,8 +84,6 @@
     <string name="ShowGroups">Показване на групи</string>
     <string name="ShowStatuses">Показване на статуси</string>
     <string name="AutoJoin">Автоматичен изход</string>
-    <string name="EnableCollapseMessages">Позволи намалението на съобщенията</string>
-    <string name="CollapseBigMessages">Автоматично намаление на съобщенията</string>
     <string name="LoadAvatars">Показвай аватарите</string>
     <string name="ShowSmiles">Показвай емотикони</string>
     <string name="Autoscroll">Автоматично превъртане</string>

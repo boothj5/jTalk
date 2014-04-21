@@ -14,10 +14,9 @@
                       android:layout_height="wrap_content"
                       android:layout_width="fill_parent">
 
-            <TextView android:id="@+id/subject_view"
+            <net.ustyugov.jtalk.view.MyTextView android:id="@+id/subject_view"
                       android:layout_width="fill_parent"
                       android:layout_height="fill_parent"
-                      android:autoLink="web|email"
                       android:linksClickable="true" />
             <EditText
                     android:id="@+id/subject_edit"

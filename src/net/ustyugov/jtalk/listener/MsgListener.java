@@ -231,7 +231,6 @@ public class MsgListener implements PacketListener {
                     mucMsg.setTime(time);
                     mucMsg.setName(name);
                     mucMsg.setReceived(false);
-                    if (prefs.getBoolean("CollapseBigMessages", false) && body.length() > 196) mucMsg.setCollapsed(true);
 
                     CaptchaExtension captcha = (CaptchaExtension) msg.getExtension("captcha", "urn:xmpp:captcha");
                     if (captcha != null) {
@@ -282,10 +281,6 @@ public class MsgListener implements PacketListener {
             item.setId(id);
             item.setTime(time);
             item.setName(name);
-
-            if (prefs.getBoolean("CollapseBigMessages", false) && body.length() > 196) {
-                item.setCollapsed(true);
-            }
 
             if (group != null && group.length() > 0) user = group + "/" + name;
 

@@ -25,30 +25,24 @@ import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
+import net.ustyugov.jtalk.listener.MyTextLinkClickListener;
 import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.smiles.Smiles;
-import net.ustyugov.jtalk.dialog.JuickMessageMenuDialog;
-import net.ustyugov.jtalk.listener.TextLinkClickListener;
 import net.ustyugov.jtalk.view.MyTextView;
 
 import com.jtalk2.R;
 
-import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.method.LinkMovementMethod;
-import android.text.method.MovementMethod;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 
-public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkClickListener {
+public class ChatAdapter extends ArrayAdapter<MessageItem> {
     public enum ViewMode { single, multi }
 
 	private String searchString = "";
@@ -57,9 +51,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
 	private Context context;
 	private Smiles smiles;
 	private String jid;
-	private boolean firstClick = false;
 	private boolean showtime;
-	private Timer doubleClickTimer = new Timer();
     private ViewMode viewMode = ViewMode.single;
     private List<MessageItem> list = new ArrayList<MessageItem>();
 
@@ -110,7 +102,6 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
 
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
-		boolean enableCollapse = prefs.getBoolean("EnableCollapseMessages", true);
 		int fontSize = Integer.parseInt(context.getResources().getString(R.string.DefaultFontSize));
 		try {
 			fontSize = Integer.parseInt(prefs.getString("FontSize", context.getResources().getString(R.string.DefaultFontSize)));
@@ -127,7 +118,6 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         String name = item.getName();
         MessageItem.Type type = item.getType();
         String nick = item.getName();
-        final boolean collapsed = item.isCollapsed();
         boolean received = item.isReceived();
         String time = createTimeString(item.getTime());
 
@@ -190,58 +180,9 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
             }
         });
 
-        final ImageView expand = (ImageView) convertView.findViewById(R.id.expand);
         final MyTextView textView = (MyTextView) convertView.findViewById(R.id.chat1);
-        textView.setOnTextLinkClickListener(this);
-        if (enableCollapse) {
-        	textView.setOnTouchListener(new OnTouchListener() {
-            	View oldView = null;
-    			public boolean onTouch(View view, MotionEvent event) {
-    				switch (event.getAction()) {
-    	    			case MotionEvent.ACTION_DOWN:
-    	    				if (!firstClick) {
-    	    					oldView = view;
-    	    					firstClick = true;
-    	    					doubleClickTimer.purge();
-    	    					doubleClickTimer.cancel();
-    	    					doubleClickTimer = new Timer();
-    	    					doubleClickTimer.schedule(new TimerTask(){
-    	    						@Override
-    	    						public void run() {
-    	    							firstClick = false;
-    	    						}
-    	    					}, 500);
-    	    				} else {
-    	    					firstClick = false;
-    	    					if (oldView != null && oldView.equals(view)) {
-    		    					if (item.isCollapsed()) {
-    		    						item.setCollapsed(false);
-    		    						textView.setSingleLine(false);
-    		    						expand.setVisibility(View.GONE);
-    		    					} else {
-    		    						item.setCollapsed(true);
-    		    						textView.setSingleLine(true);
-    		    						expand.setVisibility(View.VISIBLE);
-    		    					}
-    	    					}
-    	    				}
-    	    				break;
-    	    			default:
-    	    				break;
-    				}
-    				return false;			
-    			}
-            });
-        }
-        
-        if (collapsed && enableCollapse) {
-        	textView.setSingleLine(true);
-        	expand.setVisibility(View.VISIBLE);
-        } else {
-        	textView.setSingleLine(false);
-        	expand.setVisibility(View.GONE);
-        }
-        
+        textView.setOnTextLinkClickListener(new MyTextLinkClickListener(context, jid));
+
         if (prefs.getBoolean("ShowSmiles", true)) {
         	int startPosition = message.length() - body.length();
         	ssb = smiles.parseSmiles(textView, ssb, startPosition);
@@ -251,36 +192,11 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         else if (jid.equals(Constants.POINT)) textView.setTextWithLinks(ssb, MyTextView.Mode.point);
         else textView.setTextWithLinks(ssb);
         
-        MovementMethod m = textView.getMovementMethod();
-        if ((m == null) || !(m instanceof LinkMovementMethod)) {
-            if (textView.getLinksClickable()) {
-                textView.setMovementMethod(LinkMovementMethod.getInstance());
-            }
-        }
-        
         textView.setTextSize(fontSize);
 
         convertView.setBackgroundColor(0X00000000);
         return convertView;
     }
-	
-	public void onTextLinkClick(View textView, String s) {
-		if (s.length() > 1) {
-			if (s.startsWith("@") || s.startsWith("#")) {
-				new JuickMessageMenuDialog(context, s).show();
-			} else {
-                Uri uri = Uri.parse(s);
-                if ((uri != null && uri.getScheme() != null)) {
-                    String scheme = uri.getScheme().toLowerCase();
-                    if (scheme.contains("http") || scheme.contains("xmpp")) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(uri);
-                        context.startActivity(intent);
-                    }
-                }
-			}
-		}
-	}
 	
     private String createTimeString(String time) {
         Date d = new Date();

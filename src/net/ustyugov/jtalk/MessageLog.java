@@ -48,7 +48,7 @@ public class MessageLog {
             values.put(MessageDbHelper.STAMP, message.getTime());
             values.put(MessageDbHelper.NICK, message.getName());
             values.put(MessageDbHelper.BODY, message.getBody());
-            values.put(MessageDbHelper.COLLAPSED, message.isCollapsed() ? "true" : "false");
+            values.put(MessageDbHelper.COLLAPSED, false);
             values.put(MessageDbHelper.RECEIVED, message.isReceived() ? "true" : "false");
             values.put(MessageDbHelper.FORM, "NULL");
             values.put(MessageDbHelper.BOB, "NULL");
@@ -73,13 +73,14 @@ public class MessageLog {
             values.put(MessageDbHelper.STAMP, message.getTime());
             values.put(MessageDbHelper.NICK, nick);
             values.put(MessageDbHelper.BODY, message.getBody());
-            values.put(MessageDbHelper.COLLAPSED, message.isCollapsed() ? "true" : "false");
+            values.put(MessageDbHelper.COLLAPSED, false);
             values.put(MessageDbHelper.RECEIVED, message.isReceived() ? "true" : "false");
             values.put(MessageDbHelper.FORM, "NULL");
             values.put(MessageDbHelper.BOB, "NULL");
             service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
 
             service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", group));
+            service.sendBroadcast(new Intent(Constants.PRESENCE_CHANGED).putExtra("jid", group));
         } catch (Exception sqle) {
             Log.i("SQL", sqle.getLocalizedMessage());
         }
@@ -98,7 +99,6 @@ public class MessageLog {
 						String nick = cursor.getString(cursor.getColumnIndex(MessageDbHelper.NICK));
 						String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
 						String stamp = cursor.getString(cursor.getColumnIndex(MessageDbHelper.STAMP));
-						String collapsed = cursor.getString(cursor.getColumnIndex(MessageDbHelper.COLLAPSED));
 						String received = cursor.getString(cursor.getColumnIndex(MessageDbHelper.RECEIVED));
 						
 						ContentValues values = new ContentValues();
@@ -108,7 +108,7 @@ public class MessageLog {
 		 	            values.put(MessageDbHelper.STAMP, stamp);
 		 	            values.put(MessageDbHelper.NICK, nick);
 		 	            values.put(MessageDbHelper.BODY, text);
-		 	            values.put(MessageDbHelper.COLLAPSED, collapsed);
+		 	            values.put(MessageDbHelper.COLLAPSED, false);
 		 	            values.put(MessageDbHelper.RECEIVED, received);
 		 	            values.put(MessageDbHelper.FORM, "NULL");
 		 	            values.put(MessageDbHelper.BOB, "NULL");

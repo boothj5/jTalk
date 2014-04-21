@@ -20,38 +20,30 @@ package net.ustyugov.jtalk.adapter.muc;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import android.content.*;
 import android.widget.*;
 import net.ustyugov.jtalk.Colors;
-import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.adapter.ChatAdapter;
+import net.ustyugov.jtalk.listener.MyTextLinkClickListener;
 import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.smiles.Smiles;
-import net.ustyugov.jtalk.listener.TextLinkClickListener;
 import net.ustyugov.jtalk.view.MyTextView;
 
 import com.jtalk2.R;
 
-import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.method.LinkMovementMethod;
-import android.text.method.MovementMethod;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnTouchListener;
 
-public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkClickListener {
+public class MucChatAdapter extends ArrayAdapter<MessageItem> {
     private String searchString = "";
     private String[] highArray;
 
@@ -59,9 +51,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
     private Smiles smiles;
     private String nick;
     private String group;
-    private boolean firstClick = false;
     private boolean showtime = false;
-    private Timer doubleClickTimer = new Timer();
     private ChatAdapter.ViewMode viewMode = ChatAdapter.ViewMode.single;
 
     private SharedPreferences prefs;
@@ -114,7 +104,6 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        boolean enableCollapse = prefs.getBoolean("EnableCollapseMessages", true);
         int fontSize = Integer.parseInt(context.getResources().getString(R.string.DefaultFontSize));
         try {
             fontSize = Integer.parseInt(prefs.getString("FontSize", context.getResources().getString(R.string.DefaultFontSize)));
@@ -132,7 +121,6 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         String name = item.getName();
         String n    = item.getName();
         MessageItem.Type type = item.getType();
-        final boolean collapsed = item.isCollapsed();
 
         if (showtime) name = time + " " + name;
 
@@ -205,10 +193,9 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
             }
         });
 
-        final ImageView expand = (ImageView) v.findViewById(R.id.expand);
         final MyTextView t1 = (MyTextView) v.findViewById(R.id.chat1);
         t1.setTextSize(fontSize);
-        t1.setOnTextLinkClickListener(this);
+        t1.setOnTextLinkClickListener(new MyTextLinkClickListener(context, group));
         t1.setTextColor(Colors.PRIMARY_TEXT);
 
         if (prefs.getBoolean("ShowSmiles", true)) {
@@ -217,84 +204,8 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         }
 
         t1.setTextWithLinks(ssb, n);
-        if (enableCollapse) {
-            t1.setOnTouchListener(new OnTouchListener() {
-                View oldView = null;
-                public boolean onTouch(View view, MotionEvent event) {
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            if (!firstClick) {
-                                oldView = view;
-                                firstClick = true;
-                                doubleClickTimer.purge();
-                                doubleClickTimer.cancel();
-                                doubleClickTimer = new Timer();
-                                doubleClickTimer.schedule(new TimerTask(){
-                                    @Override
-                                    public void run() {
-                                        firstClick = false;
-                                    }
-                                }, 500);
-                            } else {
-                                firstClick = false;
-                                if (oldView != null && oldView.equals(view)) {
-                                    if (item.isCollapsed()) {
-                                        item.setCollapsed(false);
-                                        t1.setSingleLine(false);
-                                        expand.setVisibility(View.GONE);
-                                    } else {
-                                        item.setCollapsed(true);
-                                        t1.setSingleLine(true);
-                                        expand.setVisibility(View.VISIBLE);
-                                    }
-                                }
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                    return false;
-                }
-            });
-        }
-
-        if (collapsed && enableCollapse) {
-            t1.setSingleLine(true);
-            expand.setVisibility(View.VISIBLE);
-        } else {
-            t1.setSingleLine(false);
-            expand.setVisibility(View.GONE);
-        }
-
-        MovementMethod m = t1.getMovementMethod();
-        if ((m == null) || !(m instanceof LinkMovementMethod)) {
-            if (t1.getLinksClickable()) {
-                t1.setMovementMethod(LinkMovementMethod.getInstance());
-            }
-        }
-
         v.setBackgroundColor(0X00000000);
         return v;
-    }
-
-    public void onTextLinkClick(View textView, String s) {
-        if (s == null || s.length() < 1) return;
-        Uri uri = Uri.parse(s);
-        if ((uri != null && uri.getScheme() != null)) {
-            String scheme = uri.getScheme().toLowerCase();
-            if (scheme.contains("http") || scheme.contains("xmpp")) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(uri);
-                context.startActivity(intent);
-            }
-        } else {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            String separator = prefs.getString("nickSeparator", ", ");
-
-            Intent intent = new Intent(Constants.PASTE_TEXT);
-            intent.putExtra("text", s + separator);
-            context.sendBroadcast(intent);
-        }
     }
 
     private String createTimeString(String time) {

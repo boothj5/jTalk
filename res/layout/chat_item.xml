@@ -18,7 +18,7 @@
 		android:src="@drawable/close"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:visibility="visible"/>
+		android:visibility="gone"/>
 		
 	<net.ustyugov.jtalk.view.MyTextView android:id="@+id/chat1"
 		android:gravity="center_vertical"

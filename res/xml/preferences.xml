@@ -67,16 +67,6 @@
                 android:title="@string/Autoscroll"
                 android:defaultValue="true" />
         <CheckBoxPreference
-                android:key="EnableCollapseMessages"
-                android:title="@string/EnableCollapseMessages"
-                android:defaultValue="true" />
-        <CheckBoxPreference
-                android:dependency="EnableCollapseMessages"
-                android:disableDependentsState="false"
-                android:key="CollapseBigMessages"
-                android:title="@string/CollapseBigMessages"
-                android:defaultValue="false" />
-        <CheckBoxPreference
                 android:key="SendOnEnter"
                 android:title="@string/SendOnEnter"
                 android:defaultValue="false" />
