@@ -54,8 +54,6 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 	private String account;
 	private Activity activity;
     private int sidebarSize = 100;
-    private int fontSize = 14;
-    private int statusSize;
     SharedPreferences prefs;
 
     enum Mode { nick, status, all }
@@ -66,12 +64,6 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 		this.group = group;
 		this.account = account;
         this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-
-        try {
-            this.fontSize = Integer.parseInt(prefs.getString("RosterSize", activity.getResources().getString(R.string.DefaultFontSize)));
-        } catch (NumberFormatException ignored) { }
-        statusSize = fontSize - 4;
-
         update(sidebarSize);
 	}
 	
@@ -328,7 +320,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 		RosterItem item = getItem(position);
 		if (item.isGroup()) {
 			GroupHolder holder;
-			if (convertView == null || convertView.findViewById(R.id.state) == null) {
+			if (convertView == null || convertView.getTag() == null || convertView.getTag() instanceof ItemHolder) {
 				LayoutInflater inflater = activity.getLayoutInflater();
 				convertView = inflater.inflate(R.layout.group, null, false);
 				
@@ -374,16 +366,16 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
             }
 			
 			int count = service.getMessagesCount(account, jid);
-			
-			if(convertView == null || convertView.findViewById(R.id.status) == null) {		
+
+            ItemHolder holder = new ItemHolder();
+			if(convertView == null || convertView.getTag() == null || convertView.getTag() instanceof GroupHolder) {
 				LayoutInflater inflater = activity.getLayoutInflater();
 				convertView = inflater.inflate(R.layout.entry, null, false);
 
-				ItemHolder holder = new ItemHolder();
 				holder.name = (TextView) convertView.findViewById(R.id.name);
 				holder.name.setTextSize(fontSize);
 				holder.status = (TextView) convertView.findViewById(R.id.status);
-                holder.status.setTextSize(statusSize);
+                holder.status.setTextSize(fontSize-4);
 				holder.status.setVisibility(View.GONE);
 				holder.counter = (TextView) convertView.findViewById(R.id.msg_counter);
 				holder.counter.setTextSize(fontSize);
@@ -395,9 +387,10 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 				holder.avatar = (ImageView) convertView.findViewById(R.id.contactlist_pic);
 				holder.caps = (ImageView) convertView.findViewById(R.id.caps);
 				convertView.setTag(holder);
-			}
-			
-			ItemHolder holder = (ItemHolder) convertView.getTag();
+			} else {
+                holder = (ItemHolder) convertView.getTag();
+            }
+
 			holder.name.setText(name);
 			if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
 			else holder.name.setTextColor(Colors.PRIMARY_TEXT);

@@ -24,6 +24,7 @@ import android.content.*;
 import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
+import net.ustyugov.jtalk.Holders;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.listener.MyTextLinkClickListener;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -53,7 +54,6 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
 	private String jid;
 	private boolean showtime;
     private ViewMode viewMode = ViewMode.single;
-    private List<MessageItem> list = new ArrayList<MessageItem>();
 
 	public ChatAdapter(Context context, Smiles smiles) {
         super(context, R.id.chat1);
@@ -73,7 +73,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
 
         boolean showStatuses = prefs.getBoolean("ShowStatus", false);
 
-        list = JTalkService.getInstance().getMessageList(account, jid);
+        List<MessageItem> list = JTalkService.getInstance().getMessageList(account, jid);
         for (int i = 0; i < list.size(); i++) {
             MessageItem item = list.get(i);
             MessageItem.Type type = item.getType();
@@ -106,10 +106,23 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
 		try {
 			fontSize = Integer.parseInt(prefs.getString("FontSize", context.getResources().getString(R.string.DefaultFontSize)));
 		} catch (NumberFormatException ignored) {	}
-		
+
+        Holders.MessageHolder holder = new Holders.MessageHolder();
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.chat_item, null, false);
+
+            holder.linear = (LinearLayout) convertView.findViewById(R.id.chat_item);
+            holder.linear.setMinimumHeight(Integer.parseInt(prefs.getString("SmilesSize", "24")));
+            holder.check = (CheckBox) convertView.findViewById(R.id.check);
+            holder.text = (MyTextView) convertView.findViewById(R.id.chat1);
+            holder.text.setOnTextLinkClickListener(new MyTextLinkClickListener(context, jid));
+            holder.text.setTextSize(fontSize);
+
+            convertView.setBackgroundColor(0X00000000);
+            convertView.setTag(holder);
+        } else {
+            holder = (Holders.MessageHolder) convertView.getTag();
         }
 
         final MessageItem item = getItem(position);
@@ -166,13 +179,9 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
             }
         }
 
-        LinearLayout linear = (LinearLayout) convertView.findViewById(R.id.chat_item);
-        linear.setMinimumHeight(Integer.parseInt(prefs.getString("SmilesSize", "24")));
-
-        CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.check);
-        checkBox.setVisibility(viewMode == ViewMode.multi ? View.VISIBLE : View.GONE);
-        checkBox.setChecked(item.isSelected());
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        holder.check.setVisibility(viewMode == ViewMode.multi ? View.VISIBLE : View.GONE);
+        holder.check.setChecked(item.isSelected());
+        holder.check.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 item.select(b);
@@ -180,21 +189,15 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
             }
         });
 
-        final MyTextView textView = (MyTextView) convertView.findViewById(R.id.chat1);
-        textView.setOnTextLinkClickListener(new MyTextLinkClickListener(context, jid));
-
         if (prefs.getBoolean("ShowSmiles", true)) {
         	int startPosition = message.length() - body.length();
-        	ssb = smiles.parseSmiles(textView, ssb, startPosition);
+        	ssb = smiles.parseSmiles(holder.text, ssb, startPosition);
         }
         
-        if (jid.equals(Constants.JUICK) || jid.equals(Constants.JUBO)) textView.setTextWithLinks(ssb, MyTextView.Mode.juick);
-        else if (jid.equals(Constants.POINT)) textView.setTextWithLinks(ssb, MyTextView.Mode.point);
-        else textView.setTextWithLinks(ssb);
-        
-        textView.setTextSize(fontSize);
+        if (jid.equals(Constants.JUICK) || jid.equals(Constants.JUBO)) holder.text.setTextWithLinks(ssb, MyTextView.Mode.juick);
+        else if (jid.equals(Constants.POINT)) holder.text.setTextWithLinks(ssb, MyTextView.Mode.point);
+        else holder.text.setTextWithLinks(ssb);
 
-        convertView.setBackgroundColor(0X00000000);
         return convertView;
     }
 	

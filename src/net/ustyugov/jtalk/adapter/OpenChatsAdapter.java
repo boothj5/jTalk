@@ -115,52 +115,51 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 
         RosterItem ri = getItem(position);
         if (ri.isGroup()) {
-            if (v == null || v.findViewById(R.id.state) == null) {
+            Holders.GroupHolder holder = new Holders.GroupHolder();
+            if (v == null || v.getTag() == null || v.getTag() instanceof Holders.ItemHolder) {
                 LayoutInflater inflater = activity.getLayoutInflater();
                 v = inflater.inflate(R.layout.group, null, false);
+                holder.messageIcon = (ImageView) v.findViewById(R.id.msg);
+                holder.messageIcon.setVisibility(View.GONE);
+                holder.text = (TextView) v.findViewById(R.id.name);
+                holder.text.setTypeface(Typeface.DEFAULT_BOLD);
+                holder.text.setTextSize(fontSize - 2);
+                holder.text.setTextColor(Colors.PRIMARY_TEXT);
+                holder.state = (ImageView) v.findViewById(R.id.state);
+                holder.state.setVisibility(View.GONE);
+                v.setBackgroundColor(Colors.GROUP_BACKGROUND);
+                v.setTag(holder);
+            } else {
+                holder = (Holders.GroupHolder) v.getTag();
             }
 
-            ImageView messageIcon = (ImageView) v.findViewById(R.id.msg);
-            messageIcon.setVisibility(View.GONE);
-
-            TextView text = (TextView) v.findViewById(R.id.name);
-            text.setTypeface(Typeface.DEFAULT_BOLD);
-            text.setTextSize(fontSize-2);
-            text.setTextColor(Colors.PRIMARY_TEXT);
-            text.setText(activity.getString(R.string.Chats) + ": " + (getCount() - 1));
-
-            ImageView state = (ImageView) v.findViewById(R.id.state);
-            state.setVisibility(View.GONE);
-            v.setBackgroundColor(Colors.GROUP_BACKGROUND);
+            holder.text.setText(activity.getString(R.string.Chats) + ": " + (getCount() - 1));
             return v;
         } else {
-            if(v == null || v.findViewById(R.id.status) == null) {
+            Holders.ItemHolder holder = new Holders.ItemHolder();
+            if(v == null || v.getTag() == null || v.getTag() instanceof Holders.GroupHolder) {
                 LayoutInflater inflater = activity.getLayoutInflater();
                 v = inflater.inflate(R.layout.entry, null, false);
+                holder.name = (TextView) v.findViewById(R.id.name);
+                holder.name.setTextColor(Colors.PRIMARY_TEXT);
+                holder.name.setTextSize(fontSize);
+                holder.status = (TextView) v.findViewById(R.id.status);
+                holder.status.setTextSize(statusSize);
+                holder.status.setTextColor(Colors.SECONDARY_TEXT);
+                holder.counter = (TextView) v.findViewById(R.id.msg_counter);
+                holder.counter.setTextSize(fontSize);
+                holder.messageIcon = (ImageView) v.findViewById(R.id.msg);
+                if (ip != null) holder.messageIcon.setImageBitmap(ip.getMsgBitmap());
+                holder.statusIcon = (ImageView) v.findViewById(R.id.status_icon);
+                holder.statusIcon.setVisibility(View.GONE);
+                holder.avatar = (ImageView) v.findViewById(R.id.contactlist_pic);
+                holder.avatar.setVisibility(View.GONE);
+                holder.caps = (ImageView) v.findViewById(R.id.caps);
+                holder.caps.setVisibility(View.GONE);
+                v.setTag(holder);
+            } else {
+                holder = (Holders.ItemHolder) v.getTag();
             }
-
-            TextView name = (TextView) v.findViewById(R.id.name);
-            name.setTextColor(Colors.PRIMARY_TEXT);
-            name.setTextSize(fontSize);
-
-            TextView status = (TextView) v.findViewById(R.id.status);
-            status.setTextSize(statusSize);
-            status.setTextColor(Colors.SECONDARY_TEXT);
-
-            TextView counter = (TextView) v.findViewById(R.id.msg_counter);
-            counter.setTextSize(fontSize);
-
-            ImageView messageIcon = (ImageView) v.findViewById(R.id.msg);
-            if (ip != null) messageIcon.setImageBitmap(ip.getMsgBitmap());
-
-            ImageView statusIcon = (ImageView) v.findViewById(R.id.status_icon);
-            statusIcon.setVisibility(View.GONE);
-
-            ImageView avatar = (ImageView) v.findViewById(R.id.contactlist_pic);
-            avatar.setVisibility(View.GONE);
-
-            ImageView caps = (ImageView) v.findViewById(R.id.caps);
-            caps.setVisibility(View.GONE);
 
             String account = ri.getAccount();
             String jid = "";
@@ -178,16 +177,15 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
                 if (nick == null || nick.equals("")) nick = jid;
             }
 
-            name.setTextSize(fontSize);
-            name.setText(nick);
-            if (service.getComposeList().contains(jid)) name.setTextColor(Colors.HIGHLIGHT_TEXT);
-            else if (service.isHighlight(account, jid)) name.setTextColor(Colors.HIGHLIGHT_TEXT);
-            else name.setTextColor(Colors.PRIMARY_TEXT);
+            holder.name.setText(nick);
+            if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
+            else if (service.isHighlight(account, jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
+            else holder.name.setTextColor(Colors.PRIMARY_TEXT);
 
             String statusText = "";
             if (ri.isMuc()) {
-                if (service.getConferencesHash(account).containsKey(name)) {
-                    MultiUserChat muc = service.getConferencesHash(account).get(name);
+                if (service.getConferencesHash(account).containsKey(ri.getName())) {
+                    MultiUserChat muc = service.getConferencesHash(account).get(ri.getName());
                     statusText = muc.getSubject();
                 }
             } else {
@@ -196,62 +194,61 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
             if (statusText == null) statusText = "";
 
             if (prefs.getBoolean("StatusInBar", true)) {
-                status.setVisibility(statusText.length() > 0 ? View.VISIBLE : View.GONE);
-                status.setText(statusText);
-            } else status.setVisibility(View.GONE);
+                holder.status.setVisibility(statusText.length() > 0 ? View.VISIBLE : View.GONE);
+                holder.status.setText(statusText);
+            } else holder.status.setVisibility(View.GONE);
 
             if (mode == Mode.nick) {
-                statusIcon.setVisibility(View.GONE);
-                avatar.setVisibility(View.GONE);
-                caps.setVisibility(View.GONE);
+                holder.statusIcon.setVisibility(View.GONE);
+                holder.avatar.setVisibility(View.GONE);
+                holder.caps.setVisibility(View.GONE);
             } else if (mode == Mode.status) {
-                statusIcon.setVisibility(View.VISIBLE);
+                holder.statusIcon.setVisibility(View.VISIBLE);
                 if (service.getJoinedConferences().containsKey(jid)) {
-                    statusIcon.setImageBitmap(ip.getMucBitmap());
+                    holder.statusIcon.setImageBitmap(ip.getMucBitmap());
                 } else {
                     Presence presence = service.getPresence(ri.getAccount(), jid);
-                    statusIcon.setImageBitmap(ip.getIconByPresence(presence));
+                    holder.statusIcon.setImageBitmap(ip.getIconByPresence(presence));
                 }
             } else if (mode == Mode.all) {
-                statusIcon.setVisibility(View.VISIBLE);
+                holder.statusIcon.setVisibility(View.VISIBLE);
                 if (service.getJoinedConferences().containsKey(jid)) {
-                    statusIcon.setImageBitmap(ip.getMucBitmap());
+                    holder.statusIcon.setImageBitmap(ip.getMucBitmap());
                 } else {
                     Presence presence = service.getPresence(ri.getAccount(), jid);
-                    statusIcon.setImageBitmap(ip.getIconByPresence(presence));
+                    holder.statusIcon.setImageBitmap(ip.getIconByPresence(presence));
                 }
 
                 if (!ri.isMuc()) {
                     if (prefs.getBoolean("ShowCaps", false)) {
                         String node = service.getNode(account, jid);
-                        ClientIcons.loadClientIcon(activity, caps, node);
+                        ClientIcons.loadClientIcon(activity, holder.caps, node);
                     }
 
                     if (prefs.getBoolean("LoadAvatar", false)) {
                         if (service.getJoinedConferences().containsKey(StringUtils.parseBareAddress(jid)))
-                            Avatars.loadAvatar(activity, jid.replaceAll("/", "%"), avatar);
-                        else Avatars.loadAvatar(activity, jid, avatar);
+                            Avatars.loadAvatar(activity, jid.replaceAll("/", "%"), holder.avatar);
+                        else Avatars.loadAvatar(activity, jid, holder.avatar);
                     }
                 }
             }
 
-            counter.setTextSize(fontSize);
             int count = service.getMessagesCount(account, jid);
             if (count > 0) {
-                messageIcon.setVisibility(View.VISIBLE);
-                counter.setVisibility(View.VISIBLE);
-                counter.setText(count+"");
+                holder.messageIcon.setVisibility(View.VISIBLE);
+                holder.counter.setVisibility(View.VISIBLE);
+                holder.counter.setText(count+"");
             } else {
-                messageIcon.setVisibility(View.GONE);
-                counter.setVisibility(View.GONE);
+                holder.messageIcon.setVisibility(View.GONE);
+                holder.counter.setVisibility(View.GONE);
             }
 
             if (jid.equals(service.getCurrentJid())) {
-                name.setTypeface(Typeface.DEFAULT_BOLD);
-                name.setTextColor(Colors.PRIMARY_TEXT);
+                holder.name.setTypeface(Typeface.DEFAULT_BOLD);
+                holder.name.setTextColor(Colors.PRIMARY_TEXT);
                 v.setBackgroundColor(Colors.ENTRY_BACKGROUND);
             } else {
-                name.setTypeface(Typeface.DEFAULT);
+                holder.name.setTypeface(Typeface.DEFAULT);
                 v.setBackgroundColor(0x00000000);
             }
 

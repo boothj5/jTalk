@@ -1,8 +1,10 @@
 package net.ustyugov.jtalk;
 
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import net.ustyugov.jtalk.view.MyTextView;
 
 public class Holders {
 	
@@ -29,5 +31,11 @@ public class Holders {
 		public ImageView caps;
 		public ImageView avatar;
 	}
+
+    public static class MessageHolder {
+        public LinearLayout linear;
+        public CheckBox check;
+        public MyTextView text;
+    }
 
 }

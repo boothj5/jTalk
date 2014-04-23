@@ -24,6 +24,7 @@ import java.util.List;
 import android.content.*;
 import android.widget.*;
 import net.ustyugov.jtalk.Colors;
+import net.ustyugov.jtalk.Holders;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.adapter.ChatAdapter;
 import net.ustyugov.jtalk.listener.MyTextLinkClickListener;
@@ -109,10 +110,22 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
             fontSize = Integer.parseInt(prefs.getString("FontSize", context.getResources().getString(R.string.DefaultFontSize)));
         } catch (NumberFormatException ignored) {	}
 
-        View v = convertView;
-        if (v == null) {
+        Holders.MessageHolder holder = new Holders.MessageHolder();
+        if (convertView == null) {
             LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = vi.inflate(R.layout.chat_item, null);
+            convertView = vi.inflate(R.layout.chat_item, null);
+
+            holder.linear = (LinearLayout) convertView.findViewById(R.id.chat_item);
+            holder.linear.setMinimumHeight(Integer.parseInt(prefs.getString("SmilesSize", "24")));
+            holder.check = (CheckBox) convertView.findViewById(R.id.check);
+            holder.text = (MyTextView) convertView.findViewById(R.id.chat1);
+            holder.text.setOnTextLinkClickListener(new MyTextLinkClickListener(context, group));
+            holder.text.setTextSize(fontSize);
+
+            convertView.setBackgroundColor(0X00000000);
+            convertView.setTag(holder);
+        } else {
+            holder = (Holders.MessageHolder) convertView.getTag();
         }
 
         final MessageItem item = getItem(position);
@@ -179,13 +192,9 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
             }
         }
 
-        LinearLayout linear = (LinearLayout) v.findViewById(R.id.chat_item);
-        linear.setMinimumHeight(Integer.parseInt(prefs.getString("SmilesSize", "24")));
-
-        CheckBox checkBox = (CheckBox) v.findViewById(R.id.check);
-        checkBox.setVisibility(viewMode == ChatAdapter.ViewMode.multi ? View.VISIBLE : View.GONE);
-        checkBox.setChecked(item.isSelected());
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        holder.check.setVisibility(viewMode == ChatAdapter.ViewMode.multi ? View.VISIBLE : View.GONE);
+        holder.check.setChecked(item.isSelected());
+        holder.check.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 item.select(b);
@@ -193,19 +202,13 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
             }
         });
 
-        final MyTextView t1 = (MyTextView) v.findViewById(R.id.chat1);
-        t1.setTextSize(fontSize);
-        t1.setOnTextLinkClickListener(new MyTextLinkClickListener(context, group));
-        t1.setTextColor(Colors.PRIMARY_TEXT);
-
         if (prefs.getBoolean("ShowSmiles", true)) {
             int startPosition = message.length() - body.length();
-            ssb = smiles.parseSmiles(t1, ssb, startPosition);
+            ssb = smiles.parseSmiles(holder.text, ssb, startPosition);
         }
+        holder.text.setTextWithLinks(ssb, n);
 
-        t1.setTextWithLinks(ssb, n);
-        v.setBackgroundColor(0X00000000);
-        return v;
+        return convertView;
     }
 
     private String createTimeString(String time) {
