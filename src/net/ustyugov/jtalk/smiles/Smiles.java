@@ -145,7 +145,7 @@ public class Smiles implements DialogInterface.OnClickListener {
         } catch(Exception e) { }
     }
 
-	public SpannableStringBuilder parseSmiles(final TextView textView, SpannableStringBuilder ssb, int startPosition) {
+	public SpannableStringBuilder parseSmiles(final TextView textView, SpannableStringBuilder ssb, int startPosition, String account, String jid) {
 		String message = ssb.toString();
 
 		Enumeration<String> keys = table.keys();
@@ -156,12 +156,16 @@ public class Smiles implements DialogInterface.OnClickListener {
 			for (String s : list) {
 				int start = message.indexOf(s, startPosition);
 	       		while(start != -1) {
-	            	ssb.setSpan(new MyImageSpan(new SmileDrawable(smilePath, new SmileDrawable.UpdateListener() {
+                    SmileDrawable.UpdateListener listener = new SmileDrawable.UpdateListener() {
                         @Override
                         public void update() {
                             textView.postInvalidate();
                         }
-                    })), start, start + s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    };
+                    SmileDrawable drawable= new SmileDrawable(smilePath, listener);
+                    MyImageSpan span = new MyImageSpan(drawable, account, jid);
+
+	            	ssb.setSpan(span, start, start + s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 	                start = message.indexOf(s, start + 1);
 	            }
 			}

@@ -6,23 +6,31 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.text.style.DynamicDrawableSpan;
+import net.ustyugov.jtalk.service.JTalkService;
 
 public class MyImageSpan extends DynamicDrawableSpan {
 
-    private Drawable mDrawable;
+    private SmileDrawable mDrawable;
 
-    public MyImageSpan(Drawable d) {
+    public MyImageSpan(SmileDrawable d, final String account, final String jid) {
         super();
         mDrawable = d;
-        // Use handler for 'ticks' to proceed to next frame
-        final Handler mHandler = new Handler();
-        mHandler.post(new Runnable() {
-            public void run() {
-                ((SmileDrawable)mDrawable).nextFrame();
-                // Set next with a delay depending on the duration for this frame
-                mHandler.postDelayed(this, ((SmileDrawable)mDrawable).getFrameDuration());
-            }
-        });
+        if (mDrawable.isAnimated()) {
+            // Use handler for 'ticks' to proceed to next frame
+            final Handler mHandler = new Handler();
+            mHandler.post(new Runnable() {
+                public void run() {
+                    mDrawable.nextFrame();
+                    if (JTalkService.getInstance() != null &&
+                            (JTalkService.getInstance().getActiveChats(account).contains(jid) ||
+                            JTalkService.getInstance().getJoinedConferences().containsKey(jid))) {
+
+                        // Set next with a delay depending on the duration for this frame
+                        mHandler.postDelayed(this, mDrawable.getFrameDuration());
+                    }
+                }
+            });
+        }
     }
 
     /*
@@ -31,7 +39,7 @@ public class MyImageSpan extends DynamicDrawableSpan {
      */
     @Override
     public Drawable getDrawable() {
-        return ((SmileDrawable)mDrawable).getDrawable();
+        return mDrawable.getDrawable();
     }
 
     /*

@@ -13,13 +13,14 @@ import java.io.File;
 import java.io.FileInputStream;
 
 public class SmileDrawable extends AnimationDrawable {
-    private int size = 18;
     private int mCurrentIndex = 0;
     private UpdateListener mListener;
+    public boolean animated = false;
 
     public SmileDrawable(String path, UpdateListener listener) {
         JTalkService service = JTalkService.getInstance();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
+        int size = 18;
         try {
             size = Integer.parseInt(prefs.getString("SmilesSize", size+""));
         } catch (NumberFormatException ignored) {	}
@@ -28,6 +29,7 @@ public class SmileDrawable extends AnimationDrawable {
         try {
             String mimeType = new File(path).toURI().toURL().openConnection().getContentType();
             if (mimeType.equals("image/gif")) {
+                animated = true;
                 GifDecoder decoder = new GifDecoder();
                 decoder.read(new FileInputStream(path));
 
@@ -41,7 +43,7 @@ public class SmileDrawable extends AnimationDrawable {
                     int newSize;
                     int h = smile.getHeight();
                     int w = smile.getWidth();
-                    Bitmap bitmap = Bitmap.createScaledBitmap(smile, size, size, true);;
+                    Bitmap bitmap = Bitmap.createScaledBitmap(smile, size, size, true);
 
                     if (h < w) {
                         k = (double)h/(double)size;
@@ -61,6 +63,7 @@ public class SmileDrawable extends AnimationDrawable {
                     }
                 }
             } else {
+                animated = false;
                 Bitmap smile = BitmapFactory.decodeFile(path);
 
                 int h = smile.getHeight();
@@ -76,6 +79,10 @@ public class SmileDrawable extends AnimationDrawable {
             }
         } catch (Exception e) { }
 
+    }
+
+    public boolean isAnimated() {
+        return animated;
     }
 
     /**

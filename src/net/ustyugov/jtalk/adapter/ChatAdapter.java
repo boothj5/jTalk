@@ -51,6 +51,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
 	private SharedPreferences prefs;
 	private Context context;
 	private Smiles smiles;
+    private String account;
 	private String jid;
 	private boolean showtime;
     private ViewMode viewMode = ViewMode.single;
@@ -67,6 +68,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
         if (this.viewMode == ViewMode.multi && viewMode == ViewMode.multi) return;
 
         this.viewMode = viewMode;
+        this.account = account;
 		this.jid = jid;
         this.searchString = searchString;
 		clear();
@@ -191,7 +193,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
 
         if (prefs.getBoolean("ShowSmiles", true)) {
         	int startPosition = message.length() - body.length();
-        	ssb = smiles.parseSmiles(holder.text, ssb, startPosition);
+        	ssb = smiles.parseSmiles(holder.text, ssb, startPosition, account, jid);
         }
         
         if (jid.equals(Constants.JUICK) || jid.equals(Constants.JUBO)) holder.text.setTextWithLinks(ssb, MyTextView.Mode.juick);

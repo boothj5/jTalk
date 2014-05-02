@@ -50,6 +50,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
 
     private Context context;
     private Smiles smiles;
+    private String account;
     private String nick;
     private String group;
     private boolean showtime = false;
@@ -73,6 +74,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
     public void update(String account, String group, String nick, String searchString, ChatAdapter.ViewMode viewMode) {
         if (this.viewMode == ChatAdapter.ViewMode.multi && viewMode == ChatAdapter.ViewMode.multi) return;
         this.viewMode = viewMode;
+        this.account = account;
         this.group = group;
         this.nick = nick;
         this.searchString = searchString;
@@ -204,7 +206,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
 
         if (prefs.getBoolean("ShowSmiles", true)) {
             int startPosition = message.length() - body.length();
-            ssb = smiles.parseSmiles(holder.text, ssb, startPosition);
+            ssb = smiles.parseSmiles(holder.text, ssb, startPosition, account, group);
         }
         holder.text.setTextWithLinks(ssb, n);
 
