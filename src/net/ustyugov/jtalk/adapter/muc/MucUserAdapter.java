@@ -349,7 +349,6 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 
 			return convertView;
 		} else if (item.isEntry()) {
-			boolean color = prefs.getBoolean("ColoredBar", true);
 			String name = item.getName();
 			String jid = item.getEntry().getUser();
 			if (name == null || name.length() <= 0 ) name = jid;
@@ -358,13 +357,6 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			Presence.Type type = presence.getType();
 	        Presence.Mode mode = presence.getMode();
 
-            boolean italic = false;
-            MUCUser mucUser = (MUCUser) presence.getExtension("x", "http://jabber.org/protocol/muc#user");
-            if (mucUser != null) {
-                String affiliation = mucUser.getItem().getAffiliation();
-                if (affiliation != null && (affiliation.equals("admin") || affiliation.equals("none"))) italic = true;
-            }
-			
 			int count = service.getMessagesCount(account, jid);
 
             ItemHolder holder = new ItemHolder();
@@ -396,11 +388,9 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			else holder.name.setTextColor(Colors.PRIMARY_TEXT);
 
 			if (service.getActiveChats(account).contains(jid)) {
-				if (italic) holder.name.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD_ITALIC));
-                else holder.name.setTypeface(Typeface.DEFAULT_BOLD);
+				holder.name.setTypeface(Typeface.DEFAULT_BOLD);
 			} else {
-                if (italic) holder.name.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
-                else holder.name.setTypeface(Typeface.DEFAULT);
+                holder.name.setTypeface(Typeface.DEFAULT);
             }
 			
 	        if (count > 0) {
@@ -408,8 +398,8 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 				holder.counter.setVisibility(View.VISIBLE);
 				holder.counter.setText(count+"");
 			} else {
-				holder.messageIcon.setVisibility(View.GONE);
-				holder.counter.setVisibility(View.GONE);
+                holder.messageIcon.setVisibility(View.GONE);
+                holder.counter.setVisibility(View.GONE);
 			}
 
             String statusText = service.getStatus(account, jid);
@@ -418,20 +408,17 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
                 holder.status.setVisibility(statusText.length() > 0 ? View.VISIBLE : View.GONE);
                 holder.status.setText(statusText);
             } else holder.status.setVisibility(View.GONE);
-	        
-	        if (color) {
-	        	if (type == Presence.Type.available) {
-	       			if(mode == Presence.Mode.away) {
-	       				holder.name.setTextColor(Colors.STATUS_AWAY);
-	       			} else if (mode == Presence.Mode.xa) {
-	       				holder.name.setTextColor(Colors.STATUS_XA);
-	       			} else if (mode == Presence.Mode.dnd) {
-	       				holder.name.setTextColor(Colors.STATUS_DND);
-	       			} else if (mode == Presence.Mode.chat) {
-	       				holder.name.setTextColor(Colors.STATUS_CHAT);
-	       			}
-	       		}
-	        }
+
+            MUCUser mucUser = (MUCUser) presence.getExtension("x", "http://jabber.org/protocol/muc#user");
+            if (mucUser != null) {
+                String affiliation = mucUser.getItem().getAffiliation();
+                if (affiliation != null) {
+                    if (affiliation.equals("admin")) holder.name.setTextColor(Colors.AFFILIATION_ADMIN);
+                    else if (affiliation.equals("owner")) holder.name.setTextColor(Colors.AFFILIATION_OWNER);
+                    else if (affiliation.equals("member")) holder.name.setTextColor(Colors.AFFILIATION_MEMBER);
+                    else holder.name.setTextColor(Colors.AFFILIATION_NONE);
+                }
+            }
 
             if (viewMode == Mode.nick) {
                 holder.statusIcon.setVisibility(View.GONE);

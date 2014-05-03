@@ -25,12 +25,10 @@ public class Colors {
     public static int OUTBOX_MESSAGE = 0xFFAA2323;
     public static int SELECTED_MESSAGE = 0xFFCCCCCC;
     public static int STATUS_MESSAGE = 0xFF239923;
-    public static int STATUS_AWAY = 0xFF22bcef;
-    public static int STATUS_XA = 0xFF3c788c;
-    public static int STATUS_DND = 0xFFee0000;
-    public static int STATUS_CHAT = 0xFF008e00;
-    public static int ROLE_MODERATOR = 0xFFFF8800;
-    public static int ROLE_VISITOR = 0xFF777777;
+    public static int AFFILIATION_NONE = 0xFF777777;
+    public static int AFFILIATION_MEMBER = 0xFF000000;
+    public static int AFFILIATION_ADMIN = 0xFF000000;
+    public static int AFFILIATION_OWNER = 0xFFDD0000;
 
     public static void updateColors(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -51,12 +49,10 @@ public class Colors {
             OUTBOX_MESSAGE = 0xFFAA2323;
             SELECTED_MESSAGE = 0xFFCCCCCC;
             STATUS_MESSAGE = 0xFF239923;
-            STATUS_AWAY = 0xFF22bcef;
-            STATUS_XA = 0xFF3c788c;
-            STATUS_DND = 0xFFee0000;
-            STATUS_CHAT = 0xFF008e00;
-            ROLE_MODERATOR = 0xFFFF8800;
-            ROLE_VISITOR = 0xFF777777;
+            AFFILIATION_NONE = 0xFF777777;
+            AFFILIATION_MEMBER = 0xFF000000;
+            AFFILIATION_ADMIN = 0xFF000000;
+            AFFILIATION_OWNER = 0xFFDD0000;
             currentTheme = "Light";
         } else if (theme.equals("Dark")) {
             isLight = false;
@@ -73,12 +69,10 @@ public class Colors {
             OUTBOX_MESSAGE = 0xFFAA2323;
             SELECTED_MESSAGE = 0xFF444444;
             STATUS_MESSAGE = 0xFF239923;
-            STATUS_AWAY = 0xFF22bcef;
-            STATUS_XA = 0xFF3c788c;
-            STATUS_DND = 0xFFee0000;
-            STATUS_CHAT = 0xFF008e00;
-            ROLE_MODERATOR = 0xFFFF8800;
-            ROLE_VISITOR = 0xFF777777;
+            AFFILIATION_NONE = 0xFF777777;
+            AFFILIATION_MEMBER = 0xFFFFFFFF;
+            AFFILIATION_ADMIN = 0xFFFFFFFF;
+            AFFILIATION_OWNER = 0xFFDD0000;
             currentTheme = "Dark";
         } else {
             try {
@@ -126,18 +120,14 @@ public class Colors {
                                             STATUS_MESSAGE = color;
                                         } else if (name.equals("SELECTED_MESSAGE")) {
                                             SELECTED_MESSAGE = color;
-                                        } else if (name.equals("ROLE_MODERATOR")) {
-                                            ROLE_MODERATOR = color;
-                                        } else if (name.equals("ROLE_VISITOR")) {
-                                            ROLE_VISITOR = color;
-                                        } else if (name.equals("STATUS_CHAT")) {
-                                            STATUS_CHAT = color;
-                                        } else if (name.equals("STATUS_DND")) {
-                                            STATUS_DND = color;
-                                        } else if (name.equals("STATUS_XA")) {
-                                            STATUS_XA = color;
-                                        } else if (name.equals("STATUS_AWAY")) {
-                                            STATUS_AWAY = color;
+                                        } else if (name.equals("AFFILIATION_NONE")) {
+                                            AFFILIATION_NONE = color;
+                                        } else if (name.equals("AFFILIATION_MEMBER")) {
+                                            AFFILIATION_MEMBER = color;
+                                        } else if (name.equals("AFFILIATION_ADMIN")) {
+                                            AFFILIATION_ADMIN = color;
+                                        } else if (name.equals("AFFILIATION_OWNER")) {
+                                            AFFILIATION_OWNER = color;
                                         }
                                     }
                                 }

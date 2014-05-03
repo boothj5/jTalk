@@ -1509,10 +1509,8 @@ public class JTalkService extends Service {
                         connections.put(username, connection);
                         return username;
                     }
-                } catch (XMPPException e) {
-                    XMPPError error = e.getXMPPError();
-                    if (error != null) setState(username, "[" + error.getCode() + "]: " + error.getMessage());
-                    else setState(username, e.getLocalizedMessage());
+                } catch (Exception e) {
+                    setState(username, e.getLocalizedMessage());
                     sendBroadcast(intent);
                     if (!isAuthenticated()) Notify.offlineNotify(JTalkService.this, "");
                     return null;

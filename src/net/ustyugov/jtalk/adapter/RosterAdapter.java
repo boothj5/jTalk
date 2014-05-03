@@ -154,7 +154,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     }
 
                     // Add privates
-                    if (!prefs.getBoolean("ShowActiveChatsGroup", false)) {
+                    if (!prefs.getBoolean("ShowActiveChatsGroup", true)) {
                         List<String> privates = service.getPrivateMessages(account);
                         if (!privates.isEmpty()) {
                             RosterItem group = new RosterItem(account, RosterItem.Type.group, null);
@@ -178,7 +178,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                         for (RosterEntry re: entrys) {
                             String jid = re.getUser();
                             Presence.Type presenceType = service.getType(account, jid);
-                            if (prefs.getBoolean("ShowActiveChatsGroup", false)) {
+                            if (prefs.getBoolean("ShowActiveChatsGroup", true)) {
                                 if (prefs.getBoolean("ShowDoubles", false)) {
                                     if (hideOffline) {
                                         if (presenceType != Presence.Type.unavailable) list.add(jid);
@@ -224,7 +224,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     for (RosterEntry re: entrys) {
                         String jid = re.getUser();
                         Presence.Type presenceType = service.getType(account, jid);
-                        if (prefs.getBoolean("ShowActiveChatsGroup", false)) {
+                        if (prefs.getBoolean("ShowActiveChatsGroup", true)) {
                             if (prefs.getBoolean("ShowDoubles", false)) {
                                 if (hideOffline) {
                                     if (presenceType != Presence.Type.unavailable) list.add(jid);
