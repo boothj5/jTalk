@@ -20,11 +20,10 @@
                 android:text="@string/Org"
                 android:textStyle="bold" />
 
-            <TextView
+            <net.ustyugov.jtalk.view.MyTextView
                 android:id="@+id/org"
-                android:autoLink="all"
+                android:linksClickable="true"
                 android:singleLine="true"
-                android:textIsSelectable="true"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dip" />
@@ -33,11 +32,11 @@
                 android:textStyle="bold"
             	android:layout_width="wrap_content" 
             	android:layout_height="wrap_content" />
-            
-            <TextView android:id="@+id/unit" 
-                android:autoLink="all"
+
+            <net.ustyugov.jtalk.view.MyTextView
+                android:id="@+id/unit"
+                android:linksClickable="true"
                 android:singleLine="true"
-                android:textIsSelectable="true"
                 android:layout_marginLeft="16dip"
             	android:layout_height="wrap_content" 
             	android:layout_width="fill_parent" />
@@ -46,11 +45,11 @@
                 android:textStyle="bold"
             	android:layout_width="wrap_content" 
             	android:layout_height="wrap_content" />
-            
-            <TextView android:id="@+id/role" 
-                android:autoLink="all"
+
+            <net.ustyugov.jtalk.view.MyTextView
+                android:id="@+id/role"
+                android:linksClickable="true"
                 android:singleLine="true"
-                android:textIsSelectable="true"
                 android:layout_marginLeft="16dip"
             	android:layout_height="wrap_content" 
             	android:layout_width="fill_parent" />
@@ -59,11 +58,11 @@
                 android:textStyle="bold"
             	android:layout_width="wrap_content" 
             	android:layout_height="wrap_content" />
-            
-            <TextView android:id="@+id/workmail" 
-                android:autoLink="all"
+
+            <net.ustyugov.jtalk.view.MyTextView
+                android:id="@+id/workmail"
+                android:linksClickable="true"
                 android:singleLine="true"
-                android:textIsSelectable="true"
                 android:layout_marginLeft="16dip"
             	android:layout_height="wrap_content" 
             	android:layout_width="fill_parent" />
@@ -72,11 +71,11 @@
                 android:textStyle="bold"
             	android:layout_width="wrap_content" 
             	android:layout_height="wrap_content" />
-            
-            <TextView android:id="@+id/workphone" 
-                android:autoLink="all"
+
+            <net.ustyugov.jtalk.view.MyTextView
+                android:id="@+id/workphone"
+                android:linksClickable="true"
                 android:singleLine="true"
-                android:textIsSelectable="true"
                 android:layout_marginLeft="16dip"
             	android:layout_height="wrap_content" 
             	android:layout_width="fill_parent" />

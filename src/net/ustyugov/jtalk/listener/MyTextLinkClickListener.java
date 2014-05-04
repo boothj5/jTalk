@@ -14,6 +14,7 @@ public class MyTextLinkClickListener implements TextLinkClickListener {
     private String jid;
 
     public MyTextLinkClickListener(Context context, String jid) {
+        if (jid == null) jid = "";
         this.context = context;
         this.jid = jid;
     }

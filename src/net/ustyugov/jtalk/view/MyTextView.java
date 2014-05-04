@@ -39,6 +39,10 @@ public class MyTextView  extends TextView {
 		super(context, attrs);
 	}
 
+    public void setTextWithLinks(String string) {
+        setTextWithLinks(new SpannableStringBuilder(string));
+    }
+
 	public void setTextWithLinks(SpannableStringBuilder ssb) {
         ssb = parseMdLinks(ssb);
 

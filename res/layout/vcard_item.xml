@@ -9,10 +9,10 @@
         android:textStyle="bold"
         android:layout_width="wrap_content" 
         android:layout_height="wrap_content" />
-    
-    <TextView 
+
+    <net.ustyugov.jtalk.view.MyTextView
         android:id="@+id/value"
-        android:autoLink="all"
+        android:linksClickable="true"
         android:textIsSelectable="true"
         android:layout_marginLeft="16dip"
         android:layout_height="wrap_content" 

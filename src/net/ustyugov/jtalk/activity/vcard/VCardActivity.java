@@ -23,18 +23,18 @@ import java.io.FileOutputStream;
 import java.util.*;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
+import android.content.ClipData;
 import android.os.Environment;
-import android.text.ClipboardManager;
 import android.view.*;
 import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.adapter.MainPageAdapter;
 import net.ustyugov.jtalk.adapter.VCardAdapter;
+import net.ustyugov.jtalk.listener.MyTextLinkClickListener;
 import net.ustyugov.jtalk.service.JTalkService;
 
+import net.ustyugov.jtalk.view.MyTextView;
 import org.jivesoftware.smack.PacketCollector;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.filter.PacketIDFilter;
@@ -59,10 +59,8 @@ public class VCardActivity extends Activity {
 	private JTalkService service;
 	private String account;
 	private String jid;
-    private String lat;
-    private String lon;
-	
-	private TextView nick, first, last, middle, bday, url, about, ctry, locality, street, emailHome, phoneHome, org, unit, role, emailWork, phoneWork;
+
+	private MyTextView nick, first, last, middle, bday, url, about, ctry, locality, street, emailHome, phoneHome, org, unit, role, emailWork, phoneWork;
 	private ProgressBar aboutProgress, homeProgress, workProgress, avatarProgress, statusProgress;
 	private ScrollView aboutScroll, homeScroll, workScroll, avatarScroll;
 	private ListView list;
@@ -103,25 +101,25 @@ public class VCardActivity extends Activity {
 		View avatarPage = inflater.inflate(R.layout.vcard_avatar, null);
 		View statusPage = inflater.inflate(R.layout.list_activity, null);
 
-		first = (TextView) aboutPage.findViewById(R.id.firstname);
-		middle = (TextView) aboutPage.findViewById(R.id.middlename);
-		last = (TextView) aboutPage.findViewById(R.id.lastname);
-		nick = (TextView) aboutPage.findViewById(R.id.nickname);
-		bday = (TextView) aboutPage.findViewById(R.id.bday);
-		url = (TextView) aboutPage.findViewById(R.id.url);
-		about = (TextView) aboutPage.findViewById(R.id.desc);
+		first = (MyTextView) aboutPage.findViewById(R.id.firstname);
+		middle = (MyTextView) aboutPage.findViewById(R.id.middlename);
+		last = (MyTextView) aboutPage.findViewById(R.id.lastname);
+		nick = (MyTextView) aboutPage.findViewById(R.id.nickname);
+		bday = (MyTextView) aboutPage.findViewById(R.id.bday);
+		url = (MyTextView) aboutPage.findViewById(R.id.url);
+		about = (MyTextView) aboutPage.findViewById(R.id.desc);
 		
-		ctry = (TextView) homePage.findViewById(R.id.ctry);
-		locality = (TextView) homePage.findViewById(R.id.locality);
-		street = (TextView) homePage.findViewById(R.id.street);
-		emailHome = (TextView) homePage.findViewById(R.id.homemail);
-		phoneHome = (TextView) homePage.findViewById(R.id.homephone);
+		ctry = (MyTextView) homePage.findViewById(R.id.ctry);
+		locality = (MyTextView) homePage.findViewById(R.id.locality);
+		street = (MyTextView) homePage.findViewById(R.id.street);
+		emailHome = (MyTextView) homePage.findViewById(R.id.homemail);
+		phoneHome = (MyTextView) homePage.findViewById(R.id.homephone);
 		
-		org = (TextView) workPage.findViewById(R.id.org);
-		unit = (TextView) workPage.findViewById(R.id.unit);
-		role = (TextView) workPage.findViewById(R.id.role);
-		emailWork = (TextView) workPage.findViewById(R.id.workmail);
-		phoneWork = (TextView) workPage.findViewById(R.id.workphone);
+		org = (MyTextView) workPage.findViewById(R.id.org);
+		unit = (MyTextView) workPage.findViewById(R.id.unit);
+		role = (MyTextView) workPage.findViewById(R.id.role);
+		emailWork = (MyTextView) workPage.findViewById(R.id.workmail);
+		phoneWork = (MyTextView) workPage.findViewById(R.id.workphone);
 		
 		av = (ImageView) avatarPage.findViewById(R.id.av);
         av.setOnLongClickListener(new View.OnLongClickListener() {
@@ -213,9 +211,11 @@ public class VCardActivity extends Activity {
                 new LoadTask().execute();
 				break;
             case R.id.copy:
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                clipboard.setText(jid);
-
+                ClipData.Item clipItem = new ClipData.Item(jid);
+                String[] mimes = {"text/plain"};
+                ClipData copyData = new ClipData(jid, mimes, clipItem);
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                clipboard.setPrimaryClip(copyData);
 		}
 		return true;
 	}
@@ -268,7 +268,7 @@ public class VCardActivity extends Activity {
     		try {
     			re = service.getRoster(account).getEntry(jid);
     			// Load Version
-    			if (jid.indexOf("/") == -1) {
+    			if (!jid.contains("/")) {
     				Iterator<Presence> it =  service.getRoster(account).getPresences(jid);
     				int i = 0;
     				while (it.hasNext()) {
@@ -325,10 +325,22 @@ public class VCardActivity extends Activity {
     				} catch (ClassCastException e) { }
     					
     				if (vstr.length() < 3) vstr += "???";
-    				
-    				String str = getString(R.string.Status) + ": " + service.getStatus(account, jid) + "\n"
+
+                    String key = StringUtils.parseResource(jid);
+    				String value = getString(R.string.Status) + ": " + service.getStatus(account, jid) + "\n"
     						+ getString(R.string.Client) + ": " + vstr;
-    				strings.put(StringUtils.parseResource(jid), str);
+
+                    if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
+                        Presence presence = service.getPresence(account, jid);
+                        MUCUser mucUser = (MUCUser) presence.getExtension("x", "http://jabber.org/protocol/muc#user");
+                        if (mucUser != null) {
+                            String affiliation = mucUser.getItem().getAffiliation();
+                            String role = mucUser.getItem().getRole();
+                            key += " (" + role + "/" + affiliation + ")";
+                        }
+                    }
+
+    				strings.put(key, value);
     			}
     		} catch (Exception e) { }
 			return 1;
@@ -356,86 +368,104 @@ public class VCardActivity extends Activity {
 			VCardActivity.this.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+                    MyTextLinkClickListener clickListener = new MyTextLinkClickListener(VCardActivity.this, null);
 //	    			if (vCard.getField("FN") != null) {
 //    				}
 					
 					if (vCard.getFirstName() != null) {
-						first.setText(vCard.getFirstName());
+						first.setTextWithLinks(vCard.getFirstName());
+                        first.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getMiddleName() != null) {
-	    				middle.setText(vCard.getMiddleName());
+	    				middle.setTextWithLinks(vCard.getMiddleName());
+                        middle.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getLastName() != null) {
-	    				last.setText(vCard.getLastName());
+	    				last.setTextWithLinks(vCard.getLastName());
+                        last.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getNickName() != null) {
-	    				nick.setText(vCard.getNickName());
+	    				nick.setTextWithLinks(vCard.getNickName());
+                        nick.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getField("BDAY") != null) {
-	    				bday.setText(vCard.getField("BDAY"));
+	    				bday.setTextWithLinks(vCard.getField("BDAY"));
+                        bday.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getAddressFieldHome("CTRY") != null) {
-	    				ctry.setText(vCard.getAddressFieldHome("CTRY"));
+	    				ctry.setTextWithLinks(vCard.getAddressFieldHome("CTRY"));
+                        ctry.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getAddressFieldHome("LOCALITY") != null) {
-	    				locality.setText(vCard.getAddressFieldHome("LOCALITY"));
+	    				locality.setTextWithLinks(vCard.getAddressFieldHome("LOCALITY"));
+                        locality.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getAddressFieldHome("STREET") != null) {
-	    				street.setText(vCard.getAddressFieldHome("STREET"));
+	    				street.setTextWithLinks(vCard.getAddressFieldHome("STREET"));
+                        street.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getOrganization() != null) {
-	    				org.setText(vCard.getOrganization());
+	    				org.setTextWithLinks(vCard.getOrganization());
+                        org.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getOrganizationUnit() != null) {
-	    				unit.setText(vCard.getOrganizationUnit());
+	    				unit.setTextWithLinks(vCard.getOrganizationUnit());
+                        unit.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getField("ROLE") != null) {
-	    				role.setText(vCard.getField("ROLE"));
+	    				role.setTextWithLinks(vCard.getField("ROLE"));
+                        role.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getEmailHome() != null) {
-	    				emailHome.setText(vCard.getEmailHome());
+	    				emailHome.setTextWithLinks(vCard.getEmailHome());
+                        emailHome.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getEmailWork() != null) {
-	    				emailWork.setText(vCard.getEmailWork());
+	    				emailWork.setTextWithLinks(vCard.getEmailWork());
+                        emailWork.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getPhoneHome("VOICE") != null) {
-	    				phoneHome.setText(vCard.getPhoneHome("VOICE"));
+	    				phoneHome.setTextWithLinks(vCard.getPhoneHome("VOICE"));
+                        phoneHome.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getPhoneWork("VOICE") != null) {
-	    				phoneWork.setText(vCard.getPhoneWork("VOICE"));
+	    				phoneWork.setTextWithLinks(vCard.getPhoneWork("VOICE"));
+                        phoneWork.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getField("URL") != null) {
-	    				url.setText(vCard.getField("URL"));
+	    				url.setTextWithLinks(vCard.getField("URL"));
+                        url.setOnTextLinkClickListener(clickListener);
 	    			}
 	    			
 	    			if (vCard.getField("DESC") != null) {
-	    				about.setText(vCard.getField("DESC"));
+	    				about.setTextWithLinks(vCard.getField("DESC"));
+                        about.setOnTextLinkClickListener(clickListener);
 	    			}
 					
 					if (bitmap != null) av.setImageBitmap(bitmap);
 
 					if (re != null) {
 	    				LinearLayout linear = (LinearLayout) ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.vcard_item, null);
-						
+
 						TextView resource = (TextView) linear.findViewById(R.id.resource);
 						resource.setText(getString(R.string.Subscribtion) + ":");
-						
-						TextView value = (TextView) linear.findViewById(R.id.value);
+
+						MyTextView value = (MyTextView) linear.findViewById(R.id.value);
 						value.setText(re.getType().name());
 						adapter.add(linear);
 	    			}
@@ -443,12 +473,13 @@ public class VCardActivity extends Activity {
 					Enumeration<String> keys = strings.keys();
 					while (keys.hasMoreElements()) {
 						String key = keys.nextElement();
-						
+
 						LinearLayout linear = (LinearLayout) ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.vcard_item, null);
 						TextView t1 = (TextView) linear.findViewById(R.id.resource);
 						t1.setText(key);
-						TextView t2 = (TextView) linear.findViewById(R.id.value);
-						t2.setText(strings.get(key));
+						MyTextView t2 = (MyTextView) linear.findViewById(R.id.value);
+						t2.setTextWithLinks(strings.get(key));
+                        t2.setOnTextLinkClickListener(clickListener);
 						adapter.add(linear);
 					}
 
