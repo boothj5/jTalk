@@ -23,7 +23,6 @@ public class Colors {
     public static int LINK = 0xFF2323AA;
     public static int INBOX_MESSAGE = 0xFF2323AA;
     public static int OUTBOX_MESSAGE = 0xFFAA2323;
-    public static int SELECTED_MESSAGE = 0xFFCCCCCC;
     public static int STATUS_MESSAGE = 0xFF239923;
     public static int AFFILIATION_NONE = 0xFF777777;
     public static int AFFILIATION_MEMBER = 0xFF000000;
@@ -47,7 +46,6 @@ public class Colors {
             LINK = 0xFF2323AA;
             INBOX_MESSAGE = 0xFF2323AA;
             OUTBOX_MESSAGE = 0xFFAA2323;
-            SELECTED_MESSAGE = 0xFFCCCCCC;
             STATUS_MESSAGE = 0xFF239923;
             AFFILIATION_NONE = 0xFF777777;
             AFFILIATION_MEMBER = 0xFF000000;
@@ -67,7 +65,6 @@ public class Colors {
             LINK = 0xFF5180b7;
             INBOX_MESSAGE = 0xFF5180b7;
             OUTBOX_MESSAGE = 0xFFAA2323;
-            SELECTED_MESSAGE = 0xFF444444;
             STATUS_MESSAGE = 0xFF239923;
             AFFILIATION_NONE = 0xFF777777;
             AFFILIATION_MEMBER = 0xFFFFFFFF;
@@ -118,8 +115,6 @@ public class Colors {
                                             OUTBOX_MESSAGE = color;
                                         } else if (name.equals("STATUS_MESSAGE")) {
                                             STATUS_MESSAGE = color;
-                                        } else if (name.equals("SELECTED_MESSAGE")) {
-                                            SELECTED_MESSAGE = color;
                                         } else if (name.equals("AFFILIATION_NONE")) {
                                             AFFILIATION_NONE = color;
                                         } else if (name.equals("AFFILIATION_MEMBER")) {

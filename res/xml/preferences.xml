@@ -76,6 +76,11 @@
                 android:title="@string/SendOnEnter"
                 android:defaultValue="false" />
         <CheckBoxPreference
+                android:key="SmileButtonOnKeyboard"
+                android:title="Show smiles button"
+                android:summary="On keyboard"
+                android:defaultValue="false" />
+        <CheckBoxPreference
                 android:key="HideKeyboard"
                 android:title="@string/HideKeyboard"
                 android:defaultValue="true" />

@@ -334,6 +334,11 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             messageInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
             sendButton.setVisibility(View.VISIBLE);
         }
+
+        if (prefs.getBoolean("SmileButtonOnKeyboard", false)) {
+            messageInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE);
+            sendButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -569,7 +574,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
                 item.setOnActionExpandListener(listener);
 
-                if (!prefs.getBoolean("ShowSmiles", true)) menu.removeItem(R.id.smile);
                 super.onCreateOptionsMenu(menu);
             }
         }

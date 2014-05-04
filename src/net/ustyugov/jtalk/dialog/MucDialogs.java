@@ -344,7 +344,8 @@ public class MucDialogs {
 			Iterator<DiscoverItems.Item> it = items.getItems();
 			while(it.hasNext()) {
 				DiscoverItems.Item item = it.next();
-				list.add(StringUtils.parseResource(item.getEntityID()));
+                String nick = StringUtils.parseResource(item.getEntityID());
+				if (!list.contains(nick)) list.add(nick);
 			}
 			
 			CharSequence[] array = new CharSequence[list.size()];

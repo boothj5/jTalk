@@ -352,12 +352,8 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			String name = item.getName();
 			String jid = item.getEntry().getUser();
 			if (name == null || name.length() <= 0 ) name = jid;
-			
+            int count = service.getMessagesCount(account, jid);
 			Presence presence = service.getPresence(item.getAccount(), jid);
-			Presence.Type type = presence.getType();
-	        Presence.Mode mode = presence.getMode();
-
-			int count = service.getMessagesCount(account, jid);
 
             ItemHolder holder = new ItemHolder();
 			if(convertView == null || convertView.getTag() == null || convertView.getTag() instanceof GroupHolder) {

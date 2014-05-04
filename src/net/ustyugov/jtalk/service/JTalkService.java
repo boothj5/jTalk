@@ -370,6 +370,7 @@ public class JTalkService extends Service {
     }
 
     public void addActiveChat(String account, String jid) {
+        if (getConferencesHash(account).containsKey(jid)) return;
         if (activeChats.containsKey(account)) {
             List<String> chats = activeChats.get(account);
             if (!chats.contains(jid)) chats.add(jid);

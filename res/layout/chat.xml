@@ -4,7 +4,7 @@
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
 	android:id="@+id/chat_linear">
-	
+
 	<LinearLayout android:id="@+id/linear"
 		android:layout_weight="2"
 		android:orientation="horizontal"
@@ -34,7 +34,7 @@
 					android:layout_height="fill_parent"/>
 			</LinearLayout>
 	</LinearLayout>
-		
+
 	<LinearLayout android:layout_weight="0"
 	    android:id="@+id/InputPanel"
 		android:orientation="horizontal"
@@ -58,8 +58,8 @@
 
 	   <ImageButton android:id="@+id/SendButton"
            android:src="@drawable/ic_menu_forward"
-	       android:layout_width="wrap_content" 
-	       android:layout_height="wrap_content" 
+	       android:layout_width="wrap_content"
+	       android:layout_height="wrap_content"
 	       android:text="@string/Send"/>
     </LinearLayout>
 </LinearLayout>
