@@ -30,7 +30,7 @@ import android.view.*;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
 import net.ustyugov.jtalk.*;
-import net.ustyugov.jtalk.activity.filetransfer.SendFileActivity;
+import net.ustyugov.jtalk.SendFileTask;
 import net.ustyugov.jtalk.activity.muc.SubjectActivity;
 import net.ustyugov.jtalk.activity.note.TemplatesActivity;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
@@ -69,6 +69,7 @@ import com.jtalk2.R;
 public class Chat extends Activity implements View.OnClickListener, OnScrollListener {
     public static final int REQUEST_TEMPLATES = 1;
     public static final int REQUEST_FILE = 2;
+    public static final int REQUEST_PHOTO = 3;
 
     private boolean isMuc = false;
     private boolean isPrivate = false;
@@ -78,6 +79,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private Menu menu;
 
     private LinearLayout sidebar;
+    private LinearLayout attachPanel;
     private ImageView slider;
     private ChatAdapter  listAdapter;
     private MucChatAdapter listMucAdapter;
@@ -88,13 +90,16 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private ListView chatsList;
     private ListView nickList;
     private EditText messageInput;
+    private TextView attachPath;
     private ImageButton sendButton;
+    private ImageView removeAttach;
 
     private String jid;
     private String account;
     private String resource;
     private String searchString = "";
     private boolean compose = false;
+    private boolean imgur = false;
     private int maxCount = 0;
 
     private BroadcastReceiver textReceiver;
@@ -339,6 +344,13 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             messageInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE);
             sendButton.setVisibility(View.VISIBLE);
         }
+
+        attachPanel = (LinearLayout) findViewById(R.id.attachPanel);
+        attachPath = (TextView) findViewById(R.id.attachPath);
+        removeAttach = (ImageView) findViewById(R.id.attachRemove);
+        removeAttach.setOnClickListener(this);
+
+        if (getIntent().getBooleanExtra("file", false)) onActivityResult(REQUEST_FILE, RESULT_OK, getIntent());
     }
 
     @Override
@@ -601,7 +613,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 Intent fIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 fIntent.setType("image/*");
                 fIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(Intent.createChooser(fIntent, getString(R.string.SelectFile)), REQUEST_FILE);
+                startActivityForResult(Intent.createChooser(fIntent, getString(R.string.SelectFile)), REQUEST_PHOTO);
                 break;
             case android.R.id.home:
                 startActivity(new Intent(this, RosterActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
@@ -673,10 +685,15 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 startActivity(infoIntent);
                 break;
             case R.id.file:
-                Intent intent = new Intent(this, SendFileActivity.class);
-                intent.putExtra("account", account);
-                intent.putExtra("jid", jid);
-                startActivity(intent);
+                Intent fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                fileIntent.setType("*/*");
+                fileIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(Intent.createChooser(fileIntent, getString(R.string.SelectFile)), REQUEST_FILE);
+
+//                Intent intent = new Intent(this, SendFileActivity.class);
+//                intent.putExtra("account", account);
+//                intent.putExtra("jid", jid);
+//                startActivity(intent);
                 break;
             case R.id.invite:
                 MucDialogs.inviteDialog(this, account, jid);
@@ -737,33 +754,55 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             String oldtext = service.getText(jid);
             if (oldtext.length() > 0) text = oldtext + " " + text;
             service.setText(jid, text);
-        } else if (requestCode == REQUEST_FILE) {
-            uploadPhoto(data);
+        } else {
+            Uri uri = data.getData();
+            if (uri == null) return;
+            imgur = requestCode == REQUEST_PHOTO;
+            attachPath.setText(uri.toString());
+            attachPanel.setVisibility(View.VISIBLE);
+            sendButton.setEnabled(true);
         }
     }
 
     @Override
     public void onClick(View v) {
         if (v == sendButton) {
-            if (messageInput.getText().length() > 0) {
-                service.resetTimer();
-                sendMessage();
-                messageInput.setText("");
-                if (prefs.getBoolean("HideKeyboard", true)) {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(messageInput.getWindowToken(), 0, null);
+            String attach = attachPath.getText().toString();
+            if (attach.isEmpty()) {
+                if (messageInput.getText().length() > 0) sendMessage();
+            } else {
+                Uri uri = Uri.parse(attach);
+                if (uri == null) return;
+                String text = messageInput.getText().toString();
+                if (imgur) {
+                    String j = jid;
+                    if (isPrivate) j = jid;
+                    else if (resource != null && resource.length() > 0) j = jid + "/" + resource;
+                    new ImgurUploadTask(uri, this, account, j, text, muc).execute();
+                } else {
+                    String j = null;
+                    String r = resource;
+                    if (r != null && r.length() > 0) j = jid + "/" + resource;
+                    else {
+                        Presence presence = service.getRoster(account).getPresence(jid);
+                        if (presence != null) j = jid + "/" + StringUtils.parseResource(presence.getFrom());
+                    }
+                    if (j != null) new SendFileTask(this, account, j, text, uri).execute();
                 }
+                removeAttach.callOnClick();
             }
-        }
-    }
 
-    private void uploadPhoto(Intent intent) {
-        Uri uri = intent.getData();
-        if (uri == null) return;
-        String j = jid;
-        if (isPrivate) j = jid;
-        else if (resource != null && resource.length() > 0) j = jid + "/" + resource;
-        new ImgurUploadTask(uri, this, account, j, muc).execute();
+            service.resetTimer();
+            messageInput.setText("");
+            if (prefs.getBoolean("HideKeyboard", true)) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(messageInput.getWindowToken(), 0, null);
+            }
+        } else if (v == removeAttach) {
+            attachPanel.setVisibility(View.GONE);
+            attachPath.setText("");
+            if (messageInput.getText().length() < 1) sendButton.setEnabled(false);
+        }
     }
 
 //    private void updateMessage(String id, String body) {

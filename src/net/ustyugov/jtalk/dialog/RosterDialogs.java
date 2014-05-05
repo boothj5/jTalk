@@ -29,7 +29,6 @@ import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.activity.CommandsActivity;
 import net.ustyugov.jtalk.activity.privacy.PrivacyListsActivity;
-import net.ustyugov.jtalk.activity.filetransfer.SendFileActivity;
 import net.ustyugov.jtalk.activity.vcard.SetVcardActivity;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
 import net.ustyugov.jtalk.adapter.ResourceAdapter;
@@ -43,7 +42,6 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ChatState;
-import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -426,19 +424,18 @@ public class RosterDialogs {
     	
     	CharSequence[] items;
     	if (service.getActiveChats(account).contains(entry.getUser())) {
-    		items = new CharSequence[10];
-    		items[9] = activity.getString(R.string.Close);
+    		items = new CharSequence[9];
+    		items[8] = activity.getString(R.string.Close);
     	}
-    	else items = new CharSequence[9];
+    	else items = new CharSequence[8];
         items[0] = activity.getString(R.string.Info);
         items[1] = activity.getString(R.string.Edit);
         items[2] = activity.getString(R.string.SendStatus);
-        items[3] = activity.getString(R.string.SendFile);
-        items[4] = activity.getString(R.string.Subscribtion);
-        items[5] = activity.getString(R.string.AddInIgnoreList);
-        items[6] = activity.getString(R.string.ExecuteCommand);
-        items[7] = activity.getString(R.string.DeleteHistory);
-        items[8] = activity.getString(R.string.Remove);
+        items[3] = activity.getString(R.string.Subscribtion);
+        items[4] = activity.getString(R.string.AddInIgnoreList);
+        items[5] = activity.getString(R.string.ExecuteCommand);
+        items[6] = activity.getString(R.string.DeleteHistory);
+        items[7] = activity.getString(R.string.Remove);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(entry.getUser());
@@ -467,31 +464,25 @@ public class RosterDialogs {
 	        		changeStatusDialog(activity, account, jid);
 	        		break;
 	        	case 3:
-		        	 Intent intent = new Intent(activity, SendFileActivity.class);
-		        	 intent.putExtra("account", account);
-		        	 intent.putExtra("jid", jid);
-		        	 activity.startActivity(intent);
-		 	        break;
-	        	case 4:
 		        	 subscribtionDialog(activity, account, jid);
 		        	 break;
-	        	case 5:
+	        	case 4:
 		        	 new IgnoreList(account).updateIgnoreList(jid);
 		        	 break;
-	        	case 6:
+	        	case 5:
 		        	 RosterDialogs.resourceDialog(activity, account, jid);
 		        	 break;
-	        	case 7:
+	        	case 6:
 	        		activity.getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
 	  	    		service.removeActiveChat(account, jid);
 	  	    		service.sendBroadcast(new Intent(Constants.UPDATE));
 	  	    		break;
-	        	case 8:
+	        	case 7:
 				    service.removeContact(account, jid);
 				    Intent i = new Intent(Constants.UPDATE);
 		         	activity.sendBroadcast(i);
 		 	        break;
-	        	case 9:
+	        	case 8:
 	        		service.setChatState(account, jid, ChatState.gone);
 		        	service.removeActiveChat(account, jid);
                     service.setMessageList(account, jid, new ArrayList<MessageItem>());
@@ -511,15 +502,14 @@ public class RosterDialogs {
 
         CharSequence[] items;
         if (service.getActiveChats(account).contains(entry.getUser())) {
-            items = new CharSequence[6];
-            items[5] = activity.getString(R.string.Close);
+            items = new CharSequence[5];
+            items[4] = activity.getString(R.string.Close);
         }
-        else items = new CharSequence[5];
+        else items = new CharSequence[4];
         items[0] = activity.getString(R.string.Info);
-        items[1] = activity.getString(R.string.SendFile);
-        items[2] = activity.getString(R.string.AddInIgnoreList);
-        items[3] = activity.getString(R.string.ExecuteCommand);
-        items[4] = activity.getString(R.string.DeleteHistory);
+        items[1] = activity.getString(R.string.AddInIgnoreList);
+        items[2] = activity.getString(R.string.ExecuteCommand);
+        items[3] = activity.getString(R.string.DeleteHistory);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(entry.getUser());
@@ -537,26 +527,20 @@ public class RosterDialogs {
                         activity.startActivity(infoIntent);
                         break;
                     case 1:
-                        Intent intent = new Intent(activity, SendFileActivity.class);
-                        intent.putExtra("account", account);
-                        intent.putExtra("jid", jid);
-                        activity.startActivity(intent);
-                        break;
-                    case 2:
                         new IgnoreList(account).updateIgnoreList(jid);
                         break;
-                    case 3:
+                    case 2:
                         Intent com = new Intent(activity, CommandsActivity.class);
                         com.putExtra("account", account);
                         com.putExtra("jid", jid + "/" + name);
                         activity.startActivity(com);
                         break;
-                    case 4:
+                    case 3:
                         activity.getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
                         service.removeActiveChat(account, jid);
                         service.sendBroadcast(new Intent(Constants.UPDATE));
                         break;
-                    case 5:
+                    case 4:
                         service.setChatState(account, jid, ChatState.gone);
                         service.removeActiveChat(account, jid);
                         if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
@@ -567,41 +551,7 @@ public class RosterDialogs {
         });
         builder.create().show();
     }
-	
-	public static void MucContactMenuDialog(final Activity activity, final String account, final String group, final String nick) {
-    	final JTalkService service = JTalkService.getInstance();
-		final MultiUserChat muc = service.getConferencesHash(account).get(group);
-		
-		CharSequence[] items = new CharSequence[3];
-		items[0] = activity.getString(R.string.Info);
-		items[1] = activity.getString(R.string.ExecuteCommand);
-		items[2] = activity.getString(R.string.Actions);
-		
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(R.string.Actions);
-        builder.setItems(items, new OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-		        switch(which) {
-		        	case 0:
-		        		Intent infoIntent = new Intent(activity, VCardActivity.class);
-		        		infoIntent.putExtra("jid", group + "/" + nick);
-		        		activity.startActivity(infoIntent);
-		        		break;
-		        	case 1:
-		        		Intent intent = new Intent(activity, CommandsActivity.class);
-		    			intent.putExtra("jid", group + "/" + nick);
-		    	        activity.startActivity(intent);
-		        		break;
-		        	case 2:
-		        		new MucAdminMenu(activity, muc, nick).show();
-		        		break;
-		        }
-			}
-        });
-        builder.create().show();
-    }
-	
+
 	public static void SelfContactMenuDialog(final Activity activity, final RosterItem item) {
     	final JTalkService service = JTalkService.getInstance();
     	final String account = item.getAccount();
@@ -609,14 +559,13 @@ public class RosterDialogs {
     	
     	CharSequence[] items;
     	if (service.getActiveChats(account).contains(entry.getUser())) {
-    		items = new CharSequence[5];
-    		items[4] = activity.getString(R.string.Close);
+    		items = new CharSequence[4];
+    		items[3] = activity.getString(R.string.Close);
     	}
-    	else items = new CharSequence[4];
+    	else items = new CharSequence[3];
         items[0] = activity.getString(R.string.Info);
-        items[1] = activity.getString(R.string.SendFile);
-        items[2] = activity.getString(R.string.ExecuteCommand);
-        items[3] = activity.getString(R.string.DeleteHistory);
+        items[1] = activity.getString(R.string.ExecuteCommand);
+        items[2] = activity.getString(R.string.DeleteHistory);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(entry.getUser());
@@ -632,12 +581,6 @@ public class RosterDialogs {
 	        		activity.startActivity(infoIntent);
 	        		break;
 	        	case 1:
-	        		Intent intent = new Intent(activity, SendFileActivity.class);
-	        		intent.putExtra("account", account);
-	        		intent.putExtra("jid", jid);
-	        		activity.startActivity(intent);
-	        		break;
-	        	case 2:
                     if (!jid.contains("/")) RosterDialogs.resourceDialog(activity, account, jid);
                     else {
                         Intent comIntent = new Intent(activity, CommandsActivity.class);
@@ -646,12 +589,12 @@ public class RosterDialogs {
                         activity.startActivity(comIntent);
                     }
 	        		break;
-	        	case 3:
+	        	case 2:
 	        		activity.getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
                     service.removeActiveChat(account, jid);
 	  	    		service.sendBroadcast(new Intent(Constants.UPDATE));
 		 	        break;
-	        	case 4:
+	        	case 3:
 	        		service.setChatState(account, jid, ChatState.gone);
                     service.removeActiveChat(account, jid);
 					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));

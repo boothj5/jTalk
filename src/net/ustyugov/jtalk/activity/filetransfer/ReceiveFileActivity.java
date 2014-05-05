@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -53,11 +54,9 @@ public class ReceiveFileActivity extends Activity implements View.OnClickListene
         LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
         linear.setBackgroundColor(Colors.BACKGROUND);
 
-        JTalkService service = JTalkService.getInstance();
-        if (service != null && service.getIncomingRequests().size() > 0) {
-            request = service.getIncomingRequests().remove(0);
-            if(service.getIncomingRequests().isEmpty()) Notify.cancelFileRequest();
-
+        Log.e("RECEIVEFILE", "sdfsdf");
+        request = JTalkService.getInstance().getIncomingRequest();
+        if (request != null) {
             TextView from = (TextView) findViewById(R.id.from);
             from.setText(request.getRequestor()+"");
 
@@ -78,14 +77,14 @@ public class ReceiveFileActivity extends Activity implements View.OnClickListene
 
             cancel = (Button) findViewById(R.id.cancel);
             cancel.setOnClickListener(this);
-        } else finish();
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                request.reject();
+                if (request != null) request.reject();
                 startActivity(new Intent(this, RosterActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                 finish();
                 break;

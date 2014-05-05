@@ -27,7 +27,7 @@ import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 public class IncomingFileListener implements FileTransferListener {
 
 	public void fileTransferRequest(FileTransferRequest request) {
-		JTalkService.getInstance().getIncomingRequests().add(request);
+		JTalkService.getInstance().addIncomingFileRequest(request);
 		Notify.incomingFile();
 	}
 }

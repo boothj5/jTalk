@@ -53,6 +53,7 @@ public class Notify {
 //	private static final int NOTIFICATION_SUBSCRIBTION = 5;
 	private static final int NOTIFICATION_CAPTCHA = 6;
 	private static final int NOTIFICATION_INVITE = 7;
+    private static final int NOTIFICATION_IMGUR = 8;
 	
 //	public static boolean newMessages = false;
 	public enum Type {Chat, Conference, Direct}
@@ -292,6 +293,38 @@ public class Notify {
             mng.notify(id, mBuilder.build());
     	}
     }
+
+    public static void imgurFileProgress(Status status, String text) {
+        JTalkService service = JTalkService.getInstance();
+        Intent i = new Intent(service, RosterActivity.class);
+        i.setAction(Intent.ACTION_MAIN);
+        i.addCategory(Intent.CATEGORY_LAUNCHER);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+        mBuilder.setContentTitle(service.getString(R.string.SendPhoto));
+        mBuilder.setContentText(text);
+        mBuilder.setContentIntent(contentIntent);
+        mBuilder.setProgress(0, 0, true);
+
+        if (status == Status.in_progress) {
+            mBuilder.setSmallIcon(android.R.drawable.stat_sys_upload);
+            mBuilder.setTicker(service.getString(R.string.SendPhoto));
+        } else if (status == Status.error) {
+            mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
+            mBuilder.setTicker(service.getString(R.string.Error));
+            mBuilder.setAutoCancel(true);
+        }
+
+        NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
+        mng.notify(NOTIFICATION_IMGUR, mBuilder.build());
+    }
+
+    public static void imgurCancel() {
+        NotificationManager mng = (NotificationManager) JTalkService.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
+        mng.cancel(NOTIFICATION_IMGUR);
+    }
     
     public static void fileProgress(String filename, Status status) {
     	JTalkService service = JTalkService.getInstance();
@@ -347,7 +380,6 @@ public class Notify {
     	JTalkService service = JTalkService.getInstance();
     	Intent i = new Intent(service, ReceiveFileActivity.class);
     	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    	i.putExtra("file", true);
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
   
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
@@ -356,6 +388,7 @@ public class Notify {
         mBuilder.setContentTitle(service.getString(R.string.app_name));
         mBuilder.setContentText(service.getString(R.string.AcceptFile));
         mBuilder.setContentIntent(contentIntent);
+        mBuilder.setAutoCancel(true);
         
     	NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(NOTIFICATION_FILE_REQUEST, mBuilder.build());

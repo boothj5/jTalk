@@ -5,7 +5,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.service.JTalkService;
+import org.jivesoftware.smackx.filetransfer.FileTransfer;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.json.JSONObject;
 
@@ -18,23 +20,23 @@ import java.net.URL;
 import java.util.Scanner;
 
 public class ImgurUploadTask extends AsyncTask<Void, Void, String> {
-
     private static final String TAG = ImgurUploadTask.class.getSimpleName();
-
     private static final String UPLOAD_URL = "https://api.imgur.com/3/image";
 
     private Activity mActivity;
     private Uri mImageUri;  // local Uri to upload
     private String jid;
     private String account;
+    private String text;
     private MultiUserChat muc;
 
-    public ImgurUploadTask(Uri imageUri, Activity activity, String account, String jid, MultiUserChat muc) {
+    public ImgurUploadTask(Uri imageUri, Activity activity, String account, String jid, String text, MultiUserChat muc) {
         this.mImageUri = imageUri;
         this.mActivity = activity;
         this.account = account;
         this.jid = jid;
         this.muc = muc;
+        this.text = text;
     }
 
     @Override
@@ -45,6 +47,7 @@ public class ImgurUploadTask extends AsyncTask<Void, Void, String> {
             imageIn = mActivity.getContentResolver().openInputStream(mImageUri);
         } catch (FileNotFoundException e) {
             Log.e(TAG, "could not open InputStream", e);
+            Notify.imgurFileProgress(FileTransfer.Status.error, e.getLocalizedMessage());
             return null;
         }
 
@@ -64,7 +67,12 @@ public class ImgurUploadTask extends AsyncTask<Void, Void, String> {
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 responseIn = conn.getInputStream();
-                return onInput(responseIn);
+                StringBuilder sb = new StringBuilder();
+                Scanner scanner = new Scanner(responseIn);
+                while (scanner.hasNext()) {
+                    sb.append(scanner.next());
+                }
+                return sb.toString();
             }
             else {
                 Log.i(TAG, "responseCode=" + conn.getResponseCode());
@@ -75,10 +83,12 @@ public class ImgurUploadTask extends AsyncTask<Void, Void, String> {
                     sb.append(scanner.next());
                 }
                 Log.i(TAG, "error response: " + sb.toString());
+                Notify.imgurFileProgress(FileTransfer.Status.error, sb.toString());
                 return null;
             }
         } catch (Exception ex) {
             Log.e(TAG, "Error during POST", ex);
+            Notify.imgurFileProgress(FileTransfer.Status.error, ex.getLocalizedMessage());
             return null;
         } finally {
             try {
@@ -93,6 +103,40 @@ public class ImgurUploadTask extends AsyncTask<Void, Void, String> {
         }
     }
 
+    @Override
+    protected void onPreExecute() {
+        Notify.imgurFileProgress(FileTransfer.Status.in_progress, mImageUri.getLastPathSegment());
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        if (result == null || result.isEmpty()) return;
+        try {
+            JSONObject root = new JSONObject(result);
+            String type = root.getJSONObject("data").getString("type");
+            String link = root.getJSONObject("data").getString("link");
+            long size = root.getJSONObject("data").getLong("size");
+            int w = root.getJSONObject("data").getInt("width");
+            int h = root.getJSONObject("data").getInt("height");
+
+            String message = type + " " + w+"x"+h + " ["+humanReadableByteCount(size, true)+"]: " + link;
+            if (text != null && !text.isEmpty()) message += " :\n" + text;
+
+            if (muc != null && muc.isJoined()) {
+                try {
+                    muc.sendMessage(message);
+                } catch (Exception ignored) {}
+            }
+            else {
+                JTalkService.getInstance().sendMessage(account, jid, message);
+            }
+
+            Notify.imgurCancel();
+        } catch (Exception e) {
+            Notify.imgurFileProgress(FileTransfer.Status.error, e.getLocalizedMessage());
+        }
+    }
+
     private static int copy(InputStream input, OutputStream output) throws IOException {
         byte[] buffer = new byte[8192];
         int count = 0;
@@ -102,33 +146,6 @@ public class ImgurUploadTask extends AsyncTask<Void, Void, String> {
             count += n;
         }
         return count;
-    }
-
-    protected String onInput(InputStream in) throws Exception {
-        StringBuilder sb = new StringBuilder();
-        Scanner scanner = new Scanner(in);
-        while (scanner.hasNext()) {
-            sb.append(scanner.next());
-        }
-
-        JSONObject root = new JSONObject(sb.toString());
-        String id = root.getJSONObject("data").getString("id");
-        String type = root.getJSONObject("data").getString("type");
-        String link = root.getJSONObject("data").getString("link");
-        long size = root.getJSONObject("data").getLong("size");
-        int w = root.getJSONObject("data").getInt("width");
-        int h = root.getJSONObject("data").getInt("height");
-
-        String message = type + " " + w+"x"+h + " ["+humanReadableByteCount(size, true)+"]: " + link;
-        if (muc != null && muc.isJoined()) {
-            try {
-                muc.sendMessage(message);
-            } catch (Exception ignored) {}
-        }
-        else {
-            JTalkService.getInstance().sendMessage(account, jid, message);
-        }
-        return id;
     }
 
     private String humanReadableByteCount(long bytes, boolean si) {

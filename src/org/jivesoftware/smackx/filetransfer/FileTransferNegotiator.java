@@ -41,11 +41,13 @@ public class FileTransferNegotiator {
      */
     public static final String INBAND_BYTE_STREAM = "http://jabber.org/protocol/ibb";
 
-    private static final String[] NAMESPACE = {
-            "http://jabber.org/protocol/si/profile/file-transfer",
-            "http://jabber.org/protocol/si", BYTE_STREAM, INBAND_BYTE_STREAM};
+//    private static final String[] NAMESPACE = {
+//            "http://jabber.org/protocol/si/profile/file-transfer",
+//            "http://jabber.org/protocol/si", BYTE_STREAM, INBAND_BYTE_STREAM};
+    private static final String[] NAMESPACE = {BYTE_STREAM};
 
-    private static final String[] PROTOCOLS = {BYTE_STREAM, INBAND_BYTE_STREAM};
+//    private static final String[] PROTOCOLS = {BYTE_STREAM, INBAND_BYTE_STREAM};
+    private static final String[] PROTOCOLS = {BYTE_STREAM};
 
     private static final Map<XMPPConnection, FileTransferNegotiator> transferObject =
             new ConcurrentHashMap<XMPPConnection, FileTransferNegotiator>();

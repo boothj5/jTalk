@@ -115,7 +115,7 @@ public class JTalkService extends Service {
 //    private BroadcastReceiver updateReceiver;
     private ScreenStateReceiver screenStateReceiver;
     private ChangeConnectionReceiver connectionReceiver;
-    private FileTransferManager fileTransferManager;
+    private Hashtable<String, FileTransferManager> fileTransferManagers = new Hashtable<String, FileTransferManager>();
     private List<FileTransferRequest> incomingRequests = new ArrayList<FileTransferRequest>();
     private Timer autoStatusTimer = new Timer();
     private boolean autoStatus = false;
@@ -277,8 +277,20 @@ public class JTalkService extends Service {
     public boolean getAutoStatus() { return autoStatus; }
     public void setOldPresence(Presence presence) { this.oldPresence = presence; }
     public Presence getOldPresence() { return oldPresence; }
-    public FileTransferManager getFileTransferManager() { return fileTransferManager; }
-    public List<FileTransferRequest> getIncomingRequests() { return incomingRequests; }
+
+    public FileTransferManager getFileTransferManager(String account) {
+        if (fileTransferManagers.containsKey(account)) return fileTransferManagers.get(account);
+        else return null;
+    }
+
+    public void addIncomingFileRequest(FileTransferRequest request) {
+        incomingRequests.add(request);
+    }
+    public FileTransferRequest getIncomingRequest() {
+        if (incomingRequests.size() > 0) return incomingRequests.remove(0);
+        else return null;
+    }
+
     public void setCurrentJid(String jid) { this.currentJid = jid; }
     public String getCurrentJid() { return currentJid; }
     public String getGlobalState() { return globalState; }
@@ -1537,8 +1549,9 @@ public class JTalkService extends Service {
                 new ServiceDiscoveryManager(connection);
                 new AdHocCommandManager(connection);
 
-                fileTransferManager = new FileTransferManager(connection);
+                FileTransferManager fileTransferManager = new FileTransferManager(connection);
                 fileTransferManager.addFileTransferListener(new IncomingFileListener());
+                fileTransferManagers.put(username, fileTransferManager);
 
                 try {
                     MultiUserChat.addInvitationListener(connection, new InviteListener(username));

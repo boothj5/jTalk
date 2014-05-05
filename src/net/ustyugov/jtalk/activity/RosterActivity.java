@@ -23,7 +23,6 @@ import android.content.*;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -128,6 +127,8 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
             String account = getIntent().getStringExtra("account");
             RosterDialogs.passwordDialog(this, account);
         }
+
+
 
         File table = new File(Constants.PATH_SMILES + "/default/table.xml");
         if (!table.exists()) {

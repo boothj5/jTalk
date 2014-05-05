@@ -102,14 +102,11 @@ public class BookmarksDialogs {
 	public static void EditDialog(final Activity a, final String account, final BookmarkedConference bc) {
 		if (bc == null) return;
 		
-		final String jid = bc.getJid();
-		
 		LayoutInflater inflater = a.getLayoutInflater();
 		View layout = inflater.inflate(R.layout.bookmark_dialog, (ViewGroup) a.findViewById(R.id.bookmarks_dialog_linear));
-	    
+
 		final EditText groupEdit = (EditText) layout.findViewById(R.id.bookmarks_dialog_jid);
 		groupEdit.setText(bc.getJid());
-		groupEdit.setEnabled(false);
 	    final EditText nameEdit = (EditText) layout.findViewById(R.id.bookmarks_dialog_name);
 	    nameEdit.setText(bc.getName());
 	    final EditText passEdit = (EditText) layout.findViewById(R.id.bookmarks_dialog_pass);
@@ -125,6 +122,7 @@ public class BookmarksDialogs {
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				JTalkService service = JTalkService.getInstance();
+                String jid = groupEdit.getText().toString();
 				String name = nameEdit.getText().toString();
 				String nick = nickEdit.getText().toString();
 				String pass = passEdit.getText().toString();

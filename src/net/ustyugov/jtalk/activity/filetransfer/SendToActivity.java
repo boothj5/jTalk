@@ -94,10 +94,10 @@ public class SendToActivity extends Activity {
                         startActivity(i);
                     } else {
                         Uri data = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                        Intent i = new Intent(SendToActivity.this, SendFileActivity.class);
+                        Intent i = new Intent(SendToActivity.this, Chat.class);
                         i.putExtra("account", account);
                         i.putExtra("jid", jid);
-                        i.putExtra("muc", false);
+                        i.putExtra("file", true);
                         i.setAction(Intent.ACTION_SEND);
                         i.setData(data);
                         startActivity(i);
