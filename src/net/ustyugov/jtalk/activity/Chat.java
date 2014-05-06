@@ -689,11 +689,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 fileIntent.setType("*/*");
                 fileIntent.addCategory(Intent.CATEGORY_OPENABLE);
                 startActivityForResult(Intent.createChooser(fileIntent, getString(R.string.SelectFile)), REQUEST_FILE);
-
-//                Intent intent = new Intent(this, SendFileActivity.class);
-//                intent.putExtra("account", account);
-//                intent.putExtra("jid", jid);
-//                startActivity(intent);
                 break;
             case R.id.invite:
                 MucDialogs.inviteDialog(this, account, jid);
@@ -702,9 +697,23 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 loadStory(true);
                 break;
             case R.id.delete_history:
-                getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
                 service.setMessageList(account, jid, new ArrayList<MessageItem>());
-                updateList();
+                new Thread() {
+                    public void run() {
+                        Chat.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
+                                updateList();
+                            }
+                        });
+                    }
+                }.start();
+                break;
+            case R.id.export_history:
+                Intent export = new Intent(this, ExportActivity.class);
+                export.putExtra("jid", jid);
+                startActivity(export);
                 break;
             case R.id.chats:
                 ChangeChatDialog.show(this);

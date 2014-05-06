@@ -77,8 +77,8 @@
                 android:defaultValue="false" />
         <CheckBoxPreference
                 android:key="SmileButtonOnKeyboard"
-                android:title="Show smiles button"
-                android:summary="On keyboard"
+                android:title="@string/ShowSmilesButton"
+                android:summary="@string/OnKeyboard"
                 android:defaultValue="false" />
         <CheckBoxPreference
                 android:key="HideKeyboard"

@@ -44,6 +44,7 @@
         <activity android:name="net.ustyugov.jtalk.activity.ServiceDiscovery" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.DataFormActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.CommandsActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="net.ustyugov.jtalk.activity.ExportActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.account.Accounts" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.account.AddAccountActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.note.TemplatesActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>

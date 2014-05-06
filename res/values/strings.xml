@@ -79,7 +79,7 @@
     <string name="Port">Port</string>
     <string name="EnableTls">TLS</string>
     <string name="EnableSasl">SASL</string>
-    <string name="History">History</string>
+    <string name="History">History...</string>
     <string name="KeepHistory">Keep history</string>
     <string name="LoadHistory">Load history</string>
     <string name="Autostatus">Autostatus</string>
@@ -139,6 +139,8 @@
     <string name="Version">Version</string>
     <string name="AlwaysVisibleState">Always visible state</string>
     <string name="SendOnEnter">Send on Enter</string>
+    <string name="ShowSmilesButton">Show smiles button</string>
+    <string name="OnKeyboard">On keyboard</string>
 
     <!--  Menus -->
     <string name="Update">Update</string>
@@ -204,6 +206,7 @@
     <string name="SelectMessage">Select messages</string>
     <string name="Finish">Finish</string>
     <string name="SendPhoto">Send photo</string>
+    <string name="Export">Export</string>
 
     <!-- Dialogs -->
     <string name="Room">Room</string>

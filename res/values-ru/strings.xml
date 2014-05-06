@@ -71,7 +71,7 @@
     <string name="Port">Порт</string>
     <string name="EnableTls">TLS</string>
     <string name="EnableSasl">SASL</string>
-    <string name="History">История</string>
+    <string name="History">История...</string>
     <string name="KeepHistory">Хранить историю</string>
     <string name="LoadHistory">Подгружать историю</string>
     <string name="Autostatus">Автостатус</string>
@@ -131,6 +131,8 @@
     <string name="Version">Версия</string>
     <string name="AlwaysVisibleState">Всегда показывать статус</string>
     <string name="SendOnEnter">Отправка по Enter</string>
+    <string name="ShowSmilesButton">Показывать клавишу смайлов</string>
+    <string name="OnKeyboard">На клавиатуре</string>
     
     <!--  Menus -->
     <string name="Update">Обновить</string>
@@ -197,6 +199,7 @@
     <string name="SelectMessage">Выбрать сообщения</string>
     <string name="Finish">Готово</string>
     <string name="SendPhoto">Отправить фото</string>
+    <string name="Export">Экспорт</string>
 
     <!-- Dialogs -->
     <string name="Room">Комната</string>

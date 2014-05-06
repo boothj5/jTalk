@@ -20,17 +20,20 @@ package net.ustyugov.jtalk;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
+import com.jtalk2.R;
+import net.ustyugov.jtalk.service.JTalkService;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.packet.BobExtension;
 import org.jivesoftware.smackx.packet.DataForm;
 
 public class MessageItem {
+    public enum Type {message, status}
+
     private String account;
     private String jid;
 	private String time = null;
 	private String body = "";
 	private String subj = "";
-	private String stamp = null;
 	private String name = null;
 	private String id = null;
     private String baseId = null;
@@ -42,26 +45,12 @@ public class MessageItem {
 	private BobExtension bob = null;
     private boolean selected = false;
 	
-//	public MessageItem(String account, String time, String body, String name, String id ) {
-//		Date d = new Date();
-//	    DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-//	    this.stamp = df.format(d);
-//	    this.account = account;
-//		this.time = time;
-//		this.body = body;
-//		this.name = name;
-//		this.id = id;
-//		this.edited = false;
-//		this.received = false;
-//		this.collapsed = false;
-//	}
-	
 	public MessageItem(String account, String jid) {
         this.account = account;
         this.jid = jid;
 		Date d = new Date();
 	    DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-	    this.stamp = df.format(d);
+	    this.time = df.format(d);
         this.edited = false;
 		this.received = false;
 	}
@@ -97,32 +86,61 @@ public class MessageItem {
     public boolean isSelected() {return selected;}
 
     public void setBody(String body) {
-		this.body = body.replaceAll("&lt;", "<");
-		this.body = body.replaceAll(";amp;", "&");
-	}
+        this.body = body.replaceAll("&lt;", "<");
+        this.body = body.replaceAll(";amp;", "&");
+    }
 	
 	public void setSubject(String subject) {
 		if (subject != null) {
-			this.subj = subject.replaceAll("&lt;", "<");
-			this.subj = subject.replaceAll(";amp;", "&");
-		}
+            this.subj = subject.replaceAll("&lt;", "<");
+            this.subj = subject.replaceAll(";amp;", "&");
+        }
 	}
 
 	public String toXml() {
-		StringBuilder sb = new StringBuilder();
-		String message = getBody().replaceAll("<", "&lt;").replaceAll("&", ";amp;");
-		sb.append("<" + getType().name() + " from='" + name + "' stamp='" + stamp + "'>");
-		sb.append(message);
-		sb.append("</" + getType().name() + ">\n");
+		String message = StringUtils.escapeForXML(getBody());
+        StringBuilder sb = new StringBuilder();
+		sb.append("<" + getType().name() + " from='" + getJid() +"'>");
+        sb.append("<name>"+getName()+"</name>");
+        sb.append("<time>"+getTime()+"</time>");
+		sb.append("<text>"+message+"</text>");
+        sb.append("</" + getType().name() + ">\n");
 		return sb.toString();
 	}
+
+    public String toJson() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("\"Type\": \"" + getType().name() + "\", ");
+        sb.append("\"Time\": \"" + getTime() + "\", ");
+        sb.append("\"From\": \"" + getJid() + "\", ");
+        sb.append("\"Name\": \"" + getName() + "\", ");
+        sb.append("\"Text\": \"" + getBody() + "\"");
+        sb.append("}");
+        return sb.toString();
+    }
 	
 	public String toString() {
-		return stamp + " " + name + "\n" + body + "\n\n";
+        StringBuilder sb = new StringBuilder();
+        sb.append(getTime() + " ").append(getName());
+        if (getType() == Type.message) sb.append(":\n"); else sb.append(" ");
+        sb.append(getBody() + "\n\n");
+        return sb.toString();
 	}
-	
-	public enum Type {
-		message,
-		status;
-	}
+
+    public String toHtml() {
+        String body = StringUtils.escapeForXML(getBody());
+        StringBuilder sb = new StringBuilder();
+        sb.append("<p>");
+        if (getType() == Type.message) {
+            sb.append("<font color='");
+            if (getName().equals(JTalkService.getInstance().getString(R.string.Me))) sb.append("red'>");
+            else sb.append("blue'>");
+            sb.append(getTime() + " " + getName() + ":</font>").append("<br>" + body);
+        } else {
+            sb.append("<font color='green'>").append(getTime() + " ").append(getName() + " ").append(body).append("</font>");
+        }
+        sb.append("</p>");
+        return sb.toString();
+    }
 }

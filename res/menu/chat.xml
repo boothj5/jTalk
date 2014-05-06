@@ -26,16 +26,21 @@
     <item android:id="@+id/imgur"
           android:title="@string/SendPhoto"
           android:showAsAction="never"/>
-    <item android:id="@+id/history"
-          android:title="@string/History"
-          android:showAsAction="never"/>
     <item android:id="@+id/search"
           android:title="@android:string/search_go"/>
+    <item android:title="@string/History"
+          android:showAsAction="never">
+        <menu>
+            <item android:id="@+id/history"
+                  android:title="@string/Load"/>
+            <item android:id="@+id/delete_history"
+                  android:title="@string/DeleteHistory"/>
+            <item android:id="@+id/export_history"
+                  android:title="@string/Export"/>
+        </menu>
+    </item>
     <item android:id="@+id/clear"
           android:title="@string/Clear"
-          android:showAsAction="never"/>
-    <item android:id="@+id/delete_history"
-          android:title="@string/DeleteHistory"
           android:showAsAction="never"/>
     <item android:id="@+id/close"
           android:title="@string/Close"

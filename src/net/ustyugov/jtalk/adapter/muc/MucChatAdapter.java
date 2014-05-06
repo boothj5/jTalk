@@ -153,6 +153,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
 
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         ssb.append(message);
+        ssb.setSpan(new ForegroundColorSpan(Colors.PRIMARY_TEXT), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         if (type == MessageItem.Type.status) {
             ssb.setSpan(new ForegroundColorSpan(Colors.STATUS_MESSAGE), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {

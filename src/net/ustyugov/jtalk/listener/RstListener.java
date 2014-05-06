@@ -28,6 +28,7 @@ import net.ustyugov.jtalk.service.JTalkService;
 
 import net.ustyugov.jtalk.Constants;
 
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
@@ -67,6 +68,9 @@ public class RstListener implements RosterListener {
     public void presenceChanged(Presence presence) {
     	String[] statusArray = service.getResources().getStringArray(R.array.statusArray);
     	String jid  = StringUtils.parseBareAddress(presence.getFrom());
+        String name = jid;
+        RosterEntry entry = service.getRoster(account).getEntry(jid);
+        if (entry != null && entry.getName() != null) name = entry.getName();
 
     	Presence.Mode mode = presence.getMode();
     	if (mode == null) mode = Presence.Mode.available;
@@ -88,7 +92,7 @@ public class RstListener implements RosterListener {
 		else {
 			item.setBody(statusArray[5] + " " + status);
 		}
-        item.setName(jid);
+        item.setName(name);
         item.setTime(time);
         item.setType(MessageItem.Type.status);
         item.setId(System.currentTimeMillis()+"");
