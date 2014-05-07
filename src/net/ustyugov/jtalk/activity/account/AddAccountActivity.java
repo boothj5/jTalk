@@ -36,7 +36,7 @@ import net.ustyugov.jtalk.service.JTalkService;
 
 public class AddAccountActivity extends AccountAuthenticatorActivity implements View.OnClickListener {
     private EditText jidEdit, passEdit, resEdit, serEdit, portEdit;
-    private CheckBox enabled, savePass, tls, sasl;
+    private CheckBox enabled, savePass, tls, sasl, compression;
     private Button okButton, cancelButton;
     private int id = -1;
 
@@ -56,6 +56,7 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
         enabled = (CheckBox) findViewById(R.id.account_active);
         tls = (CheckBox) findViewById(R.id.account_tls);
         sasl = (CheckBox) findViewById(R.id.account_sasl);
+        compression = (CheckBox) findViewById(R.id.account_compression);
         savePass = (CheckBox) findViewById(R.id.save);
         okButton = (Button) findViewById(R.id.account_ok);
         cancelButton = (Button) findViewById(R.id.account_cancel);
@@ -86,6 +87,7 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
             String e = "";
             String t = "";
             String s = "";
+            String c = "";
             int port = 5222;
 
             Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, "_id = '" + id + "'", null, null);
@@ -104,6 +106,7 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
                 e = cursor.getString(cursor.getColumnIndex(AccountDbHelper.ENABLED));
                 t = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
                 s = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
+                c = cursor.getString(cursor.getColumnIndex(AccountDbHelper.COMPRESSION));
             }
 
             jidEdit.setText(username);
@@ -114,6 +117,7 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
             enabled.setChecked(e.equals("1"));
             tls.setChecked(t.equals("1"));
             sasl.setChecked(s.equals("1"));
+            compression.setChecked(c.equals("1"));
         } else setTitle(R.string.Add);
     }
 
@@ -135,6 +139,7 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
             boolean e = enabled.isChecked();
             boolean t = tls.isChecked();
             boolean s = sasl.isChecked();
+            boolean c = compression.isChecked();
 
             if (!savePass.isChecked()) {
                 JTalkService.getInstance().addPassword(jid, pass);
@@ -156,6 +161,8 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
                 else values.put(AccountDbHelper.TLS, "0");
                 if (s) values.put(AccountDbHelper.SASL, "1");
                 else values.put(AccountDbHelper.SASL, "0");
+                if (c) values.put(AccountDbHelper.COMPRESSION, "1");
+                else values.put(AccountDbHelper.COMPRESSION, "0");
 
                 if (id == -1) {
                     Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.JID +" = '" + jid + "'", null, null);

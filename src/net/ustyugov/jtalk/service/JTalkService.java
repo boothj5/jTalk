@@ -845,6 +845,7 @@ public class JTalkService extends Service {
 				do {
 					String username = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
 					String password = cursor.getString(cursor.getColumnIndex(AccountDbHelper.PASS)).trim();
+                    int port = 5222;
 
                     if (password.isEmpty()) {
                         if (passHash.containsKey(username)) {
@@ -855,16 +856,20 @@ public class JTalkService extends Service {
                         }
                     }
 
+                    try {
+                        port = Integer.parseInt(cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT)));
+                    } catch (NumberFormatException ignored) { }
+
                     String resource = cursor.getString(cursor.getColumnIndex(AccountDbHelper.RESOURCE)).trim();
                     String service = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SERVER));
                     String tls = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
                     String sasl = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
-                    String port = cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT));
+                    String compression = cursor.getString(cursor.getColumnIndex(AccountDbHelper.COMPRESSION));
 
-                    ConnectionTask task = new ConnectionTask();
+                    ConnectionTask task = new ConnectionTask(username, password, service, port, resource, tls.equals("1"), sasl.equals("1"), compression.equals("1"));
                     if (connectionTasks.containsKey(username)) task = connectionTasks.get(username);
                     if (task.getStatus() != AsyncTask.Status.RUNNING && task.getStatus() != AsyncTask.Status.FINISHED) {
-                        task.execute(username, password, resource, service, tls, sasl, port);
+                        task.execute();
                         connectionTasks.put(username, task);
                     }
 				} while(cursor.moveToNext());
@@ -889,7 +894,12 @@ public class JTalkService extends Service {
 			String service = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SERVER));
 			String tls = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
             String sasl = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
-			String port = cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT));
+            String compression = cursor.getString(cursor.getColumnIndex(AccountDbHelper.COMPRESSION));
+
+            int port = 5222;
+            try {
+                port = Integer.parseInt(cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT)));
+            } catch (NumberFormatException ignored) { }
 
             if (password.isEmpty()) {
                 if (passHash.containsKey(username)) {
@@ -897,8 +907,8 @@ public class JTalkService extends Service {
                 }
             }
 
-            ConnectionTask task = new ConnectionTask();
-            task.execute(username, password, resource, service, tls, sasl, port);
+            ConnectionTask task = new ConnectionTask(username, password, service, port, resource, tls.equals("1"), sasl.equals("1"), compression.equals("1"));
+            task.execute();
             connectionTasks.put(username, task);
 			cursor.close();
 		}
@@ -1421,22 +1431,25 @@ public class JTalkService extends Service {
 
     public class ConnectionTask extends AsyncTask<String, Integer, String> {
         Intent intent = new Intent(Constants.UPDATE);
+        String username, password, resource, service;
+        boolean tls = true, sasl = true, compression = false;
+        int port = 5222;
+
+        public ConnectionTask(String username, String password, String service, int port, String resource, boolean tls, boolean sasl, boolean compression) {
+            this.username = username;
+            this.password = password;
+            this.service = service;
+            this.port = port;
+            this.resource = resource;
+            this.tls = tls;
+            this.sasl = sasl;
+            this.compression = compression;
+        }
 
         @Override
         protected String doInBackground(String... args) {
             if (connecting) return null;
             else connecting = true;
-
-            String username = args[0];
-            String password = args[1];
-            String resource = args[2];
-            String service = args[3];
-            String tls = args[4];
-            String sasl = args[5];
-            int port = 5222;
-            try {
-                port = Integer.parseInt(args[6]);
-            } catch (NumberFormatException ignored) { }
 
             if (username == null || username.indexOf("@") < 1) {
                 setState(username, getString(R.string.ConnectionError));
@@ -1478,11 +1491,9 @@ public class JTalkService extends Service {
                 cc.setReconnectionAllowed(false);
                 cc.setRosterLoadedAtLogin(true);
                 cc.setSendPresence(false);
-                cc.setSASLAuthenticationEnabled(sasl.equals("1"));
-                cc.setSecurityMode(tls.equals("0") ? SecurityMode.disabled : SecurityMode.enabled);
-
-                if (service.equals("talk.google.com") || host.equals("gmail.com")) cc.setSASLAuthenticationEnabled(false);
-                else if (service.equals("vkmessenger.com")) cc.setSecurityMode(SecurityMode.disabled);
+                cc.setSASLAuthenticationEnabled(sasl);
+                cc.setSecurityMode(tls ? SecurityMode.enabled : SecurityMode.disabled);
+                cc.setCompressionEnabled(compression);
 
                 XMPPConnection connection = new XMPPConnection(cc);
                 connection.setSoftName(getString(R.string.app_name));

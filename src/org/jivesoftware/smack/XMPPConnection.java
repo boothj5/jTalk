@@ -210,6 +210,11 @@ public class XMPPConnection extends Connection {
         // Do partial version of nameprep on the username.
         username = username.toLowerCase().trim();
 
+        // If compression is enabled then request the server to use stream compression
+        if (config.isCompressionEnabled()) {
+            useCompression();
+        }
+
         String response;
         if (config.isSASLAuthenticationEnabled() && saslAuthentication.hasNonAnonymousAuthentication()) {
             // Authenticate using SASL
@@ -239,10 +244,7 @@ public class XMPPConnection extends Connection {
             }
         }
 
-        // If compression is enabled then request the server to use stream compression
-        if (config.isCompressionEnabled()) {
-            useCompression();
-        }
+
 
         // Create the roster if it is not a reconnection.
         if (this.roster == null) {

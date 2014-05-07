@@ -91,6 +91,11 @@
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
                           android:text="SASL" />
+                <CheckBox android:id="@+id/account_compression"
+                          android:checked="true"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="Compression" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

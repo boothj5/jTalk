@@ -98,12 +98,11 @@ public class MessageItem {
 	}
 
 	public String toXml() {
-		String message = StringUtils.escapeForXML(getBody());
         StringBuilder sb = new StringBuilder();
-		sb.append("<" + getType().name() + " from='" + getJid() +"'>");
+		sb.append("<" + getType().name() + ">");
         sb.append("<name>"+getName()+"</name>");
         sb.append("<time>"+getTime()+"</time>");
-		sb.append("<text>"+message+"</text>");
+		sb.append("<text>"+StringUtils.escapeForXML(getBody())+"</text>");
         sb.append("</" + getType().name() + ">\n");
 		return sb.toString();
 	}
@@ -113,7 +112,6 @@ public class MessageItem {
         sb.append("{");
         sb.append("\"Type\": \"" + getType().name() + "\", ");
         sb.append("\"Time\": \"" + getTime() + "\", ");
-        sb.append("\"From\": \"" + getJid() + "\", ");
         sb.append("\"Name\": \"" + getName() + "\", ");
         sb.append("\"Text\": \"" + getBody() + "\"");
         sb.append("}");
