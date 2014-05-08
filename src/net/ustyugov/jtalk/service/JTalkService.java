@@ -195,6 +195,10 @@ public class JTalkService extends Service {
         }
     }
 
+    public void addConnection(String account, XMPPConnection connection) {
+        connections.put(account, connection);
+    }
+
     public XMPPConnection getConnection(String account) {
     	if (account != null && connections.containsKey(account)) return connections.get(account);
     	else return null;
