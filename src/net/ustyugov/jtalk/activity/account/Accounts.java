@@ -21,14 +21,14 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.view.*;
-import android.widget.AdapterView;
-import android.widget.LinearLayout;
+import android.widget.*;
 import net.ustyugov.jtalk.Account;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.Notify;
+import net.ustyugov.jtalk.activity.DataFormActivity;
 import net.ustyugov.jtalk.activity.privacy.PrivacyListsActivity;
 import net.ustyugov.jtalk.activity.vcard.SetVcardActivity;
 import net.ustyugov.jtalk.adapter.AccountsAdapter;
@@ -37,9 +37,10 @@ import net.ustyugov.jtalk.service.JTalkService;
 
 import android.os.Bundle;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.ListView;
 
 import com.jtalk2.R;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
 
 public class Accounts extends Activity {
     private static final int REQUEST_ACCOUNT = 8;
@@ -105,22 +106,23 @@ public class Accounts extends Activity {
 
     @Override
     public void onActivityResult(int request, int result, Intent data) {
-        if (request == REQUEST_ACCOUNT && result == RESULT_OK) {
-            boolean enabled = data.getBooleanExtra("enabled", true);
-            String account = data.getStringExtra("account");
-            if (enabled) connectDialog(account);
-            else {
-                JTalkService service = JTalkService.getInstance();
-                if (service.isAuthenticated(account)) {
-                    service.disconnect(account);
-                    if (service.isAuthenticated()) Notify.updateNotify();
-                    else Notify.offlineNotify(service, service.getGlobalState());
+        if (result == RESULT_OK) {
+            if (request == REQUEST_ACCOUNT) {
+                boolean enabled = data.getBooleanExtra("enabled", true);
+                String account = data.getStringExtra("account");
+                if (enabled) connectDialog(account);
+                else {
+                    JTalkService service = JTalkService.getInstance();
+                    if (service.isAuthenticated(account)) {
+                        service.disconnect(account);
+                        if (service.isAuthenticated()) Notify.updateNotify();
+                        else Notify.offlineNotify(service, service.getGlobalState());
+                    }
                 }
             }
-            return;
-        }
-        if (request == REQUEST_REGISTRATION) {
-            startActivityForResult(new Intent(this, AddAccountActivity.class), REQUEST_ACCOUNT);
+            else if (request == REQUEST_REGISTRATION) {
+                startActivityForResult(new Intent(this, AddAccountActivity.class), REQUEST_ACCOUNT);
+            }
         }
     }
 	
@@ -142,16 +144,25 @@ public class Accounts extends Activity {
 	     		startActivityForResult(new Intent(this, AddAccountActivity.class), REQUEST_ACCOUNT);
 	     		break;
             case R.id.reg:
-                String[] serverNames = getResources().getStringArray(R.array.serverNames);
-                final String[] servers = getResources().getStringArray(R.array.servers);
+                LayoutInflater inflater = getLayoutInflater();
+                View layout = inflater.inflate(R.layout.set_nick_dialog, (ViewGroup) findViewById(R.id.set_nick_linear));
+
+                final EditText edit = (EditText) layout.findViewById(R.id.nick_edit);
+                edit.setText("jabber.ru");
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setItems(serverNames, new DialogInterface.OnClickListener() {
-                    @Override
+                builder.setView(layout);
+                builder.setTitle(R.string.Server);
+                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(Uri.parse(servers[which]));
-                        startActivityForResult(intent, REQUEST_REGISTRATION);
+                        String server = edit.getText().toString();
+                        new GetRegistrationForm(server).execute();
+                        Toast.makeText(Accounts.this, "Please wait...", Toast.LENGTH_LONG).show();
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
                     }
                 });
                 builder.create().show();
@@ -231,5 +242,59 @@ public class Accounts extends Activity {
             }
         });
         builder.create().show();
+    }
+
+    private class GetRegistrationForm extends AsyncTask<String, Void, Void> {
+        private String server;
+
+        public GetRegistrationForm(String server) {
+            this.server = server;
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            XMPPConnection connection = new XMPPConnection(server);
+            try {
+                connection.connect();
+            } catch (XMPPException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(Accounts.this, "Not connect to server!", Toast.LENGTH_LONG).show();
+                    }
+                });
+                return null;
+            }
+
+            org.jivesoftware.smack.AccountManager accountManager = new org.jivesoftware.smack.AccountManager(connection);
+            boolean support = accountManager.supportsAccountCreation();
+            if (!support) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(Accounts.this, "Registration not supported on this server!", Toast.LENGTH_LONG).show();
+                    }
+                });
+                return null;
+            } else {
+                boolean xData = accountManager.containsDataForm();
+                if (xData) {
+                    JTalkService.getInstance().addConnection("tmp", connection);
+                    Intent i = new Intent(Accounts.this, DataFormActivity.class);
+                    i.putExtra("account", "tmp");
+                    i.putExtra("reg", true);
+                    i.putExtra("jid", server);
+                    startActivityForResult(i, REQUEST_REGISTRATION);
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(Accounts.this, "Support only x-data registration", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }
+            return null;
+        }
     }
 }

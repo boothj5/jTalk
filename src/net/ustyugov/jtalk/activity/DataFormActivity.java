@@ -224,7 +224,10 @@ public class DataFormActivity extends Activity implements OnClickListener {
                                         String message = error.getMessage();
                                         Toast.makeText(DataFormActivity.this, "["+code+"] " + condition + ": " + message, Toast.LENGTH_LONG).show();
                                     }
-									else finish();
+									else {
+                                        setResult(RESULT_OK);
+                                        finish();
+                                    }
 								}
 							} else if (cap) {
 								CaptchaExtension captcha = new CaptchaExtension(f);

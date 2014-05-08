@@ -194,7 +194,7 @@ public class JTalkService extends Service {
             } else return getString(R.string.Disconnect);
         }
     }
-    
+
     public XMPPConnection getConnection(String account) {
     	if (account != null && connections.containsKey(account)) return connections.get(account);
     	else return null;

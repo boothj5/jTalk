@@ -48,16 +48,6 @@
         <item>Red</item>
     </string-array>
 
-    <string-array name="servers">
-        <item>https://register.jabber.org</item>
-        <item>https://secure.jabbim.com/reg/</item>
-    </string-array>
-
-    <string-array name="serverNames">
-        <item>Jabber.Org</item>
-        <item>JabbIM</item>
-    </string-array>
-
     <string-array name="rooms">
         <item>jtalk@conference.jabber.ru</item>
     </string-array>

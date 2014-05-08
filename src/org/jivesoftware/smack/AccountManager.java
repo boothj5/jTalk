@@ -25,6 +25,7 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.packet.Registration;
 import org.jivesoftware.smack.util.StringUtils;
 
@@ -34,7 +35,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Allows creation and management of accounts on an XMPP server.
@@ -332,5 +332,10 @@ public class AccountManager {
         else {
             info = (Registration)result;
         }
+    }
+
+    public boolean containsDataForm() {
+        PacketExtension form = info.getExtension("jabber:x:data");
+        return form != null;
     }
 }
