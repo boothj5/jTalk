@@ -58,8 +58,7 @@ public class AccountDbHelper extends SQLiteOpenHelper implements BaseColumns {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		if (newVersion > oldVersion) {
-			db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-			onCreate(db);
+            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD " + COMPRESSION + " TEXT");
 		}
 	}
 }

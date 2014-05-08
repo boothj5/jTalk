@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.content.*;
 import android.net.Uri;
 import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.view.*;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
@@ -80,7 +81,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
     private LinearLayout sidebar;
     private LinearLayout attachPanel;
-    private ImageView slider;
     private ChatAdapter  listAdapter;
     private MucChatAdapter listMucAdapter;
     private OpenChatsAdapter chatsAdapter;
@@ -100,6 +100,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private String searchString = "";
     private boolean compose = false;
     private boolean imgur = false;
+    boolean move = false;
     private int maxCount = 0;
 
     private BroadcastReceiver textReceiver;
@@ -161,52 +162,13 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
         smiles = service.getSmiles(this);
 
-        sidebar = (LinearLayout) findViewById(R.id.sidebar);
-        int width = prefs.getInt("SideBarSize", 100);
-        ViewGroup.LayoutParams lp = sidebar.getLayoutParams();
-        lp.width = width;
-        sidebar.setLayoutParams(lp);
-
-        slider = (ImageView) findViewById(R.id.slider);
-        slider.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_UP:
-                        updateChats();
-                        updateUsers();
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        int nowX = (int) event.getX();
-
-                        ViewGroup.LayoutParams lp = sidebar.getLayoutParams();
-                        int lastSize = lp.width;
-                        int newSize = lastSize - nowX;
-                        if (newSize < 5) newSize = 5;
-                        lp.width = newSize;
-                        sidebar.setLayoutParams(lp);
-                        break;
-                    default:
-                        break;
-                }
-                return true;
-            }
-        });
-
-        if (prefs.getBoolean("ShowSidebar", true)) {
-            sidebar.setVisibility(View.VISIBLE);
-            slider.setVisibility(View.VISIBLE);
-        } else {
-            sidebar.setVisibility(View.GONE);
-            slider.setVisibility(View.GONE);
-        }
-
         chatsAdapter = new OpenChatsAdapter(this);
         chatsList = (ListView) findViewById(R.id.open_chat_list);
         chatsList.setCacheColorHint(0x00000000);
         chatsList.setDividerHeight(0);
         chatsList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long arg3) {
+                if (move) return;
                 if (position > 0) {
                     RosterItem item = (RosterItem) parent.getItemAtPosition(position);
                     String j = null;
@@ -229,6 +191,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         chatsList.setOnItemLongClickListener(new OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
+                if (move) return false;
                 if (position > 0) {
                     RosterItem item = (RosterItem) parent.getItemAtPosition(position);
                     if (item.isEntry()) {
@@ -263,6 +226,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         nickList.setCacheColorHint(0x00000000);
         nickList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long arg3) {
+                if (move) return;
                 RosterItem item = (RosterItem) parent.getItemAtPosition(position);
                 if (item.isEntry()) {
                     String separator = prefs.getString("nickSeparator", ", ");
@@ -285,6 +249,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         nickList.setOnItemLongClickListener(new OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
+                if (move) return false;
                 RosterItem item = (RosterItem) parent.getItemAtPosition(position);
                 if (item.isEntry()) {
                     String nick = item.getName();
@@ -351,6 +316,80 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         removeAttach.setOnClickListener(this);
 
         if (getIntent().getBooleanExtra("file", false)) onActivityResult(REQUEST_FILE, RESULT_OK, getIntent());
+
+        sidebar = (LinearLayout) findViewById(R.id.sidebar);
+        int width = prefs.getInt("SideBarSize", 100);
+        ViewGroup.LayoutParams lp = sidebar.getLayoutParams();
+        lp.width = width;
+        sidebar.setLayoutParams(lp);
+        if (prefs.getBoolean("ShowSidebar", true)) {
+            sidebar.setVisibility(View.VISIBLE);
+        } else {
+            sidebar.setVisibility(View.GONE);
+        }
+
+        View.OnTouchListener onTouchListener = new View.OnTouchListener() {
+            int firstY = 0;
+            int firstX = 0;
+            boolean lock = false;
+
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+
+                DisplayMetrics metrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(metrics);
+                int displayWidht = metrics.widthPixels;
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        firstX = (int) event.getRawX();
+                        firstY = (int) event.getRawY();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        lock = false;
+                        updateChats();
+                        updateUsers();
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Thread.sleep(200);
+                                    move = false;
+                                } catch (InterruptedException ignored) { }
+                            }
+                        }).start();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        // Detect vertical scroll
+                        int nowY = (int) event.getRawY();
+                        int offsetY = nowY - firstY;
+                        if (Math.abs(offsetY) > 32 && !move) {
+                            lock = true;
+                            return false;
+                        }
+
+                        // Horizontal scroll
+                        int nowX = (int) event.getRawX();
+                        int offsetX = nowX - firstX;
+                        if (Math.abs(offsetX) > 32 || move) {
+                            if (lock) return false;
+                            move = true; // block OnClickListener and OnLongClickListener
+                            ViewGroup.LayoutParams lp = sidebar.getLayoutParams();
+                            int lastSize = lp.width;
+                            int newSize = lastSize - offsetX;
+                            if (newSize < 72) newSize = 72;
+                            if (newSize > displayWidht) newSize = displayWidht - 72;
+                            lp.width = newSize;
+                            sidebar.setLayoutParams(lp);
+                            firstX = nowX;
+                        }
+                        break;
+                }
+                return move;
+            }
+        };
+        chatsList.setOnTouchListener(onTouchListener);
+        nickList.setOnTouchListener(onTouchListener);
     }
 
     @Override
@@ -598,11 +637,9 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 SharedPreferences.Editor editor = prefs.edit();
                 if (sidebar.getVisibility() == View.GONE) {
                     sidebar.setVisibility(View.VISIBLE);
-                    slider.setVisibility(View.VISIBLE);
                     editor.putBoolean("ShowSidebar", true);
                 } else {
                     sidebar.setVisibility(View.GONE);
-                    slider.setVisibility(View.GONE);
                     editor.putBoolean("ShowSidebar", false);
                 }
                 editor.commit();

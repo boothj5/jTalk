@@ -15,11 +15,6 @@
                                             android:layout_height="fill_parent"
                                             android:layout_weight="1" />
 
-        <ImageView android:id="@+id/slider"
-                   android:src="@drawable/slider"
-                   android:layout_width="wrap_content"
-                   android:layout_height="fill_parent"/>
-
         <LinearLayout android:id="@+id/sidebar"
                       android:orientation="vertical"
                       android:layout_width="100dip"

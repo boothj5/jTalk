@@ -864,7 +864,11 @@ public class JTalkService extends Service {
                     String service = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SERVER));
                     String tls = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
                     String sasl = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
-                    String compression = cursor.getString(cursor.getColumnIndex(AccountDbHelper.COMPRESSION));
+                    String compression = "1";
+                    if (AccountDbHelper.VERSION > 3) {
+                        compression = cursor.getString(cursor.getColumnIndex(AccountDbHelper.COMPRESSION));
+                        if (compression == null) compression = "1";
+                    }
 
                     ConnectionTask task = new ConnectionTask(username, password, service, port, resource, tls.equals("1"), sasl.equals("1"), compression.equals("1"));
                     if (connectionTasks.containsKey(username)) task = connectionTasks.get(username);
@@ -894,7 +898,11 @@ public class JTalkService extends Service {
 			String service = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SERVER));
 			String tls = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
             String sasl = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
-            String compression = cursor.getString(cursor.getColumnIndex(AccountDbHelper.COMPRESSION));
+            String compression = "1";
+            if (AccountDbHelper.VERSION > 3) {
+                compression = cursor.getString(cursor.getColumnIndex(AccountDbHelper.COMPRESSION));
+                if (compression == null) compression = "1";
+            }
 
             int port = 5222;
             try {

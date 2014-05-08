@@ -85,9 +85,9 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
             String resource = "";
             String service = "";
             String e = "";
-            String t = "";
-            String s = "";
-            String c = "";
+            String t = "1";
+            String s = "1";
+            String c = "1";
             int port = 5222;
 
             Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, "_id = '" + id + "'", null, null);
@@ -106,7 +106,11 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
                 e = cursor.getString(cursor.getColumnIndex(AccountDbHelper.ENABLED));
                 t = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
                 s = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
-                c = cursor.getString(cursor.getColumnIndex(AccountDbHelper.COMPRESSION));
+
+                if (AccountDbHelper.VERSION > 3) {
+                    c = cursor.getString(cursor.getColumnIndex(AccountDbHelper.COMPRESSION));
+                    if (c == null) c ="1";
+                }
             }
 
             jidEdit.setText(username);
@@ -161,8 +165,11 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
                 else values.put(AccountDbHelper.TLS, "0");
                 if (s) values.put(AccountDbHelper.SASL, "1");
                 else values.put(AccountDbHelper.SASL, "0");
-                if (c) values.put(AccountDbHelper.COMPRESSION, "1");
-                else values.put(AccountDbHelper.COMPRESSION, "0");
+
+                if (AccountDbHelper.VERSION > 3) {
+                    if (c) values.put(AccountDbHelper.COMPRESSION, "1");
+                    else values.put(AccountDbHelper.COMPRESSION, "0");
+                }
 
                 if (id == -1) {
                     Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.JID +" = '" + jid + "'", null, null);
@@ -187,9 +194,8 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
                             result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.app_name));
                             if (response != null) response.onResult(result);
                         }
-
-                        cursor.close();
                     } else {
+                        cursor.close();
                         Toast.makeText(this, "Account is already added!", Toast.LENGTH_LONG).show();
                         return;
                     }
