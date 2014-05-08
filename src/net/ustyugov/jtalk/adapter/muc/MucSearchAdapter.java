@@ -18,15 +18,11 @@
 package net.ustyugov.jtalk.adapter.muc;
 
 import java.util.Collection;
-
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.service.JTalkService;
-
 import org.jivesoftware.smackx.muc.HostedRoom;
-
 import com.jtalk2.R;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -39,6 +35,7 @@ import android.widget.TextView;
 
 public class MucSearchAdapter extends ArrayAdapter<HostedRoom>{
 	private Context context;
+    private Collection<HostedRoom> rooms;
 	
 	static class ViewHolder {
 		protected TextView name;
@@ -49,10 +46,20 @@ public class MucSearchAdapter extends ArrayAdapter<HostedRoom>{
 	public MucSearchAdapter(Context context, Collection<HostedRoom> rooms) {
 		super(context, R.id.name);
 		this.context = context;
-		for (HostedRoom room : rooms) {
-			if (room.getJid().contains("@")) add(room);
-		}
+        this.rooms = rooms;
+        update("");
 	}
+
+    public void update(String search) {
+        clear();
+        for (HostedRoom room : rooms) {
+            String jid = room.getJid();
+            String name = room.getName();
+            if (jid.contains(search) || name.contains(search)) {
+                add(room);
+            }
+        }
+    }
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {

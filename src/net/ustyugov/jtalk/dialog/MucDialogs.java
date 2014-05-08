@@ -335,7 +335,7 @@ public class MucDialogs {
 	public static void showUsersDialog(final Activity activity, final String account, final BookmarkedConference bc) {
 		final JTalkService service = JTalkService.getInstance();
 		final String group = bc.getJid();
-		
+
 		try {
 			List<String> list = new ArrayList<String>();
 			ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(service.getConnection(account));
@@ -373,4 +373,41 @@ public class MucDialogs {
 			e1.printStackTrace();
 		}
 	}
+
+    public static void showUsersDialog(final Activity activity, final String account, final String group) {
+        final JTalkService service = JTalkService.getInstance();
+
+        try {
+            List<String> list = new ArrayList<String>();
+            ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(service.getConnection(account));
+            DiscoverItems items = discoManager.discoverItems(group);
+
+            Iterator<DiscoverItems.Item> it = items.getItems();
+            while (it.hasNext()) {
+                DiscoverItems.Item item = it.next();
+                String nick = StringUtils.parseResource(item.getEntityID());
+                if (!list.contains(nick)) list.add(nick);
+            }
+
+            CharSequence[] array = new CharSequence[list.size()];
+            list.toArray(array);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            builder.setTitle(group);
+            builder.setItems(array, null);
+            builder.setPositiveButton(R.string.Join, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    MucDialogs.joinDialog(activity, account, group, null);
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.create().show();
+        } catch (XMPPException e1) {
+            e1.printStackTrace();
+        }
+    }
 }

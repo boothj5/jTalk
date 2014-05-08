@@ -719,6 +719,7 @@ public class JTalkService extends Service {
         Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
         if (cursor != null && cursor.getCount() > 0) {
             connect();
+            cursor.close();
         }
     }
 

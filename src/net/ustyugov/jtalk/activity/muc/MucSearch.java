@@ -18,9 +18,13 @@
 package net.ustyugov.jtalk.activity.muc;
 
 import java.util.Collection;
-
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.muc.MucSearchAdapter;
 import net.ustyugov.jtalk.dialog.BookmarksDialogs;
@@ -37,21 +41,16 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 
 import com.jtalk2.R;
 
 public class MucSearch extends Activity implements OnClickListener, OnItemClickListener, OnItemLongClickListener {
+    private static final String PREF_KEY = "lastMucServer";
+
 	private JTalkService service;
 	private String account;
-	private ImageButton searchButton;
 	private EditText searchInput;
 	private SharedPreferences prefs;
 	private ProgressBar progress;
@@ -72,12 +71,12 @@ public class MucSearch extends Activity implements OnClickListener, OnItemClickL
         LinearLayout linear = (LinearLayout) findViewById(R.id.muc_search);
         linear.setBackgroundColor(Colors.BACKGROUND);
         
-        searchButton = (ImageButton) findViewById(R.id.search_button);
+        ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
         searchButton.setOnClickListener(this);
         
         searchInput = (EditText) findViewById(R.id.search_input);
         progress = (ProgressBar) findViewById(R.id.progress);
-        
+
         list = (ListView) findViewById(R.id.search_list);
         list.setDividerHeight(0);
         list.setCacheColorHint(0x00000000);
@@ -89,16 +88,19 @@ public class MucSearch extends Activity implements OnClickListener, OnItemClickL
 	public void onResume() {
 		super.onResume();
 		service = JTalkService.getInstance();
-		String server = prefs.getString("lastGroup", "");
-		if (server.indexOf("@") > 0 ) server = server.substring(server.indexOf("@") + 1);
-		if (server.length() > 0) searchInput.setText(server);
+		String server = prefs.getString(PREF_KEY, "");
+		searchInput.setText(server);
 	}
 	
 	@Override
-	public void onClick(View arg0) {
+	public void onClick(View v) {
+        String server = searchInput.getText().toString();
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(service).edit();
+        editor.putString(PREF_KEY, server).commit();
+
 		if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) task.cancel(true);
-		task = new GetRooms();
-		task.execute(null, null, null);
+		task = new GetRooms(server);
+		task.execute();
 	}
 	
 	@Override
@@ -120,28 +122,75 @@ public class MucSearch extends Activity implements OnClickListener, OnItemClickL
 	
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-		HostedRoom item = (HostedRoom) parent.getItemAtPosition(position);
-		BookmarksDialogs.AddDialog(this, account, item.getJid(), item.getName());
+		final  HostedRoom item = (HostedRoom) parent.getItemAtPosition(position);
+        CharSequence[] items = new CharSequence[2];
+        items[0] = getString(R.string.Users);
+        items[1] = getString(R.string.Add);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MucSearch.this);
+        builder.setTitle(R.string.Actions);
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0:
+                        MucDialogs.showUsersDialog(MucSearch.this, account, item.getJid());
+                        break;
+                    case 1:
+                        BookmarksDialogs.AddDialog(MucSearch.this, account, item.getJid(), item.getName());
+                        break;
+                }
+            }
+        });
+        builder.create().show();
         return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.muc_search, menu);
+
+        SearchView searchView = new SearchView(this);
+        searchView.setQueryHint(getString(android.R.string.search_go));
+        searchView.setSubmitButtonEnabled(true);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return true;
+            }
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if (adapter != null) adapter.update(query);
+                return true;
+            }
+        });
+
+        MenuItem item = menu.findItem(R.id.search);
+        item.setActionView(searchView);
+        return super.onCreateOptionsMenu(menu);
     }
 	
 	private class GetRooms extends AsyncTask<String, Void, Void> {
+        String server;
+
+        public GetRooms(String server) {
+            this.server = server;
+        }
 		@Override
 		protected Void doInBackground(String... params) {
 			try {
-				String server = searchInput.getText().toString();
-				Collection<HostedRoom> rooms = MultiUserChat.getHostedRooms(service.getConnection(account), server);
+                Collection<HostedRoom> rooms = MultiUserChat.getHostedRooms(service.getConnection(account), server);
 				if (!rooms.isEmpty()) adapter = new MucSearchAdapter(MucSearch.this, rooms);
-			} catch (XMPPException e) { }
+			} catch (XMPPException ignored) { }
 			return null;
 		}
 		
 		@Override
 		protected void onPostExecute(Void v) {
 			super.onPostExecute(v);
-		    list.refreshDrawableState();
-		    list.setAdapter(adapter);
-		    list.setVisibility(View.VISIBLE);
+            list.setAdapter(adapter);
+            list.setVisibility(View.VISIBLE);
 		    progress.setVisibility(View.GONE);
 		}
 		
