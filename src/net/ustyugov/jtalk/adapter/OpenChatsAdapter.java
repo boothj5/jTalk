@@ -124,7 +124,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
                 holder.text = (TextView) v.findViewById(R.id.name);
                 holder.text.setTypeface(Typeface.DEFAULT_BOLD);
                 holder.text.setTextSize(fontSize - 2);
-                holder.text.setTextColor(Colors.PRIMARY_TEXT);
+                holder.text.setTextColor(Colors.GROUP_FOREGROUND);
                 holder.state = (ImageView) v.findViewById(R.id.state);
                 holder.state.setVisibility(View.GONE);
                 v.setBackgroundColor(Colors.GROUP_BACKGROUND);
@@ -141,7 +141,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
                 LayoutInflater inflater = activity.getLayoutInflater();
                 v = inflater.inflate(R.layout.entry, null, false);
                 holder.name = (TextView) v.findViewById(R.id.name);
-                holder.name.setTextColor(Colors.PRIMARY_TEXT);
+                holder.name.setTextColor(Colors.ENTRY_FOREGROUND);
                 holder.name.setTextSize(fontSize);
                 holder.status = (TextView) v.findViewById(R.id.status);
                 holder.status.setTextSize(statusSize);
@@ -180,7 +180,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
             holder.name.setText(nick);
             if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
             else if (service.isHighlight(account, jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
-            else holder.name.setTextColor(Colors.PRIMARY_TEXT);
+            else holder.name.setTextColor(Colors.ENTRY_FOREGROUND);
 
             String statusText = "";
             if (ri.isMuc()) {
@@ -245,7 +245,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 
             if (jid.equals(service.getCurrentJid())) {
                 holder.name.setTypeface(Typeface.DEFAULT_BOLD);
-                holder.name.setTextColor(Colors.PRIMARY_TEXT);
+                holder.name.setTextColor(Colors.ENTRY_FOREGROUND);
                 v.setBackgroundColor(Colors.ENTRY_BACKGROUND);
             } else {
                 holder.name.setTypeface(Typeface.DEFAULT);

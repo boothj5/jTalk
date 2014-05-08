@@ -57,8 +57,7 @@ public class CommandsAdapter extends ArrayAdapter<Item> {
 	}
 	
 	@Override
-	public View getView(final int position, View convertView, ViewGroup parent) {
-        View v = convertView;
+	public View getView(final int position, View v, ViewGroup parent) {
         Item item = getItem(position);
         String name = item.getName();
         if (name == null || name.length() < 1) name = item.getNode();

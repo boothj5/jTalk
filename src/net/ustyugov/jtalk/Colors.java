@@ -16,6 +16,10 @@ public class Colors {
     public static int ACCOUNT_BACKGROUND = 0xEE999999;
     public static int GROUP_BACKGROUND = 0xEECCCCCC;
     public static int ENTRY_BACKGROUND = 0xEEEFEFEF;
+    public static int ACCOUNT_FOREGROUND = 0xFF000000;
+    public static int GROUP_FOREGROUND = 0xFF000000;
+    public static int ENTRY_FOREGROUND = 0xFF000000;
+    public static int SEARCH_FOREGROUND = 0xFF000000;
     public static int PRIMARY_TEXT = 0xFF000000;
     public static int SECONDARY_TEXT = 0xFF666666;
     public static int HIGHLIGHT_TEXT = 0xFFCC0000;
@@ -39,6 +43,10 @@ public class Colors {
             ACCOUNT_BACKGROUND = 0xEE999999;
             GROUP_BACKGROUND = 0xEECCCCCC;
             ENTRY_BACKGROUND = 0xEEEFEFEF;
+            ACCOUNT_FOREGROUND = 0xFF000000;
+            GROUP_FOREGROUND = 0xFF000000;
+            ENTRY_FOREGROUND = 0xFF000000;
+            SEARCH_FOREGROUND = 0xFF000000;
             PRIMARY_TEXT = 0xFF000000;
             SECONDARY_TEXT = 0xFF666666;
             HIGHLIGHT_TEXT = 0xFFCC0000;
@@ -58,6 +66,10 @@ public class Colors {
             ACCOUNT_BACKGROUND = 0x77888888;
             GROUP_BACKGROUND = 0x77404040;
             ENTRY_BACKGROUND = 0x55222222;
+            ACCOUNT_FOREGROUND = 0xFFFFFFFF;
+            GROUP_FOREGROUND = 0xFFFFFFFF;
+            ENTRY_FOREGROUND = 0xFFFFFFFF;
+            SEARCH_FOREGROUND = 0xFFFFFFFF;
             PRIMARY_TEXT = 0xFFFFFFFF;
             SECONDARY_TEXT = 0xFF999999;
             HIGHLIGHT_TEXT = 0xFFCC0000;
@@ -101,6 +113,14 @@ public class Colors {
                                             ENTRY_BACKGROUND = color;
                                         } else if (name.equals("SEARCH_BACKGROUND")) {
                                             SEARCH_BACKGROUND = color;
+                                        } else if (name.equals("ACCOUNT_FOREGROUND")) {
+                                            ACCOUNT_FOREGROUND = color;
+                                        } else if (name.equals("GROUP_FOREGROUND")) {
+                                            GROUP_FOREGROUND = color;
+                                        } else if (name.equals("ENTRY_FOREGROUND")) {
+                                            ENTRY_FOREGROUND = color;
+                                        } else if (name.equals("SEARCH_FOREGROUND")) {
+                                            SEARCH_FOREGROUND = color;
                                         } else if (name.equals("PRIMARY_TEXT")) {
                                             PRIMARY_TEXT = color;
                                         } else if (name.equals("SECONDARY_TEXT")) {

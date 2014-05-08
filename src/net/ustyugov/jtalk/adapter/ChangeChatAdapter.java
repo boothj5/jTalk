@@ -84,8 +84,7 @@ public class ChangeChatAdapter extends ArrayAdapter<RosterItem> {
     }
 	
 	@Override
-	public View getView(final int position, View convertView, ViewGroup parent) {
-        View v = convertView;
+	public View getView(final int position, View v, ViewGroup parent) {
         RosterItem item = getItem(position);
         String account = item.getAccount();
         

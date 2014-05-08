@@ -78,9 +78,8 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
 	}
 	
 	@Override
-	public View getView(final int position, View convertView, ViewGroup parent) {
+	public View getView(final int position, View v, ViewGroup parent) {
 		IconPicker ip = service.getIconPicker();
-		View v = convertView;
 		final Account account = getItem(position);
 		final String jid = account.getJid();
         final int id = account.getId();

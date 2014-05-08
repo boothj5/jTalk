@@ -330,7 +330,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 
 	            holder.text = (TextView) convertView.findViewById(R.id.name);
 	            holder.text.setTextSize(fontSize-2);
-	            holder.text.setTextColor(Colors.PRIMARY_TEXT);
+	            holder.text.setTextColor(Colors.GROUP_FOREGROUND);
                 holder.text.setEllipsize(TextUtils.TruncateAt.MIDDLE);
 
 	            holder.state = (ImageView) convertView.findViewById(R.id.state);
@@ -380,13 +380,21 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
             }
 
 			holder.name.setText(name);
-			if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
-			else holder.name.setTextColor(Colors.PRIMARY_TEXT);
-
 			if (service.getActiveChats(account).contains(jid)) {
 				holder.name.setTypeface(Typeface.DEFAULT_BOLD);
 			} else {
                 holder.name.setTypeface(Typeface.DEFAULT);
+            }
+
+            MUCUser mucUser = (MUCUser) presence.getExtension("x", "http://jabber.org/protocol/muc#user");
+            if (mucUser != null) {
+                String affiliation = mucUser.getItem().getAffiliation();
+                if (affiliation != null) {
+                    if (affiliation.equals("admin")) holder.name.setTextColor(Colors.AFFILIATION_ADMIN);
+                    else if (affiliation.equals("owner")) holder.name.setTextColor(Colors.AFFILIATION_OWNER);
+                    else if (affiliation.equals("member")) holder.name.setTextColor(Colors.AFFILIATION_MEMBER);
+                    else holder.name.setTextColor(Colors.AFFILIATION_NONE);
+                }
             }
 			
 	        if (count > 0) {
@@ -404,17 +412,6 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
                 holder.status.setVisibility(statusText.length() > 0 ? View.VISIBLE : View.GONE);
                 holder.status.setText(statusText);
             } else holder.status.setVisibility(View.GONE);
-
-            MUCUser mucUser = (MUCUser) presence.getExtension("x", "http://jabber.org/protocol/muc#user");
-            if (mucUser != null) {
-                String affiliation = mucUser.getItem().getAffiliation();
-                if (affiliation != null) {
-                    if (affiliation.equals("admin")) holder.name.setTextColor(Colors.AFFILIATION_ADMIN);
-                    else if (affiliation.equals("owner")) holder.name.setTextColor(Colors.AFFILIATION_OWNER);
-                    else if (affiliation.equals("member")) holder.name.setTextColor(Colors.AFFILIATION_MEMBER);
-                    else holder.name.setTextColor(Colors.AFFILIATION_NONE);
-                }
-            }
 
             if (viewMode == Mode.nick) {
                 holder.statusIcon.setVisibility(View.GONE);

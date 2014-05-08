@@ -286,7 +286,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 				holder.messageIcon.setVisibility(View.INVISIBLE);
 	            holder.text = (TextView) convertView.findViewById(R.id.name);
 	            holder.text.setTextSize(fontSize);
-	            holder.text.setTextColor(Colors.PRIMARY_TEXT);
+	            holder.text.setTextColor(Colors.GROUP_FOREGROUND);
 	            holder.state = (ImageView) convertView.findViewById(R.id.state);
 	            convertView.setTag(holder);
 			} else {
@@ -308,7 +308,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                 holder.avatar = (ImageView) convertView.findViewById(R.id.avatar);
                 holder.jid = (TextView) convertView.findViewById(R.id.jid);
                 holder.jid.setTextSize(fontSize);
-                holder.jid.setTextColor(Colors.PRIMARY_TEXT);
+                holder.jid.setTextColor(Colors.ACCOUNT_FOREGROUND);
                 holder.status = (TextView) convertView.findViewById(R.id.status);
                 holder.status.setTextSize(statusSize);
                 holder.status.setTextColor(Colors.SECONDARY_TEXT);
@@ -345,7 +345,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 				holder = new ItemHolder();
 
                 holder.name = (TextView) convertView.findViewById(R.id.name);
-				holder.name.setTextColor(Colors.PRIMARY_TEXT);
+				holder.name.setTextColor(Colors.ENTRY_FOREGROUND);
 				holder.name.setTextSize(fontSize);
 				holder.status = (TextView) convertView.findViewById(R.id.status);
 				holder.status.setTextSize(statusSize);
@@ -440,7 +440,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 			holder.name.setTypeface(Typeface.DEFAULT);
 			holder.name.setText(StringUtils.parseName(name));
 			if (service.isHighlight(account, name)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
-			else holder.name.setTextColor(Colors.PRIMARY_TEXT);
+			else holder.name.setTextColor(Colors.ENTRY_FOREGROUND);
 			
 			holder.status.setText(subject);
 	        holder.status.setVisibility((prefs.getBoolean("ShowStatuses", false) && subject.length() > 0) ? View.VISIBLE : View.GONE);

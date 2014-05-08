@@ -47,7 +47,7 @@ public class DiscoveryAdapter extends ArrayAdapter<DiscoItem>{
 	}
 	
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(int position, View v, ViewGroup parent) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		int fontSize;
 		try {
@@ -56,7 +56,6 @@ public class DiscoveryAdapter extends ArrayAdapter<DiscoItem>{
 			fontSize = Integer.parseInt(context.getResources().getString(R.string.DefaultFontSize));
 		}
 		
-        View v = convertView;
         if (v == null) {
             LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             v = vi.inflate(R.layout.entry, null, false);

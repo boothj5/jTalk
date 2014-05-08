@@ -70,9 +70,8 @@ public class OnlineUsersAdapter extends ArrayAdapter<RosterItem> {
 	}
 	
 	@Override
-	public View getView(final int position, View convertView, ViewGroup parent) {
+	public View getView(final int position, View v, ViewGroup parent) {
 		IconPicker ip = service.getIconPicker();
-        View v = convertView;
         RosterItem item = getItem(position);
         RosterEntry entry = item.getEntry();
         
@@ -86,10 +85,8 @@ public class OnlineUsersAdapter extends ArrayAdapter<RosterItem> {
         
         TextView label = (TextView) v.findViewById(R.id.item);
         label.setText(name);
-        if (Build.VERSION.SDK_INT >= 11) {
-        	label.setTextColor(Colors.PRIMARY_TEXT);
-        } else label.setTextColor(0xFF232323);
-        
+        label.setTextColor(Colors.PRIMARY_TEXT);
+
 		Presence presence = service.getRoster(item.getAccount()).getPresence(entry.getUser());
       	ImageView icon = (ImageView)v.findViewById(R.id.status);
        	icon.setImageBitmap(ip.getIconByPresence(presence));

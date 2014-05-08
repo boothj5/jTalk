@@ -210,8 +210,6 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 			Presence presence = service.getPresence(account, jid);
 			int count = service.getMessagesCount(account, jid);
 			
-			if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
-			else holder.name.setTextColor(Colors.PRIMARY_TEXT);
 	        holder.name.setText(name);
 	        holder.name.setTypeface(Typeface.DEFAULT_BOLD);
 	        
@@ -253,8 +251,6 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 				joined = muc.isJoined();
 			}
 			
-			if (service.isHighlight(account, name)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
-			else holder.name.setTextColor(Colors.PRIMARY_TEXT);
 	        holder.name.setText(StringUtils.parseName(name));
 	        holder.name.setTypeface(Typeface.DEFAULT_BOLD);
 	        
