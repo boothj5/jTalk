@@ -45,7 +45,8 @@
                    android:layout_gravity="center_vertical"
                    android:src="@drawable/ic_menu_emoticons" />
 
-        <EditText android:id="@+id/messageInput"
+        <net.ustyugov.jtalk.view.MyEditText android:id="@+id/messageInput"
+                  android:singleLine="false"
                   android:layout_height="wrap_content"
                   android:layout_width="0dip"
                   android:layout_weight="1"
@@ -65,15 +66,8 @@
                   android:layout_width="fill_parent"
                   android:layout_height="wrap_content">
 
-        <ImageView
-                android:paddingTop="7dip"
-                android:paddingLeft="3dip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:src="@android:drawable/ic_menu_upload" />
-
         <TextView android:id="@+id/attachPath"
+                  android:layout_marginLeft="12dp"
                   android:singleLine="true"
                   android:ellipsize="start"
                   android:gravity="center_vertical"

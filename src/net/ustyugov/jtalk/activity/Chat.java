@@ -297,7 +297,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
         if (prefs.getBoolean("SendOnEnter", false)) {
             messageInput.setImeOptions(EditorInfo.IME_ACTION_SEND);
-            messageInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+            messageInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
             sendButton.setVisibility(View.GONE);
         } else {
             messageInput.setImeOptions(EditorInfo.IME_ACTION_NONE);
@@ -306,7 +306,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         }
 
         if (prefs.getBoolean("SmileButtonOnKeyboard", false)) {
-            messageInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE);
+            messageInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
             sendButton.setVisibility(View.VISIBLE);
         }
 
@@ -806,7 +806,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             imgur = requestCode == REQUEST_PHOTO;
             attachPath.setText(uri.toString());
             attachPanel.setVisibility(View.VISIBLE);
-            sendButton.setEnabled(true);
+            service.setText(jid, messageInput.getText().toString() + " ");
         }
     }
 
