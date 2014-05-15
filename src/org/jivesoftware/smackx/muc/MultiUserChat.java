@@ -1603,7 +1603,7 @@ public class MultiUserChat {
      *         don't have enough privileges to get this information.
      */
     public Collection<Affiliate> getOwners() throws XMPPException {
-        return getAffiliatesByOwner("owner");
+        return getAffiliatesByAdmin("owner");
     }
 
     /**
@@ -1614,7 +1614,7 @@ public class MultiUserChat {
      *         don't have enough privileges to get this information.
      */
     public Collection<Affiliate> getAdmins() throws XMPPException {
-        return getAffiliatesByOwner("admin");
+        return getAffiliatesByAdmin("admin");
     }
 
     /**

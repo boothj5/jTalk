@@ -21,12 +21,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.*;
+import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.AffiliateAdapter;
 import net.ustyugov.jtalk.adapter.MainPageAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
 
+import net.ustyugov.jtalk.view.MyTextView;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smackx.muc.Affiliate;
@@ -37,14 +40,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.jtalk2.R;
 import com.viewpagerindicator.TitlePageIndicator;
@@ -242,21 +238,32 @@ public class MucUsers extends Activity {
 				  public void run() {
 					  if (muc != null) {
 						   try {
-							   Collection<Affiliate> ownersColl = muc.getOwners();
-							   ((AffiliateAdapter) ownersList.getAdapter()).update(ownersColl);
-							   
-							   Collection<Affiliate> adminsColl = muc.getAdmins();
-							   ((AffiliateAdapter) adminsList.getAdapter()).update(adminsColl);
-							   
-							   Collection<Affiliate> membersColl = muc.getMembers();
-							   ((AffiliateAdapter) membersList.getAdapter()).update(membersColl);
-							   
-							   Collection<Affiliate> outcastsColl = muc.getOutcasts();
-							   ((AffiliateAdapter) outcastsList.getAdapter()).update(outcastsColl);
-							   
-						   } catch(XMPPException e) { 
-							   Log.i("EXCEPTION", e.getLocalizedMessage());
-						   }
+                               Collection<Affiliate> ownersColl = muc.getOwners();
+                               ((AffiliateAdapter) ownersList.getAdapter()).update(ownersColl);
+                           } catch (XMPPException e) {
+                               Toast.makeText(MucUsers.this, "Owners: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                           }
+
+                          try {
+                              Collection<Affiliate> adminsColl = muc.getAdmins();
+                              ((AffiliateAdapter) adminsList.getAdapter()).update(adminsColl);
+                          } catch (XMPPException e) {
+                              Toast.makeText(MucUsers.this, "Admins: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                          }
+
+                          try {
+                              Collection<Affiliate> membersColl = muc.getMembers();
+                              ((AffiliateAdapter) membersList.getAdapter()).update(membersColl);
+                          } catch (XMPPException e) {
+                              Toast.makeText(MucUsers.this, "Members: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                          }
+
+                          try {
+                              Collection<Affiliate> outcastsColl = muc.getOutcasts();
+                              ((AffiliateAdapter) outcastsList.getAdapter()).update(outcastsColl);
+                          } catch (XMPPException e) {
+                              Toast.makeText(MucUsers.this, "Outcasts: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                          }
 					   }
 				  }
 			   });
