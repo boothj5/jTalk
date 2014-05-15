@@ -775,6 +775,9 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 createOptionMenu();
                 updateList();
                 break;
+            case R.id.add_bookmark:
+                BookmarksDialogs.AddDialog(this, account, jid, StringUtils.parseName(jid));
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }

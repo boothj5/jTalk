@@ -200,6 +200,7 @@
     <string name="Finish">Готово</string>
     <string name="SendPhoto">Отправить фото</string>
     <string name="Export">Экспорт</string>
+    <string name="AddBookmark">Добавить закладку</string>
 
     <!-- Dialogs -->
     <string name="Room">Комната</string>

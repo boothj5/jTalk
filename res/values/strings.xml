@@ -207,6 +207,7 @@
     <string name="Finish">Finish</string>
     <string name="SendPhoto">Send photo</string>
     <string name="Export">Export</string>
+    <string name="AddBookmark">Add bookmark</string>
 
     <!-- Dialogs -->
     <string name="Room">Room</string>

@@ -67,7 +67,7 @@ public class BookmarksDialogs {
 	    
 		AlertDialog.Builder builder = new AlertDialog.Builder(a);
 		builder.setView(layout);
-		builder.setTitle("Add bookmark");
+		builder.setTitle(R.string.AddBookmark);
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				String name = nameEdit.getText().toString();
@@ -118,7 +118,7 @@ public class BookmarksDialogs {
 	    
 		AlertDialog.Builder builder = new AlertDialog.Builder(a);
 		builder.setView(layout);
-		builder.setTitle("Edit bookmark");
+		builder.setTitle(R.string.Edit);
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				JTalkService service = JTalkService.getInstance();
