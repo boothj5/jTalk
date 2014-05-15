@@ -102,6 +102,8 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private boolean imgur = false;
     boolean move = false;
     private int maxCount = 0;
+    private int unreadMessages = 0;
+    private int separatorPosition = 0;
 
     private BroadcastReceiver textReceiver;
     private BroadcastReceiver finishReceiver;
@@ -504,23 +506,10 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             }
         }
 
+        unreadMessages = service.getMessagesCount(account, jid);
+        if (unreadMessages > 0) separatorPosition = 0;
         updateList();
         if (service.getMessageList(account, jid).isEmpty()) loadStory(false);
-
-        int unreadMessages = service.getMessagesCount(account, jid);
-        int lastPosition = service.getLastPosition(jid);
-        if (lastPosition >= 0) {
-            listView.setScroll(false);
-            listView.setSelection(lastPosition);
-        } else {
-            if (unreadMessages > 1) {
-                listView.setScroll(false);
-                listView.setSelection(listView.getCount() - (unreadMessages + 1));
-            } else {
-                if (listView.isScroll()) listView.setSelection(listView.getCount());
-            }
-        }
-
         if (account.equals(jid)) {
             service.removeMessagesCountForJid(account, jid);
         }
@@ -872,6 +861,19 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             listAdapter.update(account, jid, searchString, viewMode);
             listAdapter.notifyDataSetChanged();
         }
+
+        try {
+            if (unreadMessages > 0 && separatorPosition == 0) {
+                separatorPosition = listView.getCount() - unreadMessages;
+            }
+
+            if (separatorPosition > 0 && separatorPosition < listView.getCount()) {
+                MessageItem item = new MessageItem(null, null);
+                item.setType(MessageItem.Type.separator);
+                if (!isMuc) listAdapter.insert(item, separatorPosition);
+                else listMucAdapter.insert(item, separatorPosition);
+            }
+        } catch (Exception ignored) {}
 
         if (prefs.getBoolean("AutoScroll", true)) {
             if (scroll && listView.getCount() >= 1) {

@@ -40,12 +40,13 @@ public class DragAndDropListener implements AdapterView.OnItemLongClickListener 
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long l) {
+        MessageItem message = (MessageItem) parent.getAdapter().getItem(position);
+        if (message.getType() == MessageItem.Type.separator) return true;
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean showtime = prefs.getBoolean("ShowTime", false);
 
-        MessageItem message = (MessageItem) parent.getAdapter().getItem(position);
         String body = message.getBody();
-
         String time = message.getTime();
         String name = message.getName();
         String t = "(" + time + ")";

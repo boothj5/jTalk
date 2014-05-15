@@ -70,7 +70,7 @@ public class MyTextView  extends TextView {
         ssb = parseMdLinks(ssb);
 
 		int start = ssb.toString().indexOf(nick);
-		if (start >= 0) {
+		if (start >= 0 && nick.length() > 0) {
 			int end = start + nick.length();
 			
 			Hyperlink spec = new Hyperlink();

@@ -21,6 +21,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import android.content.*;
+import android.text.Layout;
+import android.text.Spanned;
+import android.text.style.AlignmentSpan;
 import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
@@ -141,11 +144,18 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
         
         String message;
         SpannableStringBuilder ssb = new SpannableStringBuilder();
-        if (type == MessageItem.Type.status) {
+        message = "";
+        if (type == MessageItem.Type.separator) {
+            ssb.append("~ ~ ~ ~ ~");
+            ssb.setSpan(new AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            holder.text.setText(ssb);
+        }
+        else if (type == MessageItem.Type.status) {
         	if (showtime) message = time + "  " + body;
         	else message = body;
-        	ssb.append(message);
-        	ssb.setSpan(new ForegroundColorSpan(Colors.STATUS_MESSAGE), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.append(message);
+            ssb.setSpan(new ForegroundColorSpan(Colors.STATUS_MESSAGE), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {
         	int colorLength = name.length();
         	int boldLength = colorLength;
@@ -169,36 +179,38 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
             if (item.isEdited()) ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), colorLength, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        // Search highlight
-        if (searchString.length() > 0) {
-            if (ssb.toString().toLowerCase().contains(searchString.toLowerCase())) {
-                int from = 0;
-                int start = -1;
-                while ((start = ssb.toString().toLowerCase().indexOf(searchString.toLowerCase(), from)) != -1) {
-                    from = start + searchString.length();
-                    ssb.setSpan(new BackgroundColorSpan(Colors.SEARCH_BACKGROUND), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        if (type != MessageItem.Type.separator) {
+            // Search highlight
+            if (searchString.length() > 0) {
+                if (ssb.toString().toLowerCase().contains(searchString.toLowerCase())) {
+                    int from = 0;
+                    int start = -1;
+                    while ((start = ssb.toString().toLowerCase().indexOf(searchString.toLowerCase(), from)) != -1) {
+                        from = start + searchString.length();
+                        ssb.setSpan(new BackgroundColorSpan(Colors.SEARCH_BACKGROUND), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
                 }
             }
-        }
 
-        holder.check.setVisibility(viewMode == ViewMode.multi ? View.VISIBLE : View.GONE);
-        holder.check.setChecked(item.isSelected());
-        holder.check.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                item.select(b);
-                getItem(position).select(b);
+            holder.check.setVisibility(viewMode == ViewMode.multi ? View.VISIBLE : View.GONE);
+            holder.check.setChecked(item.isSelected());
+            holder.check.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    item.select(b);
+                    getItem(position).select(b);
+                }
+            });
+
+            if (prefs.getBoolean("ShowSmiles", true)) {
+                int startPosition = message.length() - body.length();
+                ssb = smiles.parseSmiles(holder.text, ssb, startPosition, account, jid);
             }
-        });
 
-        if (prefs.getBoolean("ShowSmiles", true)) {
-        	int startPosition = message.length() - body.length();
-        	ssb = smiles.parseSmiles(holder.text, ssb, startPosition, account, jid);
+            if (jid.equals(Constants.JUICK) || jid.equals(Constants.JUBO)) holder.text.setTextWithLinks(ssb, MyTextView.Mode.juick);
+            else if (jid.equals(Constants.POINT)) holder.text.setTextWithLinks(ssb, MyTextView.Mode.point);
+            else holder.text.setTextWithLinks(ssb);
         }
-        
-        if (jid.equals(Constants.JUICK) || jid.equals(Constants.JUBO)) holder.text.setTextWithLinks(ssb, MyTextView.Mode.juick);
-        else if (jid.equals(Constants.POINT)) holder.text.setTextWithLinks(ssb, MyTextView.Mode.point);
-        else holder.text.setTextWithLinks(ssb);
 
         return convertView;
     }
@@ -218,7 +230,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
             boolean showtime = prefs.getBoolean("ShowTime", false);
 
             MessageItem message = getItem(i);
-            if (message.isSelected()) {
+            if (message.isSelected() && message.getType() != MessageItem.Type.separator) {
                 String body = message.getBody();
                 String time = message.getTime();
                 String name = message.getName();

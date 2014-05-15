@@ -27,7 +27,7 @@ import org.jivesoftware.smackx.packet.BobExtension;
 import org.jivesoftware.smackx.packet.DataForm;
 
 public class MessageItem {
-    public enum Type {message, status}
+    public enum Type {message, status, separator}
 
     private String account;
     private String jid;

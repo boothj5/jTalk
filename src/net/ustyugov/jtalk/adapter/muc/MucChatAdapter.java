@@ -22,6 +22,9 @@ import java.util.Date;
 import java.util.List;
 
 import android.content.*;
+import android.text.Layout;
+import android.text.Spanned;
+import android.text.style.AlignmentSpan;
 import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Holders;
@@ -154,7 +157,14 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         ssb.append(message);
         ssb.setSpan(new ForegroundColorSpan(Colors.PRIMARY_TEXT), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        if (type == MessageItem.Type.status) {
+        if (type == MessageItem.Type.separator) {
+            ssb.clear();
+            ssb.append("~ ~ ~ ~ ~");
+            ssb.setSpan(new AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            holder.text.setText(ssb);
+        }
+        else if (type == MessageItem.Type.status) {
             ssb.setSpan(new ForegroundColorSpan(Colors.STATUS_MESSAGE), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {
             if (showtime && time.length() > 2) {
@@ -165,7 +175,6 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                 ssb.setSpan(new ForegroundColorSpan(Colors.SECONDARY_TEXT), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
-                int idx = message.indexOf(n);
                 boolean highlight = false;
                 if (nick != null && message.contains(nick)) highlight = true;
                 else {
@@ -178,38 +187,44 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                     ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
-                ssb.setSpan(new ForegroundColorSpan(Colors.INBOX_MESSAGE), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-        }
 
-        // Search highlight
-        if (searchString.length() > 0) {
-            if (ssb.toString().toLowerCase().contains(searchString.toLowerCase())) {
-                int from = 0;
-                int start = -1;
-                while ((start = ssb.toString().toLowerCase().indexOf(searchString.toLowerCase(), from)) != -1) {
-                    from = start + searchString.length();
-                    ssb.setSpan(new BackgroundColorSpan(Colors.SEARCH_BACKGROUND), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                if (n.length() > 0) {
+                    int idx = message.indexOf(n);
+                    ssb.setSpan(new ForegroundColorSpan(Colors.INBOX_MESSAGE), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
         }
 
-        holder.check.setVisibility(viewMode == ChatAdapter.ViewMode.multi ? View.VISIBLE : View.GONE);
-        holder.check.setChecked(item.isSelected());
-        holder.check.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                item.select(b);
-                getItem(position).select(b);
+        if (type != MessageItem.Type.separator) {
+            // Search highlight
+            if (searchString.length() > 0) {
+                if (ssb.toString().toLowerCase().contains(searchString.toLowerCase())) {
+                    int from = 0;
+                    int start = -1;
+                    while ((start = ssb.toString().toLowerCase().indexOf(searchString.toLowerCase(), from)) != -1) {
+                        from = start + searchString.length();
+                        ssb.setSpan(new BackgroundColorSpan(Colors.SEARCH_BACKGROUND), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                }
             }
-        });
 
-        if (prefs.getBoolean("ShowSmiles", true)) {
-            int startPosition = message.length() - body.length();
-            ssb = smiles.parseSmiles(holder.text, ssb, startPosition, account, group);
+            holder.check.setVisibility(viewMode == ChatAdapter.ViewMode.multi ? View.VISIBLE : View.GONE);
+            holder.check.setChecked(item.isSelected());
+            holder.check.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    item.select(b);
+                    getItem(position).select(b);
+                }
+            });
+
+            if (prefs.getBoolean("ShowSmiles", true)) {
+                int startPosition = message.length() - body.length();
+                ssb = smiles.parseSmiles(holder.text, ssb, startPosition, account, group);
+            }
+            holder.text.setTextWithLinks(ssb, n);
         }
-        holder.text.setTextWithLinks(ssb, n);
 
         return convertView;
     }
@@ -231,7 +246,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
             boolean showtime = prefs.getBoolean("ShowTime", false);
 
             MessageItem message = getItem(i);
-            if (message.isSelected()) {
+            if (message.isSelected() && message.getType() != MessageItem.Type.separator) {
                 String body = message.getBody();
                 String time = message.getTime();
                 String name = message.getName();
