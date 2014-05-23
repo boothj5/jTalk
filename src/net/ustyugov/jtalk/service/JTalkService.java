@@ -1600,7 +1600,7 @@ public class JTalkService extends Service {
                                 for(BookmarkedConference bc : bookmarks) {
                                     String nick = bc.getNickname();
                                     if (nick == null || nick.length() < 1) nick = StringUtils.parseName(username);
-                                    if (bc.isAutoJoin()) joinRoom(username, bc.getJid(), bc.getNickname(), bc.getPassword());
+                                    if (bc.isAutoJoin()) joinRoom(username, bc.getJid(), nick, bc.getPassword());
                                 }
                             } catch (XMPPException ignored) { }
                         }
