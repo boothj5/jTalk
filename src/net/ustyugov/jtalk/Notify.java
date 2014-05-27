@@ -225,7 +225,6 @@ public class Notify {
                     new SoundTask().execute("");
                 }
         	}
-    		return;
     	} else if (type == Type.Direct) {
             text = StringUtils.parseResource(fullJid) + ": " + text;
             if (!prefs.getBoolean("soundDisabled", false)) {
