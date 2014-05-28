@@ -294,12 +294,15 @@ public class VCardActivity extends Activity {
     							    vstr = name + " " + ver + " (" + os + ")";
     							}
     						} catch (ClassCastException e) { }
-    						
+
     						if (vstr.length() < 3) vstr += "???";
-    						
-    						String str = getString(R.string.Status) + ": " + p.getStatus() + "\n"
-    								+ getString(R.string.Client) + ": " + vstr;
-    						
+
+    						String str = "";
+    						if (p.getStatus() != null) {
+    							str += getString(R.string.Status) + ": " + p.getStatus() + "\n";
+    						}
+    						str += getString(R.string.Client) + ": " + vstr;
+
     						strings.put(StringUtils.parseResource(p.getFrom()) + " (" + p.getPriority() + ")", str);
     					}
     				}

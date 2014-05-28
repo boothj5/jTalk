@@ -103,7 +103,7 @@
     <string name="Interface">Apariencia</string>
     <string name="Sidebar">Barra lateral</string>
     <string name="IgnoreList">Lista de ignorados</string>
-    <string name="AutoАctivate">Autoactivación</string>
+    <string name="AutoActivate">Autoactivación</string>
     <string name="ActivateIgnoreListOnStart">Activar lista de ignorados al inicio</string>
     <string name="Default">Predeterminado</string>
     <string name="IgnoreListDefaultList">La lista de ignorados es una lista predeterminada</string>

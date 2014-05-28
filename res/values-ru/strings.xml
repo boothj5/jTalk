@@ -100,7 +100,7 @@
     <string name="Interface">Интерфейс</string>
     <string name="Sidebar">Боковая панель</string>
     <string name="IgnoreList">Игнор лист</string>
-    <string name="AutoАctivate">Автовключение</string>
+    <string name="AutoActivate">Автовключение</string>
     <string name="ActivateIgnoreListOnStart">Активировать игнорлист при запуске</string>
     <string name="Default">По умолчанию</string>
     <string name="IgnoreListDefaultList">Сделать игнорлист списком по умолчанию</string>
