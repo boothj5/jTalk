@@ -233,7 +233,9 @@ public class MucDialogs {
 				String pass = passEdit.getText().toString();
 				
 				if (group.length() > 0) {
-					if (nick == null || nick.length() < 1) nick = StringUtils.parseName(service.getConnection(account).getUser());
+					if (nick == null || nick.length() < 1) {
+						nick = service.getDerivedNick(service.getConnection(account).getUser(), null);
+					}
 					service.setPreference("lastGroup", group);
   	  				service.setPreference("lastNick", nick);
   	  				service.joinRoom(account, group, nick, pass);

@@ -1539,9 +1539,15 @@ public class JTalkService extends Service {
         }
     }
     
-	public String getBookmarkNick(final String username, BookmarkedConference bc) {
+	public String getDerivedNick(final String username, BookmarkedConference bc) {
 		String bareJid = StringUtils.parseBareAddress(username);
-		String nick = bc.getNickname();
+		String nick = null;
+		
+		// try bookmark if passed
+		if (bc != null) {
+			nick = bc.getNickname();
+		}
+
 		// no nickname with bookmark
 		if (nick == null || nick.length() < 1) {
 			// try account preference
@@ -1719,7 +1725,7 @@ public class JTalkService extends Service {
                                 Collection<BookmarkedConference> bookmarks = bm.getBookmarkedConferences();
                                 for(BookmarkedConference bc : bookmarks) {
                                     if (bc.isAutoJoin()) {
-	                                	String nick = getBookmarkNick(username, bc);
+	                                	String nick = getDerivedNick(username, bc);
 	                                	joinRoom(username, bc.getJid(), nick, bc.getPassword());
                                     }
                                 }
