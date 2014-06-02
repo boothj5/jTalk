@@ -30,10 +30,10 @@ import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.listener.*;
-
 import net.ustyugov.jtalk.receivers.ChangeConnectionReceiver;
 import net.ustyugov.jtalk.receivers.ScreenStateReceiver;
 import net.ustyugov.jtalk.smiles.Smiles;
+
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.PacketListener;
@@ -1538,6 +1538,29 @@ public class JTalkService extends Service {
             }
         }
     }
+    
+	public String getBookmarkNick(final String username, BookmarkedConference bc) {
+		String bareJid = StringUtils.parseBareAddress(username);
+		String nick = bc.getNickname();
+		// no nickname with bookmark
+		if (nick == null || nick.length() < 1) {
+			// try account preference
+			Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.JID + " = '" + bareJid + "'", null, null);
+			if (cursor != null && cursor.getCount() > 0) {
+				cursor.moveToFirst();
+		        if (AccountDbHelper.VERSION > 4) {
+		            nick = cursor.getString(cursor.getColumnIndex(AccountDbHelper.NICK));
+		        }
+			}
+			cursor.close();
+		}
+		// no nickname account preference
+		if (nick == null || nick.length() < 1) {
+			// use localpart of JID
+			nick = StringUtils.parseName(bareJid);
+		}
+		return nick;
+	}
 
     public class ConnectionTask extends AsyncTask<String, Integer, String> {
         Intent intent = new Intent(Constants.UPDATE);
@@ -1703,28 +1726,6 @@ public class JTalkService extends Service {
                             } catch (XMPPException ignored) { }
                         }
                     }
-
-					private String getBookmarkNick(final String username, BookmarkedConference bc) {
-						String nick = bc.getNickname();
-						// no nickname with bookmark
-						if (nick == null || nick.length() < 1) {
-							// try account preference
-							Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.JID + " = '" + username + "'", null, null);
-							if (cursor != null && cursor.getCount() > 0) {
-								cursor.moveToFirst();
-						        if (AccountDbHelper.VERSION > 4) {
-						            nick = cursor.getString(cursor.getColumnIndex(AccountDbHelper.NICK));
-						        }
-							}
-							cursor.close();
-						}
-						// no nickname account preference
-						if (nick == null || nick.length() < 1) {
-							// use localpart of JID
-							nick = StringUtils.parseName(username);
-						}
-						return nick;
-					}
                 }.start();
 
                 if (prefs.getBoolean("Ping", false)) {
