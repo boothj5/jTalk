@@ -102,9 +102,8 @@ public class Bookmarks extends Activity {
 						BookmarkedConference bc = (BookmarkedConference) item.getObject();
 						String account = item.getAccount();
 						String jid  = bc.getJid();
-						String nick = bc.getNickname();
 						String pass = bc.getPassword();
-						if (nick == null || nick.length() < 1) nick = StringUtils.parseName(service.getConnection(account).getUser());
+						String nick = service.getDerivedNick(service.getConnection(account).getUser(), bc);
 						if (!service.getJoinedConferences().containsKey(jid)) service.joinRoom(account, jid, nick, pass);
 					}
 				});

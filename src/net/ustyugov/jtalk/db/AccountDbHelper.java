@@ -23,7 +23,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 public class AccountDbHelper extends SQLiteOpenHelper implements BaseColumns {
-	public static final int VERSION = 4;
+	public static final int VERSION = 5;
 	public static final String DB_NAME = "accounts.db";
 	public static final String TABLE_NAME = "account";
 	public static final String ENABLED = "enabled";
@@ -35,6 +35,7 @@ public class AccountDbHelper extends SQLiteOpenHelper implements BaseColumns {
 	public static final String TLS = "tls";
 	public static final String SASL = "sasl";
     public static final String COMPRESSION = "compression";
+	public static final String NICK = "nick";
 
 	public AccountDbHelper(Context context) {
 		super(context, DB_NAME, null, VERSION);
@@ -48,6 +49,7 @@ public class AccountDbHelper extends SQLiteOpenHelper implements BaseColumns {
 				+ PASS + " TEXT, "
 				+ RESOURCE + " TEXT, "
 				+ SERVER + " TEXT, "
+				+ NICK + " TEXT, "
 				+ PORT + " TEXT, "
 				+ ENABLED + " TEXT, "
                 + COMPRESSION + " TEXT, "
@@ -57,8 +59,11 @@ public class AccountDbHelper extends SQLiteOpenHelper implements BaseColumns {
 	
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		if (newVersion > oldVersion) {
+		if (oldVersion < 4 && newVersion >= 4) {
             db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD " + COMPRESSION + " TEXT");
+		}
+		if (oldVersion < 5 && newVersion >= 5) {
+            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD " + NICK + " TEXT");
 		}
 	}
 }

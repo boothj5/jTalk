@@ -30,10 +30,10 @@ import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.listener.*;
-
 import net.ustyugov.jtalk.receivers.ChangeConnectionReceiver;
 import net.ustyugov.jtalk.receivers.ScreenStateReceiver;
 import net.ustyugov.jtalk.smiles.Smiles;
+
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.PacketListener;
@@ -1538,6 +1538,35 @@ public class JTalkService extends Service {
             }
         }
     }
+    
+	public String getDerivedNick(final String username, BookmarkedConference bc) {
+		String bareJid = StringUtils.parseBareAddress(username);
+		String nick = null;
+		
+		// try bookmark if passed
+		if (bc != null) {
+			nick = bc.getNickname();
+		}
+
+		// no nickname with bookmark
+		if (nick == null || nick.length() < 1) {
+			// try account preference
+			Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.JID + " = '" + bareJid + "'", null, null);
+			if (cursor != null && cursor.getCount() > 0) {
+				cursor.moveToFirst();
+		        if (AccountDbHelper.VERSION > 4) {
+		            nick = cursor.getString(cursor.getColumnIndex(AccountDbHelper.NICK));
+		        }
+			}
+			cursor.close();
+		}
+		// no nickname account preference
+		if (nick == null || nick.length() < 1) {
+			// use localpart of JID
+			nick = StringUtils.parseName(bareJid);
+		}
+		return nick;
+	}
 
     public class ConnectionTask extends AsyncTask<String, Integer, String> {
         Intent intent = new Intent(Constants.UPDATE);
@@ -1696,9 +1725,10 @@ public class JTalkService extends Service {
                                 BookmarkManager bm = BookmarkManager.getBookmarkManager(connection);
                                 Collection<BookmarkedConference> bookmarks = bm.getBookmarkedConferences();
                                 for(BookmarkedConference bc : bookmarks) {
-                                    String nick = bc.getNickname();
-                                    if (nick == null || nick.length() < 1) nick = StringUtils.parseName(username);
-                                    if (bc.isAutoJoin()) joinRoom(username, bc.getJid(), nick, bc.getPassword());
+                                    if (bc.isAutoJoin()) {
+	                                	String nick = getDerivedNick(username, bc);
+	                                	joinRoom(username, bc.getJid(), nick, bc.getPassword());
+                                    }
                                 }
                             } catch (XMPPException ignored) { }
                         }
