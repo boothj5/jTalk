@@ -98,7 +98,7 @@
     <string name="Interface">Интерфейс</string>
     <string name="Sidebar">Странична панел</string>
     <string name="IgnoreList">Игнор лист</string>
-    <string name="AutoАctivate">Автовключване</string>
+    <string name="AutoActivate">Автовключване</string>
     <string name="ActivateIgnoreListOnStart">Активиране на игнорлист при включване</string>
     <string name="Default">По подразбиране</string>
     <string name="IgnoreListDefaultList">Направи игнорлист списък по подразбиране</string>

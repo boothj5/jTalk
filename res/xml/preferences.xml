@@ -256,7 +256,7 @@
 
     <PreferenceScreen android:title="@string/IgnoreList">
         <CheckBoxPreference
-                android:title="@string/AutoАctivate"
+                android:title="@string/AutoActivate"
                 android:summary="@string/ActivateIgnoreListOnStart"
                 android:key="ActivateIgnoreList"
                 android:defaultValue="false"/>

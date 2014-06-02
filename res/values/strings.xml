@@ -108,7 +108,7 @@
     <string name="Interface">Interface</string>
     <string name="Sidebar">Sidebar</string>
     <string name="IgnoreList">Ignore-List</string>
-    <string name="AutoАctivate">Auto Аctivate</string>
+    <string name="AutoActivate">Auto Аctivate</string>
     <string name="ActivateIgnoreListOnStart">Activate Ignore-List on start</string>
     <string name="Default">Default</string>
     <string name="IgnoreListDefaultList">Ignore-List is a default list</string>
