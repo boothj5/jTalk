@@ -35,7 +35,7 @@ import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
 public class AddAccountActivity extends AccountAuthenticatorActivity implements View.OnClickListener {
-    private EditText jidEdit, passEdit, resEdit, serEdit, portEdit;
+    private EditText jidEdit, passEdit, resEdit, serEdit, portEdit, nickEdit;
     private CheckBox enabled, savePass, tls, sasl, compression;
     private Button okButton, cancelButton;
     private int id = -1;
@@ -52,6 +52,7 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
         passEdit = (EditText) findViewById(R.id.account_password);
         resEdit = (EditText) findViewById(R.id.account_resource);
         serEdit = (EditText) findViewById(R.id.account_server);
+        nickEdit = (EditText) findViewById(R.id.account_nick);
         portEdit = (EditText) findViewById(R.id.account_port);
         enabled = (CheckBox) findViewById(R.id.account_active);
         tls = (CheckBox) findViewById(R.id.account_tls);
@@ -84,6 +85,7 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
             String password = "";
             String resource = "";
             String service = "";
+            String nick = "";
             String e = "";
             String t = "1";
             String s = "1";
@@ -111,6 +113,9 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
                     c = cursor.getString(cursor.getColumnIndex(AccountDbHelper.COMPRESSION));
                     if (c == null) c ="1";
                 }
+                if (AccountDbHelper.VERSION > 4) {
+                    nick = cursor.getString(cursor.getColumnIndex(AccountDbHelper.NICK));
+                }
             }
 
             jidEdit.setText(username);
@@ -118,6 +123,7 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
             resEdit.setText(resource);
             serEdit.setText(service);
             portEdit.setText(port+"");
+            nickEdit.setText(nick);
             enabled.setChecked(e.equals("1"));
             tls.setChecked(t.equals("1"));
             sasl.setChecked(s.equals("1"));
@@ -140,6 +146,8 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
             if (ser == null) ser = "";
             String port = portEdit.getText().toString();
             if (port == null) port = "5222";
+            String nick = nickEdit.getText().toString();
+            if (nick == null) nick = "";
             boolean e = enabled.isChecked();
             boolean t = tls.isChecked();
             boolean s = sasl.isChecked();
@@ -169,6 +177,9 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
                 if (AccountDbHelper.VERSION > 3) {
                     if (c) values.put(AccountDbHelper.COMPRESSION, "1");
                     else values.put(AccountDbHelper.COMPRESSION, "0");
+                }
+                if (AccountDbHelper.VERSION > 4) {
+                    values.put(AccountDbHelper.NICK, nick);
                 }
 
                 if (id == -1) {

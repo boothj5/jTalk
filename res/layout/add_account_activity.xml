@@ -96,7 +96,16 @@
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
                           android:text="Compression" />
-            </LinearLayout>
+                <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/DefaultNick" />
+                <EditText
+                        android:id="@+id/account_nick"
+                        android:singleLine="true"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

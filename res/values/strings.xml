@@ -76,6 +76,7 @@
     <string name="ExpandGroups">Expand groups on start</string>
     <string name="AutoSubscribe">Auto subscribe</string>
     <string name="Server">Server</string>
+    <string name="DefaultNick">Nick</string>
     <string name="Port">Port</string>
     <string name="EnableTls">TLS</string>
     <string name="EnableSasl">SASL</string>
