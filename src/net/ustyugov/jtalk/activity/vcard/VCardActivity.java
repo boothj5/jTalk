@@ -288,10 +288,7 @@ public class VCardActivity extends Activity {
     						try {
     							if (result != null && result.getType() == IQ.Type.RESULT) {
     							    Version versionResult = (Version) result;
-    							    String os = versionResult.getOs();
-    							    String ver = versionResult.getVersion();
-    							    String name = versionResult.getName();
-    							    vstr = name + " " + ver + " (" + os + ")";
+    							    vstr = getVersionString(versionResult);
     							}
     						} catch (ClassCastException e) { }
 
@@ -320,10 +317,7 @@ public class VCardActivity extends Activity {
     				try {
     					if (result != null && result.getType() == IQ.Type.RESULT) {
     					    Version versionResult = (Version) result;
-    					    String os = versionResult.getOs();
-    					    String ver = versionResult.getVersion();
-    					    String name = versionResult.getName();
-    					    vstr = name + " " + ver + " (" + os + ")";
+    					    vstr = getVersionString(versionResult);
     					}
     				} catch (ClassCastException e) { }
     					
@@ -348,7 +342,7 @@ public class VCardActivity extends Activity {
     		} catch (Exception e) { }
 			return 1;
 		}
-		
+
 		@Override
 		protected void onPreExecute() {
 			adapter = new VCardAdapter(VCardActivity.this);
@@ -502,6 +496,18 @@ public class VCardActivity extends Activity {
 				    avatarScroll.setVisibility(View.VISIBLE);
 				}
 			});
+		}
+		
+		private String getVersionString(Version versionResult) {
+			String vstr;
+			String os = versionResult.getOs();
+			String ver = versionResult.getVersion();
+			String name = versionResult.getName();
+			vstr = name + " " + ver;
+			if (os != null) {
+				vstr += " (" + os + ")";
+			}
+			return vstr;
 		}
 	}
 }
