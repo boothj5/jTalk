@@ -122,9 +122,13 @@ public class BookmarksAdapter extends ArrayAdapter<RosterItem> {
         String name = item.getName();
         String jid  = item.getJid();
         String nick = item.getNickname();
-
+        
         holder.label.setText(name);
-        holder.jid.setText(nick + " in " + jid);
+        if (nick == null || nick.length() < 1) {
+        	holder.jid.setText(jid);
+        } else {
+        	holder.jid.setText(nick + " in " + jid);
+        }
         return convertView;
     }
 }
