@@ -58,4 +58,5 @@ public final class Constants implements BaseColumns {
 	public static final String NEW_MESSAGE 				= "net.ustyugov.jtalk.NEW_MESSAGE";
 	public static final String ERROR					= "net.ustyugov.jtalk.ERROR";
 	public static final String CHANGE_CHAT				= "net.ustyugov.jtalk.CHANGE_CHAT";
+    public static final String INCOMING_CALL            = "net.ustyugov.jtalk.INCOMING_CALL";
 }

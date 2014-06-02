@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">jTalk</string>
-    <string name="version">0.48.1</string>
-    <string name="build">413</string>
+    <string name="version">0.49</string>
+    <string name="build">414</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>

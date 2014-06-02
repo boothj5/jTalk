@@ -313,6 +313,11 @@
                 android:summary="in seconds"
                 android:defaultValue="60"
                 android:numeric="integer"/>
+        <CheckBoxPreference
+                android:title="Enable SIP"
+                android:summary="Needed reconnect"
+                android:key="EnableSIP"
+                android:defaultValue="false"/>
     </PreferenceScreen>
     <PreferenceScreen android:title="@string/Info">
         <Preference

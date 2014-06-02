@@ -19,10 +19,12 @@ package net.ustyugov.jtalk.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import android.app.Activity;
+import android.net.sip.*;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
@@ -108,6 +110,7 @@ public class JTalkService extends Service {
     private Hashtable<String, ConListener> conListeners = new Hashtable<String, ConListener>();
     private Hashtable<String, ConnectionTask> connectionTasks = new Hashtable<String, ConnectionTask>();
     private Hashtable<String, Timer> pingTimers = new Hashtable<String, Timer>();
+    private Hashtable<String, SipManager> sipManagers = new Hashtable<String, SipManager>();
     private String currentJid = "me";
     private String sidebarMode = "users";
     private String globalState = "";
@@ -120,6 +123,7 @@ public class JTalkService extends Service {
     private Timer autoStatusTimer = new Timer();
     private boolean autoStatus = false;
     private Presence oldPresence;
+    private SipAudioCall call = null;
 
     private WifiManager.WifiLock wifiLock;
     
@@ -272,6 +276,21 @@ public class JTalkService extends Service {
     public int getLastPosition(String jid) {
     	if (positionHash.containsKey(jid)) return positionHash.remove(jid);
     	else return -1;
+    }
+
+    public void addSipManager(String account, SipManager manager) {
+        sipManagers.put(account, manager);
+    }
+    public SipManager getSipManager(String account) {
+        if (sipManagers.containsKey(account)) return sipManagers.get(account);
+        else return null;
+    }
+
+    public void setIncomingCall(SipAudioCall call) {
+        this.call = call;
+    }
+    public SipAudioCall getIncomingCall() {
+        return this.call;
     }
     
     public IconPicker getIconPicker() { return iconPicker; }
@@ -764,6 +783,13 @@ public class JTalkService extends Service {
 	    		removeConnectionListener(account);
 				Presence presence = new Presence(Presence.Type.unavailable, "", 0, null);
 				connection.disconnect(presence);
+
+                try {
+                    if (sipManagers.containsKey(account)) {
+                        SipManager manager = sipManagers.get(account);
+                        manager.close("sip:"+account);
+                    }
+                } catch (Exception ignored) {}
 	    	} else if (connection.isConnected()) connection.disconnect();
             setState(account, getString(R.string.Disconnect));
             connections.remove(account);
@@ -791,6 +817,12 @@ public class JTalkService extends Service {
                 connection.disconnect(presence);
             } catch (Exception ignored) { }
 
+            try {
+                if (sipManagers.containsKey(account)) {
+                    SipManager manager = sipManagers.get(account);
+                    manager.close("sip:"+account);
+                }
+            } catch (Exception ignored) {}
             setState(account, getString(R.string.Disconnect));
     	}
     	sendBroadcast(new Intent(Constants.UPDATE));
@@ -1442,6 +1474,71 @@ public class JTalkService extends Service {
         pm.addExtensionProvider("session-expired", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.SessionExpiredError());
     }
 
+    private void registerSip(String username, String password) {
+        if (!prefs.getBoolean("EnableSIP", false)) return;
+        if (SipManager.isApiSupported(JTalkService.this) && SipManager.isVoipSupported(JTalkService.this)) {
+            Log.d("SIP", "Api supported");
+            String user = StringUtils.parseName(username);
+            String host = StringUtils.parseServer(username);
+            int port = 5060;
+            try {
+                Lookup lookup = new Lookup("_sip._udp." + host, Type.SRV);
+                lookup.setCredibility(Credibility.ANY);
+                Record[] records = lookup.run();
+                if(lookup.getResult() == Lookup.SUCCESSFUL) {
+                    if (records.length > 0) {
+                        SRVRecord record = (SRVRecord) records[0];
+                        host = record.getTarget().toString();
+                        host = host.substring(0, host.length()-1);
+                        port = record.getPort();
+                    }
+                }
+            } catch(Exception ignored) { }
+            Log.d("SIP", "user: " + user + "; host: " + host + "; port: " + port);
+
+            try {
+                SipProfile.Builder builder = new SipProfile.Builder(user, host);
+                builder.setDisplayName(username);
+                builder.setProfileName(username);
+                builder.setAutoRegistration(true);
+                builder.setOutboundProxy(host);
+                builder.setProtocol("UDP");
+                builder.setPort(port);
+                builder.setPassword(password);
+                builder.setSendKeepAlive(true);
+                SipProfile profile = builder.build();
+
+                SipManager manager = getSipManager(username);
+                if (manager == null) manager = SipManager.newInstance(JTalkService.this);
+
+                Intent intent = new Intent();
+                intent.putExtra("account", username);
+                intent.setAction(Constants.INCOMING_CALL);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(JTalkService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                if (!manager.isOpened(profile.getUriString())) manager.open(profile, pendingIntent, null);
+                manager.setRegistrationListener(profile.getUriString(), new SipRegistrationListener() {
+                    @Override
+                    public void onRegistering(String localProfileUri) {
+                        Log.d("REGLISTENER", "Registering with SIP Server...");
+                    }
+                    @Override
+                    public void onRegistrationDone(String localProfileUri, long expiryTime) {
+                        Log.d("REGLISTENER", "Ready");
+                    }
+                    @Override
+                    public void onRegistrationFailed(String localProfileUri, int errorCode, String errorMessage) {
+                        Log.d("REGLISTENER", "Registration failed.  Please check settings. MSG: [" + errorCode + "] " + errorMessage);
+                    }
+                });
+                addSipManager(username, manager);
+            } catch (ParseException pe) {
+                Log.e("CreateSipProfile", pe.getLocalizedMessage());
+            } catch (SipException se) {
+                Log.e("SIPExtension", se.getLocalizedMessage());
+            }
+        }
+    }
+
     public class ConnectionTask extends AsyncTask<String, Integer, String> {
         Intent intent = new Intent(Constants.UPDATE);
         String username, password, resource, service;
@@ -1633,6 +1730,8 @@ public class JTalkService extends Service {
 
                 if (connectionTasks.containsKey(username)) connectionTasks.remove(username);
                 sendBroadcast(new Intent(Constants.UPDATE));
+
+                registerSip(username, password);
             }
         }
     }

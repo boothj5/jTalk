@@ -25,6 +25,8 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.*;
 import android.net.Uri;
+import android.net.sip.SipException;
+import android.net.sip.SipManager;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.view.*;
@@ -574,8 +576,15 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 if (isMuc) inflater.inflate(R.menu.muc_chat, menu);
                 else {
                     inflater.inflate(R.menu.chat, menu);
-                    if (isPrivate) menu.findItem(R.id.resource).setVisible(false);
-                    else menu.findItem(R.id.resource).setVisible(true);
+                    menu.findItem(R.id.resource).setVisible(!isPrivate);
+                    try {
+                        SipManager manager = service.getSipManager(account);
+                        if (manager != null && manager.isRegistered("sip:"+account)) {
+                            menu.findItem(R.id.call).setVisible(true);
+                        }
+                    } catch (SipException se) {
+                        menu.findItem(R.id.call).setVisible(false);
+                    }
                 }
 
                 MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
@@ -777,6 +786,12 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 break;
             case R.id.add_bookmark:
                 BookmarksDialogs.AddDialog(this, account, jid, StringUtils.parseName(jid));
+                break;
+            case R.id.call:
+                Intent callIntent = new Intent(this, CallActivity.class);
+                callIntent.putExtra("account", account);
+                callIntent.putExtra("jid", jid);
+                startActivity(callIntent);
                 break;
             default:
                 return super.onOptionsItemSelected(item);

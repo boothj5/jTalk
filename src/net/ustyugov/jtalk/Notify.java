@@ -23,6 +23,7 @@ import java.util.HashMap;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import net.ustyugov.jtalk.activity.CallActivity;
 import net.ustyugov.jtalk.activity.Chat;
 import net.ustyugov.jtalk.activity.DataFormActivity;
 import net.ustyugov.jtalk.activity.RosterActivity;
@@ -54,6 +55,7 @@ public class Notify {
 	private static final int NOTIFICATION_CAPTCHA = 6;
 	private static final int NOTIFICATION_INVITE = 7;
     private static final int NOTIFICATION_IMGUR = 8;
+    private static final int NOTIFICATION_CALL = 9;
 	
 //	public static boolean newMessages = false;
 	public enum Type {Chat, Conference, Direct}
@@ -260,7 +262,7 @@ public class Notify {
             i.setAction(ids+"");
             i.putExtra("jid", from);
         	i.putExtra("account", account);
-            PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
+            PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Bitmap largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.stat_msg);
             String filePath = Constants.PATH + fullJid.replaceAll("/", "%");
@@ -531,5 +533,32 @@ public class Notify {
 
         NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(Integer.parseInt((System.currentTimeMillis()+"").substring(7)), mBuilder.build());
+    }
+
+    public static void callNotify(Context context, String account, String from) {
+        Intent i = new Intent(context, CallActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        i.putExtra("account", account);
+        i.putExtra("jid", from);
+        i.putExtra("incoming", true);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
+        mBuilder.setAutoCancel(true);
+        mBuilder.setOngoing(false);
+        mBuilder.setSmallIcon(android.R.drawable.sym_call_incoming);
+        mBuilder.setLights(0xFFFF0000, 2000, 3000);
+        mBuilder.setContentTitle("Incoming call");
+        mBuilder.setContentText(from);
+        mBuilder.setTicker("Incoming call from " + from);
+        mBuilder.setContentIntent(contentIntent);
+
+        NotificationManager mng = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        mng.notify(NOTIFICATION_CALL, mBuilder.build());
+    }
+
+    public static void cancelCallNotify(Context context) {
+        NotificationManager mng = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        mng.cancel(NOTIFICATION_CALL);
     }
 }
