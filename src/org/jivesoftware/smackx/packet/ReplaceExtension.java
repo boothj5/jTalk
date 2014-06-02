@@ -5,6 +5,7 @@ import org.jivesoftware.smack.provider.PacketExtensionProvider;
 import org.xmlpull.v1.XmlPullParser;
 
 public class ReplaceExtension implements PacketExtension {
+    public final static String NAMESPACE = "urn:xmpp:message-correct:0";
 	private String id;
 
     public ReplaceExtension(String id) {
@@ -16,7 +17,7 @@ public class ReplaceExtension implements PacketExtension {
     }
 
     public String getNamespace() {
-        return "urn:xmpp:message-correct:0";
+        return NAMESPACE;
     }
     
     public String getId() {

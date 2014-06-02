@@ -23,7 +23,7 @@ import java.util.*;
 import android.content.*;
 import android.text.Layout;
 import android.text.Spanned;
-import android.text.style.AlignmentSpan;
+import android.text.style.*;
 import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
@@ -39,9 +39,6 @@ import com.jtalk2.R;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -176,7 +173,10 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
             	else ssb.setSpan(new ForegroundColorSpan(Colors.PRIMARY_TEXT), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             
-            if (item.isEdited()) ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), colorLength, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (item.isEdited()) {
+                ssb.append(" ");
+                ssb.setSpan(new ImageSpan(context, R.drawable.ic_edited), ssb.length()-1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
         }
 
         if (type != MessageItem.Type.separator) {

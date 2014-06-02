@@ -23,7 +23,7 @@ import net.ustyugov.jtalk.service.JTalkService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.util.Log;
+import org.jivesoftware.smack.util.StringUtils;
 
 import java.util.List;
 
@@ -40,22 +40,19 @@ public class MessageLog {
         }
         service.setMessageList(account, jid, list);
 
-        try {
-            ContentValues values = new ContentValues();
-            values.put(MessageDbHelper.TYPE, message.getType().name());
-            values.put(MessageDbHelper.JID, jid);
-            values.put(MessageDbHelper.ID, message.getId());
-            values.put(MessageDbHelper.STAMP, message.getTime());
-            values.put(MessageDbHelper.NICK, message.getName());
-            values.put(MessageDbHelper.BODY, message.getBody());
-            values.put(MessageDbHelper.COLLAPSED, false);
-            values.put(MessageDbHelper.RECEIVED, message.isReceived() ? "true" : "false");
-            values.put(MessageDbHelper.FORM, "NULL");
-            values.put(MessageDbHelper.BOB, "NULL");
-            service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
-        } catch (Exception sqle) {
-            Log.i("SQL", sqle.getLocalizedMessage());
-        }
+        ContentValues values = new ContentValues();
+        values.put(MessageDbHelper.TYPE, message.getType().name());
+        values.put(MessageDbHelper.JID, jid);
+        values.put(MessageDbHelper.ID, message.getId());
+        values.put(MessageDbHelper.STAMP, message.getTime());
+        values.put(MessageDbHelper.NICK, message.getName());
+        values.put(MessageDbHelper.BODY, message.getBody());
+        values.put(MessageDbHelper.COLLAPSED, false);
+        values.put(MessageDbHelper.RECEIVED, message.isReceived() ? "true" : "false");
+        values.put(MessageDbHelper.FORM, "NULL");
+        values.put(MessageDbHelper.BOB, "NULL");
+        service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
+
         service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", jid));
     }
 	
@@ -65,69 +62,106 @@ public class MessageLog {
         list.add(message);
         service.setMessageList(account, group, list);
 
-        try {
-            ContentValues values = new ContentValues();
-            values.put(MessageDbHelper.TYPE, message.getType().name());
-            values.put(MessageDbHelper.JID, group);
-            values.put(MessageDbHelper.ID, message.getId());
-            values.put(MessageDbHelper.STAMP, message.getTime());
-            values.put(MessageDbHelper.NICK, nick);
-            values.put(MessageDbHelper.BODY, message.getBody());
-            values.put(MessageDbHelper.COLLAPSED, false);
-            values.put(MessageDbHelper.RECEIVED, message.isReceived() ? "true" : "false");
-            values.put(MessageDbHelper.FORM, "NULL");
-            values.put(MessageDbHelper.BOB, "NULL");
-            service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
+        ContentValues values = new ContentValues();
+        values.put(MessageDbHelper.TYPE, message.getType().name());
+        values.put(MessageDbHelper.JID, group);
+        values.put(MessageDbHelper.ID, message.getId());
+        values.put(MessageDbHelper.STAMP, message.getTime());
+        values.put(MessageDbHelper.NICK, nick);
+        values.put(MessageDbHelper.BODY, message.getBody());
+        values.put(MessageDbHelper.COLLAPSED, false);
+        values.put(MessageDbHelper.RECEIVED, message.isReceived() ? "true" : "false");
+        values.put(MessageDbHelper.FORM, "NULL");
+        values.put(MessageDbHelper.BOB, "NULL");
+        service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
 
-            service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", group));
-            service.sendBroadcast(new Intent(Constants.PRESENCE_CHANGED).putExtra("jid", group));
-        } catch (Exception sqle) {
-            Log.i("SQL", sqle.getLocalizedMessage());
-        }
+        service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", group));
+        service.sendBroadcast(new Intent(Constants.PRESENCE_CHANGED).putExtra("jid", group));
 	}
 	
-	public static void editMessage(final String account, final String jid, final String id, final String text) {
+	public static void editMessage(final String account, final String jid, final String rid, final String text) {
 		final JTalkService service = JTalkService.getInstance();
 		new Thread() {
 			@Override
 			public void run() {
-				try {
-					Cursor cursor = service.getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND id = '" + id + "'", null, MessageDbHelper._ID);
-					if (cursor != null && cursor.getCount() > 0 && text != null && text.length() > 0) {
-						cursor.moveToLast();
-						String _id = cursor.getString(cursor.getColumnIndex(MessageDbHelper._ID));
-						String nick = cursor.getString(cursor.getColumnIndex(MessageDbHelper.NICK));
-						String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
-						String stamp = cursor.getString(cursor.getColumnIndex(MessageDbHelper.STAMP));
-						String received = cursor.getString(cursor.getColumnIndex(MessageDbHelper.RECEIVED));
-						
-						ContentValues values = new ContentValues();
-		 	            values.put(MessageDbHelper.TYPE, type);
-		 	            values.put(MessageDbHelper.JID, jid);
-		 	            values.put(MessageDbHelper.ID, id);
-		 	            values.put(MessageDbHelper.STAMP, stamp);
-		 	            values.put(MessageDbHelper.NICK, nick);
-		 	            values.put(MessageDbHelper.BODY, text);
-		 	            values.put(MessageDbHelper.COLLAPSED, false);
-		 	            values.put(MessageDbHelper.RECEIVED, received);
-		 	            values.put(MessageDbHelper.FORM, "NULL");
-		 	            values.put(MessageDbHelper.BOB, "NULL");
-		 	            
-		 	            service.getContentResolver().update(JTalkProvider.CONTENT_URI, values, "_ID = '" + _id + "'", null);
+                Cursor cursor = service.getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND id = '" + rid + "'", null, MessageDbHelper._ID);
+                if (cursor != null && cursor.getCount() > 0 && text != null && text.length() > 0) {
+                    cursor.moveToLast();
+                    String _id = cursor.getString(cursor.getColumnIndex(MessageDbHelper._ID));
+                    String id = cursor.getString(cursor.getColumnIndex(MessageDbHelper.ID));
+                    String nick = cursor.getString(cursor.getColumnIndex(MessageDbHelper.NICK));
+                    String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
+                    String stamp = cursor.getString(cursor.getColumnIndex(MessageDbHelper.STAMP));
+                    String received = cursor.getString(cursor.getColumnIndex(MessageDbHelper.RECEIVED));
+                    cursor.close();
 
-                        List<MessageItem> list = service.getMessageList(account, jid);
-                        for (MessageItem item : list) {
-                            if (item.getId().equals(id)) {
-                                item.setBody(text);
-                                item.setEdited(true);
-                            }
+                    ContentValues values = new ContentValues();
+                    values.put(MessageDbHelper.TYPE, type);
+                    values.put(MessageDbHelper.JID, jid);
+                    values.put(MessageDbHelper.ID, id);
+                    values.put(MessageDbHelper.STAMP, stamp);
+                    values.put(MessageDbHelper.NICK, nick);
+                    values.put(MessageDbHelper.BODY, text);
+                    values.put(MessageDbHelper.COLLAPSED, false);
+                    values.put(MessageDbHelper.RECEIVED, received);
+                    values.put(MessageDbHelper.FORM, "NULL");
+                    values.put(MessageDbHelper.BOB, "NULL");
+
+                    service.getContentResolver().update(JTalkProvider.CONTENT_URI, values, "_ID = '" + _id + "'", null);
+
+                    List<MessageItem> list = service.getMessageList(account, jid);
+                    for (MessageItem item : list) {
+                        if (item.getId().equals(rid)) {
+                            item.setBody(text);
+                            item.setEdited(true);
                         }
-                        service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", jid));
-					}
-	            } catch (Exception sqle) {
-	            	Log.i("SQL", sqle.getLocalizedMessage());
-	            }
+                    }
+                    service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", jid));
+                }
 			}
 		}.start();
 	}
+
+    public static void editMucMessage(final String account, final String from, final String rid, final String text) {
+        final String group = StringUtils.parseBareAddress(from);
+        final String nick = StringUtils.parseResource(from);
+        final JTalkService service = JTalkService.getInstance();
+        new Thread() {
+            @Override
+            public void run() {
+                Cursor cursor = service.getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + group + "' AND id = '" + rid + "'", null, MessageDbHelper._ID);
+                if (cursor != null && cursor.getCount() > 0 && text != null && text.length() > 0) {
+                    cursor.moveToLast();
+                    String _id = cursor.getString(cursor.getColumnIndex(MessageDbHelper._ID));
+                    String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
+                    String stamp = cursor.getString(cursor.getColumnIndex(MessageDbHelper.STAMP));
+                    cursor.close();
+
+                    ContentValues values = new ContentValues();
+                    values.put(MessageDbHelper.TYPE, type);
+                    values.put(MessageDbHelper.JID, group);
+                    values.put(MessageDbHelper.ID, rid);
+                    values.put(MessageDbHelper.STAMP, stamp);
+                    values.put(MessageDbHelper.NICK, nick);
+                    values.put(MessageDbHelper.BODY, text);
+                    values.put(MessageDbHelper.COLLAPSED, false);
+                    values.put(MessageDbHelper.RECEIVED, false);
+                    values.put(MessageDbHelper.FORM, "NULL");
+                    values.put(MessageDbHelper.BOB, "NULL");
+
+                    service.getContentResolver().update(JTalkProvider.CONTENT_URI, values, "_ID = '" + _id + "'", null);
+
+                    List<MessageItem> list = service.getMessageList(account, group);
+                    for (MessageItem item : list) {
+                        String msgID = item.getId();
+                        if (rid.equals(msgID)) {
+                            item.setBody(text);
+                            item.setEdited(true);
+                        }
+                    }
+                    service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", group));
+                }
+            }
+        }.start();
+    }
 }

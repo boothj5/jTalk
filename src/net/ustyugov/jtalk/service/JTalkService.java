@@ -1617,6 +1617,7 @@ public class JTalkService extends Service {
                 connection.addFeature("jabber:iq:version");
                 connection.addFeature("urn:xmpp:receipts");
                 connection.addFeature("urn:xmpp:time");
+                connection.addFeature(ReplaceExtension.NAMESPACE);
                 connection.addFeature(Notes.NAMESPACE);
 
                 try {

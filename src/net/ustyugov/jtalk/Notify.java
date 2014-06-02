@@ -57,7 +57,6 @@ public class Notify {
     private static final int NOTIFICATION_IMGUR = 8;
     private static final int NOTIFICATION_CALL = 9;
 	
-//	public static boolean newMessages = false;
 	public enum Type {Chat, Conference, Direct}
 	
     public static void updateNotify() {
@@ -113,10 +112,9 @@ public class Notify {
 
         mng.notify(NOTIFICATION, mBuilder.build());
     }
-    
+
     public static void offlineNotify(Context context, String state) {
         if (state == null) state = "";
-//    	newMessages = false;
         Intent i = new Intent(context, RosterActivity.class);
         i.setAction(Intent.ACTION_MAIN);
         i.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -140,7 +138,6 @@ public class Notify {
     }
 
     public static void connectingNotify(String account) {
-//        newMessages = false;
         JTalkService service = JTalkService.getInstance();
         Intent i = new Intent(service, RosterActivity.class);
         i.setAction(Intent.ACTION_MAIN);
@@ -164,9 +161,8 @@ public class Notify {
         NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(NOTIFICATION, mBuilder.build());
     }
-    
+
     public static void cancelAll(Context context) {
-//    	newMessages = false;
     	NotificationManager mng = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     	mng.cancelAll();
     }
@@ -178,7 +174,7 @@ public class Notify {
         mng.cancel(ids.get(key));
         ids.remove(key);
     }
-    
+
     public static void messageNotify(String account, String fullJid, Type type, String text) {
         JTalkService service = JTalkService.getInstance();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
@@ -194,7 +190,6 @@ public class Notify {
             color = Integer.parseInt(prefs.getString("lightsColor", Color.GREEN+""));
         } catch (NumberFormatException nfe) {}
 
-//    	newMessages = true;
     	String nick = from;
         if (service.getConferencesHash(account).containsKey(from)) {
             nick = StringUtils.parseName(from);
@@ -240,16 +235,16 @@ public class Notify {
                 soundPath = prefs.getString("ringtone", "");
             }
     	}
-    	
+
     	if (soundPath.equals("")) sound = false;
 
     	if (!currentJid.equals(from) || currentJid.equals("me")) {
     		if (vibro) vibrator.vibrate(200);
-    	
+
             if (include) {
                 ticker = service.getString(R.string.NewMessageFrom) + " " + nick + ": " + text;
             } else ticker = service.getString(R.string.NewMessageFrom) + " " + nick;
-    		
+
         	Uri sound_file = Uri.parse(soundPath);
 
             String key = account + "/" + from;
@@ -327,21 +322,21 @@ public class Notify {
         NotificationManager mng = (NotificationManager) JTalkService.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
         mng.cancel(NOTIFICATION_IMGUR);
     }
-    
+
     public static void fileProgress(String filename, Status status) {
     	JTalkService service = JTalkService.getInstance();
-    	
+
     	Intent i = new Intent(service, RosterActivity.class);
     	i.setAction(Intent.ACTION_MAIN);
         i.addCategory(Intent.CATEGORY_LAUNCHER);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
-        
+
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
         mBuilder.setContentTitle(filename);
         mBuilder.setContentIntent(contentIntent);
         mBuilder.setOngoing(false);
-        
+
         if (status == Status.complete) {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download_done);
         	mBuilder.setTicker(service.getString(R.string.Completed));
@@ -373,17 +368,17 @@ public class Notify {
         } else {
         	return;
         }
-        
+
     	NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(NOTIFICATION_FILE, mBuilder.build());
     }
-    
+
     public static void incomingFile() {
     	JTalkService service = JTalkService.getInstance();
     	Intent i = new Intent(service, ReceiveFileActivity.class);
     	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-  
+
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
         mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
         mBuilder.setLights(0xFF0000FF, 2000, 3000);
@@ -391,14 +386,14 @@ public class Notify {
         mBuilder.setContentText(service.getString(R.string.AcceptFile));
         mBuilder.setContentIntent(contentIntent);
         mBuilder.setAutoCancel(true);
-        
+
     	NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(NOTIFICATION_FILE_REQUEST, mBuilder.build());
     }
-    
+
     public static void inviteNotify(String account, String room, String from, String reason, String password) {
     	JTalkService service = JTalkService.getInstance();
-    	
+
     	Intent i = new Intent(service, Invite.class);
     	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     	i.putExtra("account", account);
@@ -407,7 +402,7 @@ public class Notify {
         i.putExtra("reason", reason);
         i.putExtra("password", password);
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-        
+
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
         mBuilder.setSmallIcon(R.drawable.icon_muc);
         mBuilder.setLights(0xFF0000FF, 2000, 3000);
@@ -416,25 +411,25 @@ public class Notify {
         mBuilder.setContentTitle(service.getString(R.string.InviteTo));
         mBuilder.setContentText(room);
         mBuilder.setContentIntent(contentIntent);
-        
+
     	NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(NOTIFICATION_INVITE, mBuilder.build());
     }
-    
+
     public static void incomingFileProgress(String filename, Status status) {
     	JTalkService service = JTalkService.getInstance();
-    	
+
     	Intent i = new Intent(service, RosterActivity.class);
     	i.setAction(Intent.ACTION_MAIN);
         i.addCategory(Intent.CATEGORY_LAUNCHER);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        
+
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
-        
+
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
         mBuilder.setContentTitle(filename);
         mBuilder.setContentIntent(contentIntent);
-        
+
         if (status == Status.complete) {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download_done);
         	mBuilder.setTicker(service.getString(R.string.Completed));
@@ -472,20 +467,20 @@ public class Notify {
         } else {
         	return;
         }
-        
+
     	NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(NOTIFICATION_IN_FILE, mBuilder.build());
     }
-    
+
     public static void cancelFileRequest() {
     	NotificationManager mng = (NotificationManager) JTalkService.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
     	mng.cancel(NOTIFICATION_FILE_REQUEST);
     }
-    
+
     public static void captchaNotify(String account, MessageItem message) {
     	JTalkService service = JTalkService.getInstance();
     	service.addDataForm(message.getId(), message.getForm());
-    	
+
     	Intent intent = new Intent(service, DataFormActivity.class);
         intent.putExtra("account", account);
     	intent.putExtra("id", message.getId());
@@ -494,9 +489,9 @@ public class Notify {
         intent.putExtra("bob", message.getBob().getData());
         intent.putExtra("cid", message.getBob().getCid());
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, intent, 0);
-   		
+
         String str = "Captcha";
-        
+
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
         mBuilder.setAutoCancel(true);
         mBuilder.setOngoing(false);
@@ -506,7 +501,7 @@ public class Notify {
         mBuilder.setContentText(message.getBody());
         mBuilder.setContentIntent(contentIntent);
         mBuilder.setTicker(str);
-        
+
         NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(NOTIFICATION_CAPTCHA, mBuilder.build());
     }

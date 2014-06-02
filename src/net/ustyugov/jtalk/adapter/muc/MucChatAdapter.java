@@ -24,7 +24,7 @@ import java.util.List;
 import android.content.*;
 import android.text.Layout;
 import android.text.Spanned;
-import android.text.style.AlignmentSpan;
+import android.text.style.*;
 import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Holders;
@@ -40,9 +40,6 @@ import com.jtalk2.R;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -193,6 +190,11 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                     ssb.setSpan(new ForegroundColorSpan(Colors.INBOX_MESSAGE), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
+            }
+
+            if (item.isEdited()) {
+                ssb.append(" ");
+                ssb.setSpan(new ImageSpan(context, R.drawable.ic_edited), ssb.length()-1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
 
