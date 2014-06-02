@@ -1695,13 +1695,36 @@ public class JTalkService extends Service {
                                 BookmarkManager bm = BookmarkManager.getBookmarkManager(connection);
                                 Collection<BookmarkedConference> bookmarks = bm.getBookmarkedConferences();
                                 for(BookmarkedConference bc : bookmarks) {
-                                    String nick = bc.getNickname();
-                                    if (nick == null || nick.length() < 1) nick = StringUtils.parseName(username);
-                                    if (bc.isAutoJoin()) joinRoom(username, bc.getJid(), nick, bc.getPassword());
+                                    if (bc.isAutoJoin()) {
+	                                	String nick = getBookmarkNick(username, bc);
+	                                	joinRoom(username, bc.getJid(), nick, bc.getPassword());
+                                    }
                                 }
                             } catch (XMPPException ignored) { }
                         }
                     }
+
+					private String getBookmarkNick(final String username, BookmarkedConference bc) {
+						String nick = bc.getNickname();
+						// no nickname with bookmark
+						if (nick == null || nick.length() < 1) {
+							// try account preference
+							Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.JID + " = '" + username + "'", null, null);
+							if (cursor != null && cursor.getCount() > 0) {
+								cursor.moveToFirst();
+						        if (AccountDbHelper.VERSION > 4) {
+						            nick = cursor.getString(cursor.getColumnIndex(AccountDbHelper.NICK));
+						        }
+							}
+							cursor.close();
+						}
+						// no nickname account preference
+						if (nick == null || nick.length() < 1) {
+							// use localpart of JID
+							nick = StringUtils.parseName(username);
+						}
+						return nick;
+					}
                 }.start();
 
                 if (prefs.getBoolean("Ping", false)) {
