@@ -169,8 +169,8 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
             if (!nick.equals(context.getResources().getString(R.string.Me)))
             	ssb.setSpan(new ForegroundColorSpan(Colors.INBOX_MESSAGE), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             else {
-            	if (received) ssb.setSpan(new ForegroundColorSpan(Colors.OUTBOX_MESSAGE), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            	else ssb.setSpan(new ForegroundColorSpan(Colors.PRIMARY_TEXT), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.setSpan(new ForegroundColorSpan(Colors.OUTBOX_MESSAGE), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                if (received) ssb.setSpan(new ImageSpan(context, R.drawable.ic_delivered), colorLength, colorLength+1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
             }
             
             if (item.isEdited()) {

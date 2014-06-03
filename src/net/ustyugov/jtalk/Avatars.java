@@ -75,7 +75,7 @@ public class Avatars {
                             if (image != null) {
                                 int value = (int) (42 * activity.getResources().getDisplayMetrics().density);
                                 ViewGroup.LayoutParams lp = image.getLayoutParams();
-                                lp.width = 1;
+                                lp.width = value;
                                 lp.height = value;
                                 image.setLayoutParams(lp);
                                 image.setVisibility(View.INVISIBLE);

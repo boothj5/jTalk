@@ -178,7 +178,7 @@ public class MsgListener implements PacketListener {
             }
 
             boolean highlight = false;
-            if (item.contains(mynick, prefs.getBoolean("TrueNick", false))) highlight = true;
+            if (item.contains(mynick, prefs.getBoolean("HighlightFullWord", false))) highlight = true;
             else {
                 String highString = prefs.getString("Highlights", "");
                 String[] highArray = highString.split(" ");
