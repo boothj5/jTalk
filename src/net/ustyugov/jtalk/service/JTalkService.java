@@ -25,6 +25,7 @@ import java.util.*;
 
 import android.app.Activity;
 import android.net.sip.*;
+import android.os.PowerManager;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
@@ -126,6 +127,7 @@ public class JTalkService extends Service {
     private SipAudioCall call = null;
 
     private WifiManager.WifiLock wifiLock;
+    private PowerManager.WakeLock wakeLock;
     
     private IconPicker iconPicker;
 
@@ -736,6 +738,8 @@ public class JTalkService extends Service {
 
         WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 		wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "jTalk");
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "jTalk");
 
         started = true;
 
@@ -770,6 +774,7 @@ public class JTalkService extends Service {
     public void disconnect() {
         if (!started) return;
         if (wifiLock != null && wifiLock.isHeld()) wifiLock.release();
+        if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
     	Collection<XMPPConnection> con = getAllConnections();
 		for (XMPPConnection connection: con) {
 			String account = StringUtils.parseBareAddress(connection.getUser());
@@ -862,6 +867,7 @@ public class JTalkService extends Service {
     public void connect() {
         if (!started) return;
     	if (prefs.getBoolean("WifiLock", false)) wifiLock.acquire();
+        if (prefs.getBoolean("WakeLock", false)) wakeLock.acquire();
     	
 //		String text  = prefs.getString("currentStatus", "");
 		String mode  = prefs.getString("currentMode", "available");

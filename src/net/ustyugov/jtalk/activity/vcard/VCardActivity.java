@@ -242,15 +242,12 @@ public class VCardActivity extends Activity {
 					matrix.postScale(scaleWidth, scaleHeight);
 					
 					bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
+                    bitmap.setDensity(metrics.densityDpi);
 					int width = bitmap.getWidth();
 					if (width > metrics.widthPixels)  {
 						double k = (double)width/(double)metrics.widthPixels;
-						int h = (int) (bitmap.getWidth()/k);
-						bitmap = Bitmap.createBitmap(bitmap, 0, 0, metrics.widthPixels, h, matrix, true);
-						bitmap.setDensity(metrics.densityDpi);
-					} else {
-						bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-						bitmap.setDensity(metrics.densityDpi);
+						int h = (int) (bitmap.getHeight()/k);
+						bitmap = Bitmap.createScaledBitmap(bitmap, metrics.widthPixels, h, true);
 					}
 					
 					try {

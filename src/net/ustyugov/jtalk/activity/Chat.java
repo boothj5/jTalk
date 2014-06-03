@@ -406,7 +406,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         if (service.getConferencesHash(account).containsKey(jid)) {
             isMuc = true;
             muc = service.getConferencesHash(account).get(jid);
-            messageInput.setHint(getString(R.string.From) + " " + StringUtils.parseName(account));
+            if (prefs.getBoolean("ShowInputHints", true)) messageInput.setHint(getString(R.string.From) + " " + StringUtils.parseName(account));
 
             String group = listMucAdapter.getGroup();
             if (listView.getAdapter() instanceof ChatAdapter) {
@@ -428,9 +428,11 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
             if (resource == null || resource.equals("")) resource = service.getResource(account, jid);
 
-            if (resource != null && !resource.equals("")) {
-                messageInput.setHint(getString(R.string.To) + " " + resource + " " + getString(R.string.From) + " " + StringUtils.parseName(account));
-            } else messageInput.setHint(getString(R.string.From) + " " + StringUtils.parseName(account));
+            if (prefs.getBoolean("ShowInputHints", true)) {
+                if (resource != null && !resource.equals("")) {
+                    messageInput.setHint(getString(R.string.To) + " " + resource + " " + getString(R.string.From) + " " + StringUtils.parseName(account));
+                } else messageInput.setHint(getString(R.string.From) + " " + StringUtils.parseName(account));
+            }
 
             String j = listAdapter.getJid();
             listAdapter.update(account, jid, searchString, viewMode);

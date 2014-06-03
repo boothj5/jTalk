@@ -102,6 +102,10 @@
                 android:title="Show delivery notifications"
                 android:key="ShowReceivedIcon"
                 android:defaultValue="true"/>
+        <CheckBoxPreference
+                android:title="Show hints on input panel"
+                android:key="ShowInputHints"
+                android:defaultValue="true"/>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/MUC">
@@ -291,6 +295,10 @@
         <CheckBoxPreference
                 android:title="Wi-Fi Lock"
                 android:key="WifiLock"
+                android:defaultValue="false"/>
+        <CheckBoxPreference
+                android:title="Wake Lock"
+                android:key="WakeLock"
                 android:defaultValue="false"/>
         <CheckBoxPreference
                 android:title="Send Tunes"
