@@ -21,12 +21,9 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 
 import android.preference.PreferenceManager;
-import net.ustyugov.jtalk.Avatars;
-import net.ustyugov.jtalk.MessageItem;
-import net.ustyugov.jtalk.MessageLog;
+import android.util.Log;
+import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.service.JTalkService;
-
-import net.ustyugov.jtalk.Constants;
 
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
@@ -66,6 +63,11 @@ public class RstListener implements RosterListener {
 
     @Override
     public void presenceChanged(Presence presence) {
+        if (presence.getType() == Presence.Type.subscribe) {
+            Notify.subscribtionNotify(service, account, presence.getFrom());
+            return;
+        }
+
     	String[] statusArray = service.getResources().getStringArray(R.array.statusArray);
     	String jid  = StringUtils.parseBareAddress(presence.getFrom());
         String name = jid;

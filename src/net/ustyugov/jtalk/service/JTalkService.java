@@ -1522,6 +1522,7 @@ public class JTalkService extends Service {
                 intent.setAction(Constants.INCOMING_CALL);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(JTalkService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 if (!manager.isOpened(profile.getUriString())) manager.open(profile, pendingIntent, null);
+                Thread.sleep(4000);
                 manager.setRegistrationListener(profile.getUriString(), new SipRegistrationListener() {
                     @Override
                     public void onRegistering(String localProfileUri) {
@@ -1541,7 +1542,7 @@ public class JTalkService extends Service {
                 Log.e("CreateSipProfile", pe.getLocalizedMessage());
             } catch (SipException se) {
                 Log.e("SIPExtension", se.getLocalizedMessage());
-            }
+            } catch (InterruptedException ignored) { }
         }
     }
     
@@ -1673,7 +1674,7 @@ public class JTalkService extends Service {
                         addConnectionListener(username, connection);
 
                         Roster roster = connection.getRoster();
-                        roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
+                        roster.setSubscriptionMode(Roster.SubscriptionMode.valueOf(prefs.getString("SubscriptionMode", Roster.SubscriptionMode.accept_all.name())));
                         roster.addRosterListener(new RstListener(username));
 
                         connections.put(username, connection);

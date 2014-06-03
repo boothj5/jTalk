@@ -909,8 +909,9 @@ public class Roster {
                     Presence response = new Presence(Presence.Type.unsubscribed);
                     response.setTo(presence.getFrom());
                     connection.sendPacket(response);
+                } else {
+                    fireRosterPresenceEvent(presence);
                 }
-                // Otherwise, in manual mode so ignore.
             }
             else if (presence.getType() == Presence.Type.unsubscribe) {
                 if (subscriptionMode != SubscriptionMode.manual) {
@@ -920,8 +921,9 @@ public class Roster {
                     Presence response = new Presence(Presence.Type.unsubscribed);
                     response.setTo(presence.getFrom());
                     connection.sendPacket(response);
+                } else {
+                    fireRosterPresenceEvent(presence);
                 }
-                // Otherwise, in manual mode so ignore.
             }
             // Error presence packets from a bare JID mean we invalidate all existing
             // presence info for the user.

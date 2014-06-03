@@ -377,7 +377,37 @@ public class RosterDialogs {
         });
         builder.create().show();
 	}
-	
+
+    public static void subscribtionRequestDialog(Activity activity, final String account, final String jid) {
+        final JTalkService service = JTalkService.getInstance();
+
+        final Presence presence = new Presence(Presence.Type.subscribed);
+        presence.setTo(jid);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(R.string.Subscribtion);
+        builder.setMessage("Request from " + jid);
+        builder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                presence.setType(Presence.Type.subscribed);
+                if (service.isAuthenticated(account)) {
+                    service.sendPacket(account, presence);
+                }
+            }
+        });
+        builder.setNegativeButton("Reject", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                presence.setType(Presence.Type.unsubscribed);
+                if (service.isAuthenticated(account)) {
+                    service.sendPacket(account, presence);
+                }
+            }
+        });
+        builder.create().show();
+    }
+
 	public static void resourceDialog(final Activity activity, final String account, final String jid) {
 		JTalkService service = JTalkService.getInstance();
 		final List<String> list = new ArrayList<String>();

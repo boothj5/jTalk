@@ -128,6 +128,12 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
             RosterDialogs.passwordDialog(this, account);
         }
 
+        if (getIntent().getBooleanExtra("subscribtion", false)) {
+            String account = getIntent().getStringExtra("account");
+            String jid = getIntent().getStringExtra("jid");
+            RosterDialogs.subscribtionRequestDialog(this, account, jid);
+        }
+
         File table = new File(Constants.PATH_SMILES + "/default/table.xml");
         if (!table.exists()) {
             new CreateDefaultSmiles().execute();

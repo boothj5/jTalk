@@ -345,7 +345,6 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 				holder = new ItemHolder();
 
                 holder.name = (TextView) convertView.findViewById(R.id.name);
-				holder.name.setTextColor(Colors.ENTRY_FOREGROUND);
 				holder.name.setTextSize(fontSize);
 				holder.status = (TextView) convertView.findViewById(R.id.status);
 				holder.status.setTextSize(statusSize);
@@ -364,6 +363,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 			}
 			
 	        holder.name.setText(name);
+            holder.name.setTextColor(Colors.ENTRY_FOREGROUND);
 	        if (service.getActiveChats(account).contains(jid)) {
 				holder.name.setTypeface(Typeface.DEFAULT_BOLD);
 			} else holder.name.setTypeface(Typeface.DEFAULT);

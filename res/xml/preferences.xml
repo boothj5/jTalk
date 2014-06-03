@@ -51,6 +51,9 @@
                 android:key="ColorLines"
                 android:title="@string/ColorLines"
                 android:defaultValue="false" />
+        <ListPreference
+                android:key="SubscriptionMode"
+                android:title="Subscription"/>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Chat">
