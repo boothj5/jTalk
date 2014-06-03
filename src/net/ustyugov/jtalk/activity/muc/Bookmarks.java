@@ -33,7 +33,6 @@ import net.ustyugov.jtalk.dialog.ChangeChatDialog;
 import net.ustyugov.jtalk.dialog.MucDialogs;
 import net.ustyugov.jtalk.service.JTalkService;
 
-import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.bookmark.BookmarkManager;
 import org.jivesoftware.smackx.bookmark.BookmarkedConference;
 
