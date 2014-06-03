@@ -98,6 +98,10 @@
                 android:key="NoMaxLines"
                 android:title="@string/NoMaxLines"
                 android:defaultValue="true" />
+        <CheckBoxPreference
+                android:title="Show delivery notifications"
+                android:key="ShowReceivedIcon"
+                android:defaultValue="true"/>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/MUC">
@@ -321,6 +325,10 @@
                 android:title="Enable SIP"
                 android:summary="Needed reconnect"
                 android:key="EnableSIP"
+                android:defaultValue="false"/>
+        <CheckBoxPreference
+                android:title="Auto load pictures"
+                android:key="LoadPictures"
                 android:defaultValue="false"/>
     </PreferenceScreen>
     <PreferenceScreen android:title="@string/Info">

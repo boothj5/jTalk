@@ -20,15 +20,13 @@ package net.ustyugov.jtalk.adapter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import android.app.Activity;
 import android.content.*;
 import android.text.Layout;
 import android.text.Spanned;
 import android.text.style.*;
 import android.widget.*;
-import net.ustyugov.jtalk.Colors;
-import net.ustyugov.jtalk.Constants;
-import net.ustyugov.jtalk.Holders;
-import net.ustyugov.jtalk.MessageItem;
+import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.listener.MyTextLinkClickListener;
 import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.smiles.Smiles;
@@ -49,18 +47,18 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
 	private String searchString = "";
 
 	private SharedPreferences prefs;
-	private Context context;
+	private Activity activity;
 	private Smiles smiles;
     private String account;
 	private String jid;
 	private boolean showtime;
     private ViewMode viewMode = ViewMode.single;
 
-	public ChatAdapter(Context context, Smiles smiles) {
-        super(context, R.id.chat1);
-        this.context = context;
+	public ChatAdapter(Activity activity, Smiles smiles) {
+        super(activity, R.id.chat1);
+        this.activity = activity;
         this.smiles  = smiles;
-        this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         this.showtime = prefs.getBoolean("ShowTime", false);
     }
 	
@@ -104,9 +102,9 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
 
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
-		int fontSize = Integer.parseInt(context.getResources().getString(R.string.DefaultFontSize));
+		int fontSize = Integer.parseInt(activity.getResources().getString(R.string.DefaultFontSize));
 		try {
-			fontSize = Integer.parseInt(prefs.getString("FontSize", context.getResources().getString(R.string.DefaultFontSize)));
+			fontSize = Integer.parseInt(prefs.getString("FontSize", activity.getResources().getString(R.string.DefaultFontSize)));
 		} catch (NumberFormatException ignored) {	}
 
         Holders.MessageHolder holder = new Holders.MessageHolder();
@@ -118,7 +116,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
             holder.linear.setMinimumHeight(Integer.parseInt(prefs.getString("SmilesSize", "24")));
             holder.check = (CheckBox) convertView.findViewById(R.id.check);
             holder.text = (MyTextView) convertView.findViewById(R.id.chat1);
-            holder.text.setOnTextLinkClickListener(new MyTextLinkClickListener(context, jid));
+            holder.text.setOnTextLinkClickListener(new MyTextLinkClickListener(activity, jid));
             holder.text.setTextSize(fontSize);
 
             convertView.setBackgroundColor(0X00000000);
@@ -136,7 +134,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
         boolean received = item.isReceived();
         String time = createTimeString(item.getTime());
 
-        if (item.getSubject().length() > 0) subj = "\n" + context.getString(R.string.Subject) + ": " + item.getSubject() + "\n";
+        if (item.getSubject().length() > 0) subj = "\n" + activity.getString(R.string.Subject) + ": " + item.getSubject() + "\n";
         body = subj + body;
         
         String message;
@@ -166,16 +164,16 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
         	ssb.append(message);
         	ssb.setSpan(new ForegroundColorSpan(Colors.PRIMARY_TEXT), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         	ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, boldLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            if (!nick.equals(context.getResources().getString(R.string.Me)))
+            if (!nick.equals(activity.getResources().getString(R.string.Me)))
             	ssb.setSpan(new ForegroundColorSpan(Colors.INBOX_MESSAGE), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             else {
                 ssb.setSpan(new ForegroundColorSpan(Colors.OUTBOX_MESSAGE), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                if (received) ssb.setSpan(new ImageSpan(context, R.drawable.ic_delivered), colorLength, colorLength+1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                if (received && prefs.getBoolean("ShowReceivedIcon", true)) ssb.setSpan(new ImageSpan(activity, R.drawable.ic_delivered), colorLength, colorLength+1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
             }
             
             if (item.isEdited()) {
                 ssb.append(" ");
-                ssb.setSpan(new ImageSpan(context, R.drawable.ic_edited), ssb.length()-1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.setSpan(new ImageSpan(activity, R.drawable.ic_edited), ssb.length()-1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
 
@@ -210,6 +208,8 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
             if (jid.equals(Constants.JUICK) || jid.equals(Constants.JUBO)) holder.text.setTextWithLinks(ssb, MyTextView.Mode.juick);
             else if (jid.equals(Constants.POINT)) holder.text.setTextWithLinks(ssb, MyTextView.Mode.point);
             else holder.text.setTextWithLinks(ssb);
+
+            if (prefs.getBoolean("LoadPictures", false)) Pictures.loadPicture(activity, jid, ssb, holder.text);
         }
 
         return convertView;
@@ -226,7 +226,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
     public void copySelectedMessages() {
         String text = "";
         for(int i = 0; i < getCount(); i++) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
             boolean showtime = prefs.getBoolean("ShowTime", false);
 
             MessageItem message = getItem(i);
@@ -245,8 +245,8 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
         String[] mimes = {"text/plain"};
         ClipData copyData = new ClipData(text, mimes, item);
 
-        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
         clipboard.setPrimaryClip(copyData);
-        Toast.makeText(context, R.string.MessagesCopied, Toast.LENGTH_SHORT).show();
+        Toast.makeText(activity, R.string.MessagesCopied, Toast.LENGTH_SHORT).show();
     }
 }

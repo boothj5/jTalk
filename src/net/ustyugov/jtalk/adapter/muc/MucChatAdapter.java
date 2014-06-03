@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.*;
 import android.text.Layout;
 import android.text.Spanned;
@@ -29,6 +30,7 @@ import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Holders;
 import net.ustyugov.jtalk.MessageItem;
+import net.ustyugov.jtalk.Pictures;
 import net.ustyugov.jtalk.adapter.ChatAdapter;
 import net.ustyugov.jtalk.listener.MyTextLinkClickListener;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -48,7 +50,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
     private String searchString = "";
     private String[] highArray;
 
-    private Context context;
+    private Activity activity;
     private Smiles smiles;
     private String account;
     private String nick;
@@ -58,11 +60,11 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
 
     private SharedPreferences prefs;
 
-    public MucChatAdapter(Context context, Smiles smiles) {
-        super(context, R.id.chat1);
-        this.context = context;
+    public MucChatAdapter(Activity activity, Smiles smiles) {
+        super(activity, R.id.chat1);
+        this.activity = activity;
         this.smiles = smiles;
-        this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         this.showtime = prefs.getBoolean("ShowTime", false);
 
         String highString = prefs.getString("Highlights", "");
@@ -107,9 +109,9 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        int fontSize = Integer.parseInt(context.getResources().getString(R.string.DefaultFontSize));
+        int fontSize = Integer.parseInt(activity.getResources().getString(R.string.DefaultFontSize));
         try {
-            fontSize = Integer.parseInt(prefs.getString("FontSize", context.getResources().getString(R.string.DefaultFontSize)));
+            fontSize = Integer.parseInt(prefs.getString("FontSize", activity.getResources().getString(R.string.DefaultFontSize)));
         } catch (NumberFormatException ignored) {	}
 
         Holders.MessageHolder holder = new Holders.MessageHolder();
@@ -121,7 +123,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
             holder.linear.setMinimumHeight(Integer.parseInt(prefs.getString("SmilesSize", "24")));
             holder.check = (CheckBox) convertView.findViewById(R.id.check);
             holder.text = (MyTextView) convertView.findViewById(R.id.chat1);
-            holder.text.setOnTextLinkClickListener(new MyTextLinkClickListener(context, group));
+            holder.text.setOnTextLinkClickListener(new MyTextLinkClickListener(activity, group));
             holder.text.setTextSize(fontSize);
 
             convertView.setBackgroundColor(0X00000000);
@@ -193,7 +195,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
 
             if (item.isEdited()) {
                 ssb.append(" ");
-                ssb.setSpan(new ImageSpan(context, R.drawable.ic_edited), ssb.length()-1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.setSpan(new ImageSpan(activity, R.drawable.ic_edited), ssb.length()-1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
 
@@ -225,6 +227,8 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                 ssb = smiles.parseSmiles(holder.text, ssb, startPosition, account, group);
             }
             holder.text.setTextWithLinks(ssb, n);
+
+            if (prefs.getBoolean("LoadPictures", false)) Pictures.loadPicture(activity, group, ssb, holder.text);
         }
 
         return convertView;
@@ -243,7 +247,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
     public void copySelectedMessages() {
         String text = "";
         for(int i = 0; i < getCount(); i++) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
             boolean showtime = prefs.getBoolean("ShowTime", false);
 
             MessageItem message = getItem(i);
@@ -262,8 +266,8 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
         String[] mimes = {"text/plain"};
         ClipData copyData = new ClipData(text, mimes, item);
 
-        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
         clipboard.setPrimaryClip(copyData);
-        Toast.makeText(context, R.string.MessagesCopied, Toast.LENGTH_SHORT).show();
+        Toast.makeText(activity, R.string.MessagesCopied, Toast.LENGTH_SHORT).show();
     }
 }
