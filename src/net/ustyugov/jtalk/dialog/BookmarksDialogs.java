@@ -22,7 +22,6 @@ import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.XMPPError;
-import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.bookmark.BookmarkManager;
 import org.jivesoftware.smackx.bookmark.BookmarkedConference;
 
@@ -77,7 +76,7 @@ public class BookmarksDialogs {
 				
 				if (group.length() > 0) {
 					if (name.length() <= 0) name = group;
-					if (nick.length() <= 0) nick = StringUtils.parseName(prefs.getString("JID", ""));
+					if (nick.length() <= 0) nick = null;
 					try {
 						BookmarkManager bm = BookmarkManager.getBookmarkManager(service.getConnection(account));
 						bm.addBookmarkedConference(name, group, autoJoin.isChecked(), nick, pass);
@@ -121,7 +120,6 @@ public class BookmarksDialogs {
 		builder.setTitle(R.string.Edit);
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
-				JTalkService service = JTalkService.getInstance();
                 String jid = groupEdit.getText().toString();
 				String name = nameEdit.getText().toString();
 				String nick = nickEdit.getText().toString();
@@ -129,7 +127,7 @@ public class BookmarksDialogs {
 				
 				if (jid.length() > 0) {
 					if (name.length() <= 0) name = jid;
-					if (nick.length() <= 0) nick = StringUtils.parseName(service.getConnection(account).getUser());
+					if (nick.length() <= 0) nick = null;
 					
 					try {
 						BookmarkManager manager = BookmarkManager.getBookmarkManager(JTalkService.getInstance().getConnection(account));
