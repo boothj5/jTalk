@@ -114,6 +114,10 @@
                 android:key="Highlights"
                 android:title="Words for highlight"
                 android:defaultValue="" />
+        <CheckBoxPreference
+                android:key="HighlightFullWord"
+                android:title="Highlight only full words"
+                android:defaultValue="false" />
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Notifications">

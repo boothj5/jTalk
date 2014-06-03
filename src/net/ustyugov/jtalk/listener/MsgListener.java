@@ -155,16 +155,6 @@ public class MsgListener implements PacketListener {
         String mynick = context.getResources().getString(R.string.Me);
         if (service.getConferencesHash(account).containsKey(group)) mynick = service.getConferencesHash(account).get(group).getNickname();
 
-        boolean highlight = false;
-        if (body.contains(mynick)) highlight = true;
-        else {
-            String highString = prefs.getString("Highlights", "");
-            String[] highArray = highString.split(" ");
-            for (String light : highArray) {
-                if (!light.isEmpty() && body.toLowerCase().contains(light.toLowerCase())) highlight = true;
-            }
-        }
-
         ReplaceExtension replace = (ReplaceExtension) msg.getExtension(ReplaceExtension.NAMESPACE);
         if (replace != null && replace.getId() != null) {
             String rid = replace.getId();
@@ -185,6 +175,16 @@ public class MsgListener implements PacketListener {
 
             if (!service.getCurrentJid().equals(group)) {
                 service.addMessagesCount(account, group);
+            }
+
+            boolean highlight = false;
+            if (item.contains(mynick, prefs.getBoolean("TrueNick", false))) highlight = true;
+            else {
+                String highString = prefs.getString("Highlights", "");
+                String[] highArray = highString.split(" ");
+                for (String light : highArray) {
+                    if (!light.isEmpty() && item.contains(light, prefs.getBoolean("HighlightFullWord", false))) highlight = true;
+                }
             }
 
             if (highlight) {

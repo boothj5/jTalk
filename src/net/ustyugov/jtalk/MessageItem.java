@@ -97,6 +97,38 @@ public class MessageItem {
         }
 	}
 
+    public boolean contains(String string, boolean correct) {
+        if (string.equals(body)) return true;
+        if (correct) {
+            int idx = body.indexOf(string);
+            if (idx != -1) {
+                if (string.length() < body.length()) {
+                    boolean startOk = false;
+                    boolean endOk = false;
+
+                    if (idx > 0) {
+                        String start = body.substring(idx-1, idx);
+                        if (start.matches("\\W?")) startOk = true;
+                    } else {
+                        startOk = true;
+                    }
+
+                    if (body.length() > idx + string.length()) {
+                        String end = body.substring(idx + string.length(), idx + string.length() + 1);
+                        if (end.matches("\\W?")) endOk = true;
+                    } else {
+                        endOk = true;
+                    }
+                    if (startOk && endOk) return true;
+                }
+            }
+            return false;
+        } else {
+            if (body.contains(string)) return true;
+        }
+        return false;
+    }
+
 	public String toXml() {
         StringBuilder sb = new StringBuilder();
 		sb.append("<" + getType().name() + ">");

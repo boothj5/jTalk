@@ -1497,7 +1497,7 @@ public class JTalkService extends Service {
             Log.d("SIP", "user: " + user + "; host: " + host + "; port: " + port);
 
             try {
-                SipProfile.Builder builder = new SipProfile.Builder(user, host);
+                SipProfile.Builder builder = new SipProfile.Builder("sip:"+username);
                 builder.setDisplayName(username);
                 builder.setProfileName(username);
                 builder.setAutoRegistration(true);

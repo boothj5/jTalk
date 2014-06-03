@@ -173,11 +173,10 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                 ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
                 boolean highlight = false;
-                if (nick != null && message.contains(nick)) highlight = true;
+                if (nick != null && item.contains(nick, prefs.getBoolean("TrueNick", false))) highlight = true;
                 else {
                     for (String light : highArray) {
-                        String searchString = body.toLowerCase();
-                        if (!light.isEmpty() && searchString.contains(light.toLowerCase())) highlight = true;
+                        if (!light.isEmpty() && item.contains(light, prefs.getBoolean("HighlightFullWord", false))) highlight = true;
                     }
                 }
                 if (highlight) {
