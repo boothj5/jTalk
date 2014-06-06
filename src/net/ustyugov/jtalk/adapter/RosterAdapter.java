@@ -101,6 +101,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     if (prefs.getBoolean("SelfContact", true) && selfPresences.size() > 0) {
                         RosterItem selfgroup = new RosterItem(account, RosterItem.Type.group, null);
                         selfgroup.setName(service.getString(R.string.SelfGroup));
+                        selfgroup.setObject("(" +selfPresences.size() + ")");
                         add(selfgroup);
 
                         if (!service.getCollapsedGroups().contains(service.getString(R.string.SelfGroup))) {
@@ -121,6 +122,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     if (prefs.getBoolean("ShowActiveChatsGroup", false) && service.getActiveChats(account).size() > 0) {
                         RosterItem group = new RosterItem(account, RosterItem.Type.group, null);
                         group.setName(service.getString(R.string.ActiveChats));
+                        group.setObject("(" + service.getActiveChats(account).size() + ")");
                         add(group);
 
                         activeChats = service.getActiveChats(account);
@@ -141,6 +143,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     if (!service.getConferencesHash(account).isEmpty()) {
                         RosterItem mucGroup = new RosterItem(account, RosterItem.Type.group, null);
                         mucGroup.setName(service.getString(R.string.MUC));
+                        mucGroup.setObject("(" + service.getConferencesHash(account).size() + ")");
                         add(mucGroup);
 
                         if (!service.getCollapsedGroups().contains(service.getString(R.string.MUC))) {
@@ -159,6 +162,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                         if (!privates.isEmpty()) {
                             RosterItem group = new RosterItem(account, RosterItem.Type.group, null);
                             group.setName(service.getString(R.string.Privates));
+                            group.setObject("(" + service.getPrivateMessages(account) + ")");
                             add(group);
 
                             if (!service.getCollapsedGroups().contains(service.getString(R.string.Privates))) {
@@ -171,6 +175,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                         }
                     }
 
+                    int onlineCount = 0;
                     Collection<RosterGroup> groups = roster.getGroups();
                     for (RosterGroup group: groups) {
                         List<String> list = new ArrayList<String>();
@@ -178,6 +183,8 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                         for (RosterEntry re: entrys) {
                             String jid = re.getUser();
                             Presence.Type presenceType = service.getType(account, jid);
+                            if (presenceType != Presence.Type.unavailable) onlineCount++;
+
                             if (prefs.getBoolean("ShowActiveChatsGroup", true)) {
                                 if (prefs.getBoolean("ShowDoubles", false)) {
                                     if (hideOffline) {
@@ -206,6 +213,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                             String name = group.getName();
                             RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
                             item.setName(name);
+                            item.setObject("(" + onlineCount + "/" + group.getEntryCount() + ")");
                             add(item);
                             if (service.getCollapsedGroups().contains(name)) item.setCollapsed(true);
                             else {
@@ -220,10 +228,13 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     }
 
                     List<String> list = new ArrayList<String>();
+                    onlineCount = 0;
                     Collection<RosterEntry> entrys = roster.getUnfiledEntries();
                     for (RosterEntry re: entrys) {
                         String jid = re.getUser();
                         Presence.Type presenceType = service.getType(account, jid);
+                        if (presenceType != Presence.Type.unavailable) onlineCount++;
+
                         if (prefs.getBoolean("ShowActiveChatsGroup", true)) {
                             if (prefs.getBoolean("ShowDoubles", false)) {
                                 if (hideOffline) {
@@ -252,6 +263,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     if (list.size() > 0) {
                         String name = activity.getString(R.string.Nogroup);
                         RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
+                        item.setObject("(" + onlineCount + "/" + roster.getUnfiledEntryCount() + ")");
                         item.setName(name);
                         add(item);
                         if (service.getCollapsedGroups().contains(name)) item.setCollapsed(true);
@@ -292,7 +304,11 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 			} else {
 				holder = (GroupHolder) convertView.getTag();
 			}
-	        holder.text.setText(ri.getName());
+
+            String name = ri.getName();
+            if (ri.getObject() instanceof String) name += " " + ri.getObject();
+
+	        holder.text.setText(name);
             holder.messageIcon.setImageResource(R.drawable.icon_msg);
             holder.messageIcon.setVisibility(View.INVISIBLE);
 			holder.state.setImageResource(ri.isCollapsed() ? R.drawable.close : R.drawable.open);

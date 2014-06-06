@@ -192,7 +192,7 @@ public class MsgListener implements PacketListener {
                     item.setJid(group);
                     service.addHighlight(account, group);
                     service.addUnreadMessage(item);
-                    Notify.messageNotify(account, from, Notify.Type.Direct, body);
+                    if (delayExt == null) Notify.messageNotify(account, from, Notify.Type.Direct, body);
                 }
             } else {
                 if (delayExt == null) Notify.messageNotify(account, group, Notify.Type.Conference, body);

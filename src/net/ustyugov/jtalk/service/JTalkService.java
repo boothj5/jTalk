@@ -1072,8 +1072,16 @@ public class JTalkService extends Service {
 
     public void addContact(String account, String jid, String name, String group) {
 	    try {
-		    final String[] groups = { group };
-		    getRoster(account).createEntry(jid, name, groups);
+            Roster roster = getRoster(account);
+            if (roster != null) {
+                String[] groups = { group };
+                roster.createEntry(jid, name, groups);
+                if (roster.getSubscriptionMode() == Roster.SubscriptionMode.manual) {
+                    Presence presence = new Presence(Presence.Type.subscribe);
+                    presence.setTo(jid);
+                    sendPacket(account, presence);
+                }
+            }
 	    } catch (XMPPException ignored) {    }
     }
   
