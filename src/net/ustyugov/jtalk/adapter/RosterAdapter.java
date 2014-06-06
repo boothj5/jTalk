@@ -404,7 +404,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 			}
 	        
 	        if (prefs.getBoolean("LoadAvatar", false)) {
-				Avatars.loadAvatar(activity, jid, holder.avatar);
+				Avatars.loadAvatar(activity, StringUtils.parseBareAddress(jid), holder.avatar);
 			}
 
             if (prefs.getBoolean("ColorLines", false)) {
