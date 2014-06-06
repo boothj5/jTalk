@@ -18,6 +18,7 @@
 package net.ustyugov.jtalk.dialog;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.bookmark.BookmarkedConference;
 import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.muc.Occupant;
 import org.jivesoftware.smackx.packet.DiscoverItems;
 
 import android.app.Activity;
@@ -57,14 +59,27 @@ import com.jtalk2.R;
 public class MucDialogs {
 
 	public static void roomMenu(final Activity activity, final String account, final String group) {
-		CharSequence[] items = new CharSequence[6];
+        boolean isModerator = false;
+        try {
+            JTalkService service = JTalkService.getInstance();
+            MultiUserChat muc = service.getConferencesHash(account).get(group);
+            Occupant occupant = muc.getOccupant(muc.getRoom() + "/" + muc.getNickname());
+            if (occupant.getRole().equals("moderator")) isModerator = true;
+        } catch (Exception ignored) { }
+
+		CharSequence[] items;
+        if (isModerator) items = new CharSequence[6];
+        else items = new CharSequence[4];
+
         items[0] = activity.getString(R.string.Open);
         items[1] = activity.getString(R.string.ChangeNick);
         items[2] = activity.getString(R.string.SendStatus);
-        items[3] = activity.getString(R.string.Users);
-        items[4] = activity.getString(R.string.Configuration);
-        items[5] = activity.getString(R.string.Leave);
-        
+        items[3] = activity.getString(R.string.Leave);
+        if (isModerator) {
+            items[4] = activity.getString(R.string.Users);
+            items[5] = activity.getString(R.string.Configuration);
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(group);
         builder.setItems(items, new OnClickListener() {
@@ -84,22 +99,22 @@ public class MucDialogs {
 		        	case 2:
 		        		RosterDialogs.changeStatusDialog(activity, account, group);
 		        		break;
-		        	case 3:
-		        		Intent uIntent = new Intent(activity, MucUsers.class);
+                    case 3:
+                        JTalkService.getInstance().leaveRoom(account, group);
+                        activity.sendBroadcast(new Intent(Constants.UPDATE));
+                        break;
+                    case 4:
+                        Intent uIntent = new Intent(activity, MucUsers.class);
                         uIntent.putExtra("account", account);
-		           	 	uIntent.putExtra("group", group);
-		           	 	activity.startActivity(uIntent);
-		        		break;
-		        	case 4:
+                        uIntent.putExtra("group", group);
+                        activity.startActivity(uIntent);
+                        break;
+		        	case 5:
 		        		Intent cIntent = new Intent(activity, DataFormActivity.class);
                         cIntent.putExtra("account", account);
 		           	 	cIntent.putExtra("group", group);
 		           	 	cIntent.putExtra("muc", true);
 		           	 	activity.startActivity(cIntent);
-		        		break;
-		        	case 5:
-		        		JTalkService.getInstance().leaveRoom(account, group);
-		        		activity.sendBroadcast(new Intent(Constants.UPDATE));
 		        		break;
 		        }
 			}
@@ -108,12 +123,27 @@ public class MucDialogs {
 	}
 	
 	public static void userMenu(final Activity activity, final String account, final String group, final String nick) {
-		CharSequence[] items = new CharSequence[5];
+        boolean isModerator = false;
+        final JTalkService service = JTalkService.getInstance();
+        try {
+            MultiUserChat muc = service.getConferencesHash(account).get(group);
+            Occupant occupant = muc.getOccupant(muc.getRoom() + "/" + muc.getNickname());
+            if (occupant.getRole().equals("moderator")) isModerator = true;
+        } catch (Exception ignored) { }
+
+		CharSequence[] items;
+        if (isModerator) items = new CharSequence[7];
+        else items = new CharSequence[4];
+
         items[0] = activity.getString(R.string.Chat);
         items[1] = activity.getString(R.string.Info);
         items[2] = activity.getString(R.string.AddInIgnoreList);
         items[3] = activity.getString(R.string.ExecuteCommand);
-        items[4] = activity.getString(R.string.Actions);
+        if (isModerator) {
+            items[4] = activity.getString(R.string.Kick);
+            items[5] = activity.getString(R.string.Ban);
+            items[6] = activity.getString(R.string.Actions);
+        }
         
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(group);
@@ -143,13 +173,24 @@ public class MucDialogs {
 		    			cintent.putExtra("jid", group + "/" + nick);
 		    	        activity.startActivity(cintent);
 		        		break;
-		        	case 4:
-		        		JTalkService service = JTalkService.getInstance();
+                    case 4:
+                        if (service.getConferencesHash(account).containsKey(group)) {
+                            MultiUserChat muc = service.getConferencesHash(account).get(group);
+                            kickDialog(activity, muc, nick);
+                        }
+                        break;
+                    case 5:
+                        if (service.getConferencesHash(account).containsKey(group)) {
+                            MultiUserChat muc = service.getConferencesHash(account).get(group);
+                            String jid = muc.getOccupant(group + "/" + nick).getJid();
+                            if (jid != null) banDialog(activity, muc, jid);
+                        }
+                        break;
+		        	case 6:
 		        		if (service.getConferencesHash(account).containsKey(group)) {
 		        			MultiUserChat muc = service.getConferencesHash(account).get(group);
 			        		new MucAdminMenu(activity, muc, nick).show();
 		        		}
-		        		
 		        		break;
 		        }
 			}
@@ -171,7 +212,9 @@ public class MucDialogs {
 				try {
 					String reason = et.getText().toString();
 					muc.kickParticipant(nick, reason);
-				} catch (XMPPException e) {	}
+				} catch (XMPPException e) {
+                    Toast.makeText(activity, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                }
 			}
 		});
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -196,7 +239,9 @@ public class MucDialogs {
 					try {
 						String reason = et.getText().toString();
 						muc.banUser(jid, reason);
-					} catch (XMPPException e) {	}
+					} catch (XMPPException e) {
+                        Toast.makeText(activity, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                    }
 			}
 		});
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

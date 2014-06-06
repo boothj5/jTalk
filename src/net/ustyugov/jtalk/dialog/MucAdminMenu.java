@@ -32,8 +32,7 @@ public class MucAdminMenu implements OnClickListener {
 	private MultiUserChat muc;
 	private String nick;
 	private String group;
-	private CharSequence[] items = null;
-	
+
 	public MucAdminMenu(Activity activity, MultiUserChat muc, String nick) {
 		this.activity = activity;
 		this.muc = muc;
@@ -42,7 +41,7 @@ public class MucAdminMenu implements OnClickListener {
 	}
 	
 	public void show() {
-		items = new CharSequence[12];
+        CharSequence[] items = new CharSequence[10];
 		items[0] = activity.getString(R.string.GrantVoice);
 		items[1] = activity.getString(R.string.GrantMember);
 		items[2] = activity.getString(R.string.GrantModer);
@@ -53,9 +52,7 @@ public class MucAdminMenu implements OnClickListener {
 		items[7] = activity.getString(R.string.RevokeModer);
 		items[8] = activity.getString(R.string.RevokeAdmin);
 		items[9] = activity.getString(R.string.RevokeOwner);
-		items[10] = activity.getString(R.string.Kick);
-		items[11] = activity.getString(R.string.Ban);
-		
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(R.string.Actions);
         builder.setItems(items, this);
@@ -119,13 +116,6 @@ public class MucAdminMenu implements OnClickListener {
 					String jid = muc.getOccupant(group + "/" + nick).getJid();
 					if (jid != null) muc.revokeOwnership(jid);
 				} catch (XMPPException e) {	}
-				break;
-			case 10:
-				MucDialogs.kickDialog(activity, muc, nick);
-				break;
-			case 11:
-				String jid = muc.getOccupant(group + "/" + nick).getJid();
-				if (jid != null) MucDialogs.banDialog(activity, muc, jid);
 				break;
 		}
 	}
