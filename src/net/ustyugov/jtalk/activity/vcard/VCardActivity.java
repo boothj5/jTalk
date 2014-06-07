@@ -283,7 +283,7 @@ public class VCardActivity extends Activity {
                                     date.setTime(System.currentTimeMillis()-idle);
                                     String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
 
-                                    if (idle != 0) lastString = "Last activity: " + time + "\n";
+                                    if (idle != 0) lastString = getString(R.string.LastActivity) + ": " + time + "\n";
                                 }
                             } catch (Exception ignored) { }
 
@@ -325,7 +325,7 @@ public class VCardActivity extends Activity {
                                 date.setTime(System.currentTimeMillis()-idle);
                                 String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
 
-                                strings.put("Last activity", time + " " + lastStatus);
+                                strings.put(getString(R.string.LastActivity), time + " " + lastStatus);
                             }
                         }
     				}
@@ -342,7 +342,7 @@ public class VCardActivity extends Activity {
                             date.setTime(System.currentTimeMillis()-idle);
                             String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
 
-                            lastActivity = "Last activity: " + time + "\n";
+                            lastActivity = getString(R.string.LastActivity) + ": " + time + "\n";
                         }
                     } catch (Exception ignored) { }
 

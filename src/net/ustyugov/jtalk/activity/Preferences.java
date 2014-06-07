@@ -96,9 +96,9 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		}
 
         CharSequence[] subscriptionEntries = new CharSequence[3];
-        subscriptionEntries[0] = "Accept all";
-        subscriptionEntries[1] = "Manual";
-        subscriptionEntries[2] = "Reject all";
+        subscriptionEntries[0] = getString(R.string.AcceptAll);
+        subscriptionEntries[1] = getString(R.string.Manual);
+        subscriptionEntries[2] = getString(R.string.RejectAll);
 
         CharSequence[] subscriptionValues = new CharSequence[3];
         subscriptionValues[0] = Roster.SubscriptionMode.accept_all.name();

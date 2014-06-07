@@ -53,7 +53,7 @@
                 android:defaultValue="false" />
         <ListPreference
                 android:key="SubscriptionMode"
-                android:title="Subscription"/>
+                android:title="@string/Subscription"/>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Chat">
@@ -102,11 +102,11 @@
                 android:title="@string/NoMaxLines"
                 android:defaultValue="true" />
         <CheckBoxPreference
-                android:title="Show delivery notifications"
+                android:title="@string/ShowDeliveryNotifications"
                 android:key="ShowReceivedIcon"
                 android:defaultValue="true"/>
         <CheckBoxPreference
-                android:title="Show hints on input panel"
+                android:title="@string/ShowHintsOnInputPanel"
                 android:key="ShowInputHints"
                 android:defaultValue="true"/>
     </PreferenceScreen>
@@ -123,11 +123,11 @@
                 android:defaultValue=", " />
         <EditTextPreference
                 android:key="Highlights"
-                android:title="Words for highlight"
+                android:title="@string/WordsForHighlight"
                 android:defaultValue="" />
         <CheckBoxPreference
                 android:key="HighlightFullWord"
-                android:title="Highlight only full words"
+                android:title="@string/HighlightOnlyFullWords"
                 android:defaultValue="false" />
     </PreferenceScreen>
 
@@ -288,7 +288,7 @@
                 android:key="AUTOSTART"
                 android:defaultValue="false"/>
         <CheckBoxPreference
-                android:title="Auto load avatars"
+                android:title="@string/AutoLoadAvatars"
                 android:key="LoadAllAvatars"
                 android:defaultValue="false"/>
         <CheckBoxPreference
@@ -296,15 +296,15 @@
                 android:key="DeleteHistory"
                 android:defaultValue="false"/>
         <CheckBoxPreference
-                android:title="Wi-Fi Lock"
+                android:title="@string/WiFiLock"
                 android:key="WifiLock"
                 android:defaultValue="false"/>
         <CheckBoxPreference
-                android:title="Wake Lock"
+                android:title="@string/WakeLock"
                 android:key="WakeLock"
                 android:defaultValue="false"/>
         <CheckBoxPreference
-                android:title="Send Tunes"
+                android:title="@string/SendTunes"
                 android:key="PlayingNow"
                 android:defaultValue="false"/>
         <CheckBoxPreference
@@ -313,32 +313,32 @@
                 android:defaultValue="false"/>
     </PreferenceScreen>
 
-    <PreferenceScreen android:title="Experimental">
+    <PreferenceScreen android:title="@string/Experimental">
         <EditTextPreference
                 android:key="RosterColumns"
-                android:title="Columns in roster"
+                android:title="@string/ColumnsInRoster"
                 android:summary="Only if 'Show groups' is off"
                 android:defaultValue="1"
                 android:numeric="integer"/>
         <CheckBoxPreference
-                android:title="Ping to server"
-                android:summary="Needed reconnect"
+                android:title="@string/PingToServer"
+                android:summary="@string/NeededReconnect"
                 android:key="Ping"
                 android:defaultValue="false"/>
         <EditTextPreference
                 android:dependency="Ping"
                 android:key="PingTimeout"
-                android:title="Ping timeout"
-                android:summary="in seconds"
+                android:title="@string/PingTimeout"
+                android:summary="@string/inseconds"
                 android:defaultValue="60"
                 android:numeric="integer"/>
         <CheckBoxPreference
-                android:title="Enable SIP"
-                android:summary="Needed reconnect"
+                android:title="@string/EnableSIP"
+                android:summary="@string/NeededReconnect"
                 android:key="EnableSIP"
                 android:defaultValue="false"/>
         <CheckBoxPreference
-                android:title="Auto load pictures"
+                android:title="@string/AutoLoadPictures"
                 android:key="LoadPictures"
                 android:defaultValue="false"/>
     </PreferenceScreen>
@@ -348,7 +348,7 @@
                 android:summary="@string/app_name"/>
         <Preference
                 android:key="version"
-                android:title="Version"/>
+                android:title="@string/Version"/>
         <Preference
                 android:key="build"
                 android:title="Build"/>

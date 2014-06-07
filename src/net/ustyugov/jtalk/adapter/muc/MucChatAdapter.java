@@ -226,11 +226,10 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                 int startPosition = message.length() - body.length();
                 ssb = smiles.parseSmiles(holder.text, ssb, startPosition, account, group);
             }
-            holder.text.setTextWithLinks(ssb, n);
-
             if (prefs.getBoolean("LoadPictures", false)) Pictures.loadPicture(activity, group, ssb, holder.text);
-        }
 
+            holder.text.setTextWithLinks(ssb, n);
+        }
         return convertView;
     }
 

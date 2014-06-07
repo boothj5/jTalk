@@ -200,6 +200,8 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
                 }
             });
 
+            if (prefs.getBoolean("LoadPictures", false)) Pictures.loadPicture(activity, jid, ssb, holder.text);
+
             if (prefs.getBoolean("ShowSmiles", true)) {
                 int startPosition = message.length() - body.length();
                 ssb = smiles.parseSmiles(holder.text, ssb, startPosition, account, jid);
@@ -208,8 +210,6 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
             if (jid.equals(Constants.JUICK) || jid.equals(Constants.JUBO)) holder.text.setTextWithLinks(ssb, MyTextView.Mode.juick);
             else if (jid.equals(Constants.POINT)) holder.text.setTextWithLinks(ssb, MyTextView.Mode.point);
             else holder.text.setTextWithLinks(ssb);
-
-            if (prefs.getBoolean("LoadPictures", false)) Pictures.loadPicture(activity, jid, ssb, holder.text);
         }
 
         return convertView;
