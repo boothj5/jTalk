@@ -222,11 +222,12 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                 }
             });
 
+            if (prefs.getBoolean("LoadPictures", false)) Pictures.loadPicture(activity, group, ssb, holder.text);
+
             if (prefs.getBoolean("ShowSmiles", true)) {
                 int startPosition = message.length() - body.length();
                 ssb = smiles.parseSmiles(holder.text, ssb, startPosition, account, group);
             }
-            if (prefs.getBoolean("LoadPictures", false)) Pictures.loadPicture(activity, group, ssb, holder.text);
 
             holder.text.setTextWithLinks(ssb, n);
         }
