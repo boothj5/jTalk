@@ -58,25 +58,28 @@ import com.jtalk2.R;
 public class MucDialogs {
 
 	public static void roomMenu(final Activity activity, final String account, final String group) {
-        boolean isModerator = false;
+        String affil = "none";
         try {
             JTalkService service = JTalkService.getInstance();
             MultiUserChat muc = service.getConferencesHash(account).get(group);
             Occupant occupant = muc.getOccupant(muc.getRoom() + "/" + muc.getNickname());
-            if (occupant.getRole().equals("moderator")) isModerator = true;
+            affil = occupant.getAffiliation();
         } catch (Exception ignored) { }
 
 		CharSequence[] items;
-        if (isModerator) items = new CharSequence[6];
+        if (affil.equals("owner")) items = new CharSequence[6];
+        else if (affil.equals("admin")) items = new CharSequence[5];
         else items = new CharSequence[4];
 
         items[0] = activity.getString(R.string.Open);
         items[1] = activity.getString(R.string.ChangeNick);
         items[2] = activity.getString(R.string.SendStatus);
         items[3] = activity.getString(R.string.Leave);
-        if (isModerator) {
+        if (affil.equals("owner")) {
             items[4] = activity.getString(R.string.Users);
             items[5] = activity.getString(R.string.Configuration);
+        } else if (affil.equals("admin")) {
+            items[4] = activity.getString(R.string.Users);
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -122,28 +125,43 @@ public class MucDialogs {
 	}
 	
 	public static void userMenu(final Activity activity, final String account, final String group, final String nick) {
-        boolean isModerator = false;
+        boolean isAccountModerator = false;
+        boolean isUserModerator = false;
+        String accountAffil = "none";
+        String userAffil = "none";
+
         final JTalkService service = JTalkService.getInstance();
         try {
             MultiUserChat muc = service.getConferencesHash(account).get(group);
             Occupant occupant = muc.getOccupant(muc.getRoom() + "/" + muc.getNickname());
-            if (occupant.getRole().equals("moderator")) isModerator = true;
+            if (occupant.getRole().equals("moderator")) isAccountModerator = true;
+            accountAffil = occupant.getAffiliation();
+
+            occupant = muc.getOccupant(group + "/" + nick);
+            if (occupant.getRole().equals("moderator")) isUserModerator = true;
+            userAffil = occupant.getAffiliation();
         } catch (Exception ignored) { }
 
 		CharSequence[] items;
-        if (isModerator) items = new CharSequence[7];
-        else items = new CharSequence[4];
+        if (accountAffil.equals("owner")) items = new CharSequence[7];
+        else if (accountAffil.equals("admin") && !userAffil.equals("admin") && !userAffil.equals("owner")) items = new CharSequence[7];
+        else {
+            if (isAccountModerator && !isUserModerator) items = new CharSequence[6];
+            else items = new CharSequence[4];
+        }
 
         items[0] = activity.getString(R.string.Chat);
         items[1] = activity.getString(R.string.Info);
         items[2] = activity.getString(R.string.AddInIgnoreList);
         items[3] = activity.getString(R.string.ExecuteCommand);
-        if (isModerator) {
-            items[4] = activity.getString(R.string.Kick);
-            items[5] = activity.getString(R.string.Ban);
-            items[6] = activity.getString(R.string.Actions);
+        if (accountAffil.equals("owner") || (accountAffil.equals("admin") && !userAffil.equals("admin") && !userAffil.equals("owner"))) {
+            items[4] = activity.getString(R.string.Actions);
+            items[5] = activity.getString(R.string.Kick);
+            items[6] = activity.getString(R.string.Ban);
+        } else if (isAccountModerator && !isUserModerator) {
+            items[4] = activity.getString(R.string.Actions);
+            items[5] = activity.getString(R.string.Kick);
         }
-        
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(group);
         builder.setItems(items, new OnClickListener() {
@@ -172,20 +190,20 @@ public class MucDialogs {
 		    			cintent.putExtra("jid", group + "/" + nick);
 		    	        activity.startActivity(cintent);
 		        		break;
-                    case 4:
+                    case 5:
                         if (service.getConferencesHash(account).containsKey(group)) {
                             MultiUserChat muc = service.getConferencesHash(account).get(group);
                             kickDialog(activity, muc, nick);
                         }
                         break;
-                    case 5:
+                    case 6:
                         if (service.getConferencesHash(account).containsKey(group)) {
                             MultiUserChat muc = service.getConferencesHash(account).get(group);
                             String jid = muc.getOccupant(group + "/" + nick).getJid();
                             if (jid != null) banDialog(activity, muc, jid);
                         }
                         break;
-		        	case 6:
+		        	case 4:
 		        		if (service.getConferencesHash(account).containsKey(group)) {
 		        			MultiUserChat muc = service.getConferencesHash(account).get(group);
 			        		new MucAdminMenu(activity, muc, nick).show();
