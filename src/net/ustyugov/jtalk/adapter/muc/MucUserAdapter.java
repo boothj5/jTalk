@@ -34,6 +34,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.jivesoftware.smackx.packet.MUCUser;
 
 import android.app.Activity;
@@ -98,10 +99,11 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 		clear();
 
 		if (group != null && service.getConferencesHash(account).containsKey(group)) {
-			Iterator<Presence> it = service.getRoster(account).getPresences(group);
+            MultiUserChat muc = service.getConferencesHash(account).get(group);
+            Iterator<String> it = muc.getOccupants();
 			while (it.hasNext()) {
-				Presence p = it.next();
-                if (p.getType() != Presence.Type.unavailable) {
+				Presence p = muc.getOccupantPresence(it.next());
+                if (p.isAvailable()) {
                     Presence.Mode m = p.getMode();
                     if (m == null) m = Presence.Mode.available;
                     String role = "visitor";
