@@ -319,8 +319,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         removeAttach = (ImageView) findViewById(R.id.attachRemove);
         removeAttach.setOnClickListener(this);
 
-        if (getIntent().getBooleanExtra("file", false)) onActivityResult(REQUEST_FILE, RESULT_OK, getIntent());
-
         sidebar = (LinearLayout) findViewById(R.id.sidebar);
         int width = prefs.getInt("SideBarSize", 100);
         ViewGroup.LayoutParams lp = sidebar.getLayoutParams();
@@ -402,6 +400,8 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         compose = false;
         jid = getIntent().getStringExtra("jid");
         account = getIntent().getStringExtra("account");
+
+        if (getIntent().getBooleanExtra("file", false)) onActivityResult(REQUEST_FILE, RESULT_OK, getIntent());
 
         if (service.getConferencesHash(account).containsKey(jid)) {
             isMuc = true;
@@ -1013,10 +1013,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             public void onReceive(Context context, Intent intent) {
                 updateChats();
                 updateUsers();
-                if (isMuc) {
-                    updateList();
-                    updateStatus();
-                } else {
+                if (!isMuc) {
                     Bundle extras = intent.getExtras();
                     if (extras != null) {
                         String j = extras.getString("jid");

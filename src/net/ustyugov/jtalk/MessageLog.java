@@ -76,7 +76,6 @@ public class MessageLog {
         service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
 
         service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", group));
-        service.sendBroadcast(new Intent(Constants.PRESENCE_CHANGED).putExtra("jid", group));
 	}
 	
 	public static void editMessage(final String account, final String jid, final String rid, final String text) {
