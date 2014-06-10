@@ -22,6 +22,8 @@ import java.util.*;
 
 import android.app.Activity;
 import android.content.*;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.text.Layout;
 import android.text.Spanned;
 import android.text.style.*;
@@ -168,12 +170,18 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
             	ssb.setSpan(new ForegroundColorSpan(Colors.INBOX_MESSAGE), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             else {
                 ssb.setSpan(new ForegroundColorSpan(Colors.OUTBOX_MESSAGE), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                if (received && prefs.getBoolean("ShowReceivedIcon", true)) ssb.setSpan(new ImageSpan(activity, R.drawable.ic_delivered), colorLength, colorLength+1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                if (received && prefs.getBoolean("ShowReceivedIcon", true)) {
+                    Bitmap b = BitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_delivered);
+                    b = Bitmap.createScaledBitmap(b, fontSize + 10, fontSize + 10, true);
+                    ssb.setSpan(new ImageSpan(activity, b, ImageSpan.ALIGN_BOTTOM), colorLength, colorLength+1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                }
             }
             
             if (item.isEdited()) {
+                Bitmap b = BitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_edited);
+                b = Bitmap.createScaledBitmap(b, fontSize + 10, fontSize + 10, true);
                 ssb.append(" ");
-                ssb.setSpan(new ImageSpan(activity, R.drawable.ic_edited), ssb.length()-1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.setSpan(new ImageSpan(activity, b), ssb.length()-1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
 

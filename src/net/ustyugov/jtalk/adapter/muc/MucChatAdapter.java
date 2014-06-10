@@ -23,6 +23,8 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.*;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.text.Layout;
 import android.text.Spanned;
 import android.text.style.*;
@@ -194,8 +196,10 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
             }
 
             if (item.isEdited()) {
+                Bitmap b = BitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_edited);
+                b = Bitmap.createScaledBitmap(b, fontSize + 10, fontSize + 10, true);
                 ssb.append(" ");
-                ssb.setSpan(new ImageSpan(activity, R.drawable.ic_edited), ssb.length()-1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.setSpan(new ImageSpan(activity, b), ssb.length()-1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
 

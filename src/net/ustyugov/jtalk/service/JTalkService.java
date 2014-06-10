@@ -531,12 +531,9 @@ public class JTalkService extends Service {
     				else return Presence.Type.unavailable;
     			}
     		} else {
-    	    	Iterator<Presence> it = getRoster(account).getPresences(user);
-    	    	if(it.hasNext()) {
-    	    		return it.next().getType();
-    	    	} else {
-    	    		return Presence.Type.unavailable;
-    	    	}
+    	    	Presence p = getRoster(account).getPresence(user);
+    	    	if (p != null) return p.getType();
+                else return Presence.Type.unavailable;
     		}
     	}
 		return Presence.Type.unavailable;

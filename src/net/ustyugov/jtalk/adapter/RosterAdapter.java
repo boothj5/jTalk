@@ -213,7 +213,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                             String name = group.getName();
                             RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
                             item.setName(name);
-                            item.setObject("(" + onlineCount + "/" + group.getEntryCount() + ")");
+                            item.setObject("(" + onlineCount + "/" + entrys.size() + ")");
                             add(item);
                             if (service.getCollapsedGroups().contains(name)) item.setCollapsed(true);
                             else {
@@ -263,7 +263,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     if (list.size() > 0) {
                         String name = activity.getString(R.string.Nogroup);
                         RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
-                        item.setObject("(" + onlineCount + "/" + roster.getUnfiledEntryCount() + ")");
+                        item.setObject("(" + onlineCount + "/" + entrys.size() + ")");
                         item.setName(name);
                         add(item);
                         if (service.getCollapsedGroups().contains(name)) item.setCollapsed(true);
