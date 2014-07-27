@@ -175,9 +175,9 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                         }
                     }
 
-                    int onlineCount = 0;
                     Collection<RosterGroup> groups = roster.getGroups();
                     for (RosterGroup group: groups) {
+                        int onlineCount = 0;
                         List<String> list = new ArrayList<String>();
                         Collection<RosterEntry> entrys = group.getEntries();
                         for (RosterEntry re: entrys) {
@@ -228,7 +228,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     }
 
                     List<String> list = new ArrayList<String>();
-                    onlineCount = 0;
+                    int onlineCount = 0;
                     Collection<RosterEntry> entrys = roster.getUnfiledEntries();
                     for (RosterEntry re: entrys) {
                         String jid = re.getUser();

@@ -1733,16 +1733,18 @@ public class JTalkService extends Service {
                                 joinRoom(username, conf.getName(), conf.getNick(), conf.getPassword());
                             }
                         } else {
-                            try {
-                                BookmarkManager bm = BookmarkManager.getBookmarkManager(connection);
-                                Collection<BookmarkedConference> bookmarks = bm.getBookmarkedConferences();
-                                for(BookmarkedConference bc : bookmarks) {
-                                    if (bc.isAutoJoin()) {
-	                                	String nick = getDerivedNick(username, bc);
-	                                	joinRoom(username, bc.getJid(), nick, bc.getPassword());
+                            if (prefs.getBoolean("EnableAutojoin", true)) {
+                                try {
+                                    BookmarkManager bm = BookmarkManager.getBookmarkManager(connection);
+                                    Collection<BookmarkedConference> bookmarks = bm.getBookmarkedConferences();
+                                    for(BookmarkedConference bc : bookmarks) {
+                                        if (bc.isAutoJoin()) {
+                                            String nick = getDerivedNick(username, bc);
+                                            joinRoom(username, bc.getJid(), nick, bc.getPassword());
+                                        }
                                     }
-                                }
-                            } catch (XMPPException ignored) { }
+                                } catch (XMPPException ignored) { }
+                            }
                         }
                     }
                 }.start();

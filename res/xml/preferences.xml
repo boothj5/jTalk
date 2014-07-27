@@ -112,6 +112,10 @@
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/MUC">
+        <CheckBoxPreference
+                android:key="EnableAutojoin"
+                android:title="@string/AutoJoin"
+                android:defaultValue="true" />
         <EditTextPreference
                 android:key="MucHistorySize"
                 android:title="@string/MucHistorySize"
