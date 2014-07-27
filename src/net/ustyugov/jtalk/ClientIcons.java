@@ -100,6 +100,8 @@ public class ClientIcons {
 								imageView.setImageResource(R.drawable.client_lampiro);
 							} else if (node.toLowerCase().contains("leechcraft")) {
 								imageView.setImageResource(R.drawable.client_leechcraft);
+							} else if (node.toLowerCase().contains("loqui.im")){
+								imageView.setImageResource(R.drawable.client_loqui);
 							} else if (node.toLowerCase().contains("mchat")) {
 								imageView.setImageResource(R.drawable.client_mchat);
 							} else if (node.toLowerCase().contains("miranda-im.org/caps")) {
