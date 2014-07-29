@@ -117,7 +117,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private JTalkService service;
     private Smiles smiles;
 
-    private RosterItem rosterItem;
     private ChatAdapter.ViewMode viewMode = ChatAdapter.ViewMode.single;
 
     @Override
@@ -138,26 +137,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        actionBar.setListNavigationCallbacks(chatsSpinnerAdapter, new ActionBar.OnNavigationListener() {
-            @Override
-            public boolean onNavigationItemSelected(int position, long itemId) {
-                RosterItem item = chatsSpinnerAdapter.getItem(position);
-                String a = item.getAccount();
-                String j = jid;
-                if (rosterItem != null && item != rosterItem) {
-                    rosterItem = item;
-                    if (item.isEntry() || item.isSelf()) j = item.getEntry().getUser();
-                    else if (item.isMuc()) j = item.getName();
-                    Intent intent = new Intent();
-                    intent.putExtra("jid", j);
-                    intent.putExtra("account", a);
-                    setIntent(intent);
-                    onPause();
-                    onResume();
-                }
-                return true;
-            }
-        });
 
         setContentView(R.layout.chat);
 
@@ -499,10 +478,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         if (!isMuc) service.setChatState(account, jid, ChatState.active);
         createOptionMenu();
 
-        int position = chatsSpinnerAdapter.getPosition(account, jid);
-        getActionBar().setSelectedNavigationItem(position);
-        rosterItem = chatsSpinnerAdapter.getItem(position);
-
         if (searchString.length() > 0) {
             if (menu != null) {
                 MenuItem item = menu.findItem(R.id.search);
@@ -518,6 +493,34 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             service.removeMessagesCountForJid(account, jid);
         }
         service.removeMessagesCount(account, jid);
+
+        setNavigationListener();
+    }
+
+    private void setNavigationListener() {
+        chatsSpinnerAdapter.update();
+        getActionBar().setListNavigationCallbacks(chatsSpinnerAdapter, new ActionBar.OnNavigationListener() {
+            @Override
+            public boolean onNavigationItemSelected(int position, long itemId) {
+                RosterItem item = chatsSpinnerAdapter.getItem(position);
+                String a = item.getAccount();
+                String j = jid;
+                if (item.isEntry() || item.isSelf()) j = item.getEntry().getUser();
+                else if (item.isMuc()) j = item.getName();
+                if (!j.equals(jid)) {
+                    Intent intent = new Intent();
+                    intent.putExtra("jid", j);
+                    intent.putExtra("account", a);
+                    setIntent(intent);
+                    onPause();
+                    onResume();
+                }
+                return true;
+            }
+        });
+
+        int position = chatsSpinnerAdapter.getPosition(account, jid);
+        getActionBar().setSelectedNavigationItem(position);
     }
 
     @Override
@@ -903,9 +906,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     }
 
     private void updateChats() {
-        chatsSpinnerAdapter.update();
-        chatsSpinnerAdapter.notifyDataSetChanged();
-
         if (sidebar.getVisibility() == View.GONE) return;
         new Thread() {
             public void run() {
@@ -943,7 +943,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     }
 
     private void updateStatus() {
-        chatsSpinnerAdapter.notifyDataSetChanged();
         if (service != null) {
             IconPicker ip = service.getIconPicker();
             if (ip != null) {
@@ -988,6 +987,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                     updateList();
                     chatsSpinnerAdapter.notifyDataSetChanged();
                 } else {
+                    setNavigationListener();
                     updateUsers();
                     updateChats();
                 }
@@ -1013,6 +1013,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         presenceReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                chatsSpinnerAdapter.notifyDataSetChanged();
                 updateChats();
                 updateUsers();
                 if (!isMuc) {
