@@ -23,8 +23,13 @@ public class Pictures {
 
     public static void loadPicture(final Activity activity, final String jid, final SpannableStringBuilder ssb, final MyTextView tv) {
         Matcher m = linkPattern.matcher(ssb);
+        int startOffset = 0;
+        int endOffset = 0;
         while (m.find()) {
-            final String url = ssb.subSequence(m.start(), m.end()).toString();
+            int start = m.start()+startOffset;
+            int end = m.end()+endOffset;
+
+            final String url = ssb.subSequence(start, end).toString();
             String file = url.substring(url.lastIndexOf("/")+1, url.length());
             final String fname = Constants.PATH + "Pictures/" + file;
 
@@ -61,22 +66,27 @@ public class Pictures {
                 matrix.postScale(scaleWidth, scaleHeight);
 
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-                int sidebar = prefs.getInt("SideBarSize", 100);
+                int sidebar = prefs.getInt("SideBarSize", 100)+10;
 
                 Bitmap bitmap = BitmapFactory.decodeFile(fname);
-                if (bitmap == null) return;
-                bitmap.setDensity(metrics.densityDpi);
-                int maxWidth = metrics.widthPixels - sidebar;
-                int width = bitmap.getWidth();
-                if (width > maxWidth)  {
-                    double k = (double)width/(double)maxWidth;
-                    int h = (int) (bitmap.getHeight()/k);
-                    bitmap = Bitmap.createScaledBitmap(bitmap, maxWidth, h, true);
-                }
+                if (bitmap != null) {
+                    bitmap.setDensity(metrics.densityDpi);
+                    int maxWidth = metrics.widthPixels - sidebar;
+                    int width = bitmap.getWidth();
+                    if (width > maxWidth)  {
+                        double k = (double)width/(double)maxWidth;
+                        int h = (int) (bitmap.getHeight()/k);
+                        bitmap = Bitmap.createScaledBitmap(bitmap, maxWidth, h, true);
+                    }
 
-                ssb.insert(m.end(), "\np\n");
-                ssb.setSpan(new ImageSpan(activity, bitmap, ImageSpan.ALIGN_BASELINE), m.end()+1, m.end()+2, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-                tv.setText(ssb);
+                    ssb.setSpan(new ImageSpan(activity, bitmap, ImageSpan.ALIGN_BASELINE), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.insert(start, "\n");
+                    ssb.insert(end+1, "\n");
+                    tv.setText(ssb);
+
+                    startOffset++;
+                    endOffset = endOffset + 2;
+                }
             }
         }
     }
