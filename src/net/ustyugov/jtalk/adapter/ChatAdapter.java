@@ -158,11 +158,23 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
         	int boldLength = colorLength;
         	
         	if (showtime) {
-        		message = time + " " + name + ": " + body;
-        		colorLength = name.length() + time.length() + 2;
-        		boldLength = name.length() + time.length() + subj.length() + 2;
+                if (body.length() > 4 && body.startsWith("/me")) {
+                    message = time + " * " + name + " " + body.substring(3);
+                } else {
+                    message = time + " " + name + ": " + body;
+                }
+        		colorLength = name.length() + time.length() + 3;
+        		boldLength = name.length() + time.length() + subj.length() + 3;
         	}
-        	else message = name + ": " + body;
+        	else {
+                if (body.length() > 4 && body.startsWith("/me")) {
+                    message = " * " + name + " " + body.substring(3);
+                    colorLength = name.length() + 3;
+                    boldLength = colorLength + subj.length();
+                } else {
+                    message = name + ": " + body;
+                }
+            }
         	ssb.append(message);
         	ssb.setSpan(new ForegroundColorSpan(Colors.PRIMARY_TEXT), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         	ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, boldLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
