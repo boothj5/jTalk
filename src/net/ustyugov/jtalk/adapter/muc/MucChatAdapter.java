@@ -84,7 +84,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
         this.searchString = searchString;
         clear();
 
-        boolean showStatuses = prefs.getBoolean("ShowStatus", false);
+        String showStatusMode = prefs.getString("StatusMessagesMode", "2");
         List<MessageItem> messages = JTalkService.getInstance().getMessageList(account, group);
         for (int i = 0; i < messages.size(); i++) {
             MessageItem item = messages.get(i);
@@ -93,7 +93,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                 String name = item.getName();
                 String body = item.getBody();
                 String time = createTimeString(item.getTime());
-                if (type == MessageItem.Type.status) {
+                if (type == MessageItem.Type.status || type == MessageItem.Type.connectionstatus) {
                     if (showtime) body = time + "  " + body;
                 } else {
                     if (showtime) body = time + " " + name + ": " + body;
@@ -101,10 +101,15 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                 }
 
                 if (body.toLowerCase().contains(searchString.toLowerCase())) {
-                    if (showStatuses || type != MessageItem.Type.status) add(item);
+                    add(item);
                 }
             } else {
-                if (showStatuses || type != MessageItem.Type.status) add(item);
+                if (showStatusMode.equals("0")) {
+                    if (type != MessageItem.Type.status && type != MessageItem.Type.connectionstatus) add(item);
+                } else if (showStatusMode.equals("1")) add(item);
+                else {
+                    if (type != MessageItem.Type.status) add(item);
+                }
             }
         }
     }
@@ -165,7 +170,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
             ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             holder.text.setText(ssb);
         }
-        else if (type == MessageItem.Type.status) {
+        else if (type == MessageItem.Type.status || type == MessageItem.Type.connectionstatus) {
             ssb.setSpan(new ForegroundColorSpan(Colors.STATUS_MESSAGE), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {
             if (showtime && time.length() > 2) {

@@ -73,7 +73,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
         this.searchString = searchString;
 		clear();
 
-        boolean showStatuses = prefs.getBoolean("ShowStatus", false);
+        String showStatusMode = prefs.getString("StatusMessagesMode", "2");
 
         List<MessageItem> list = JTalkService.getInstance().getMessageList(account, jid);
         for (int i = 0; i < list.size(); i++) {
@@ -84,7 +84,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
                 String body = item.getBody();
                 String time = createTimeString(item.getTime());
 
-                if (type == MessageItem.Type.status) {
+                if (type == MessageItem.Type.status || type == MessageItem.Type.connectionstatus) {
                     if (showtime) body = time + "  " + body;
                 } else {
                     if (showtime) body = time + " " + name + ": " + body;
@@ -95,7 +95,12 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
                     add(item);
                 }
             } else {
-                if (showStatuses || type != MessageItem.Type.status) add(item);
+                if (showStatusMode.equals("0")) {
+                    if (type != MessageItem.Type.status && type != MessageItem.Type.connectionstatus) add(item);
+                } else if (showStatusMode.equals("1")) add(item);
+                else {
+                    if (type != MessageItem.Type.status) add(item);
+                }
             }
         }
 	}
@@ -148,7 +153,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
             ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             holder.text.setText(ssb);
         }
-        else if (type == MessageItem.Type.status) {
+        else if (type == MessageItem.Type.status || type == MessageItem.Type.connectionstatus) {
         	if (showtime) message = time + "  " + body;
         	else message = body;
             ssb.append(message);

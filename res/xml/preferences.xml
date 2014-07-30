@@ -61,10 +61,12 @@
                 android:key="ShowTime"
                 android:title="@string/ShowTime"
                 android:defaultValue="false" />
-        <CheckBoxPreference
-                android:key="ShowStatus"
-                android:title="@string/ShowStatus"
-                android:defaultValue="true" />
+        <ListPreference
+                android:defaultValue="2"
+                android:entries="@array/StatusMessages"
+                android:entryValues="@array/StatusMessagesValues"
+                android:key="StatusMessagesMode"
+                android:title="@string/ShowStatus"/>
         <CheckBoxPreference
                 android:key="StatusInBar"
                 android:title="@string/ShowStatuses"

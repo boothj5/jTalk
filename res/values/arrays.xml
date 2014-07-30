@@ -51,4 +51,16 @@
     <string-array name="rooms">
         <item>jtalk@conference.jabber.ru</item>
     </string-array>
+
+    <string-array name="StatusMessagesValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="StatusMessages">
+        <item>Hide all status changes</item>
+        <item>Show all status changes</item>
+        <item>Show only connection changes</item>
+    </string-array>
 </resources>
