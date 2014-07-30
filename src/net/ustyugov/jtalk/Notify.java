@@ -260,12 +260,21 @@ public class Notify {
             PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Bitmap largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.stat_msg);
-            String filePath = Constants.PATH + fullJid.replaceAll("/", "%");
-            File a = new File(filePath);
-            if (a.exists()) largeIcon = BitmapFactory.decodeFile(filePath);
+            if (type == Type.Direct) largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.icon_muc);
             else {
-                if (type == Type.Direct) {
-                    largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.icon_muc);
+                if (prefs.getBoolean("LoadNotifyAvatar", true)) {
+                    String filePath = Constants.PATH + fullJid.replaceAll("/", "%");
+                    File a = new File(filePath);
+                    if (a.exists()) {
+                        largeIcon = BitmapFactory.decodeFile(filePath);
+
+                        int width = largeIcon.getWidth();
+                        if (width > 96)  {
+                            double k = (double)width/(double)96;
+                            int h = (int) (largeIcon.getHeight()/k);
+                            largeIcon = Bitmap.createScaledBitmap(largeIcon, 96, h, true);
+                        }
+                    }
                 }
             }
 

@@ -175,6 +175,10 @@
                 android:key="vibrationMode"
                 android:title="@string/Vibration"/>
         <CheckBoxPreference
+                android:key="LoadNotifyAvatar"
+                android:title="@string/LoadAvatars"
+                android:defaultValue="true" />
+        <CheckBoxPreference
                 android:title="@string/MessageInNotification"
                 android:key="MessageInNotification"
                 android:defaultValue="false"/>
