@@ -238,9 +238,9 @@
     <string name="MiddleName">Segundo nombre:</string>
     <string name="NickName">Apoco:</string>
     <string name="HomeMail">Email (casa):</string>
-    <string name="WorkMail">Email (tranajo):</string>
+    <string name="WorkMail">Email (trabajo):</string>
     <string name="HomePhone">Teléfono (casa):</string>
-    <string name="WorkPhone">Teleono (trabajo):</string>
+    <string name="WorkPhone">Teléfono (trabajo):</string>
     <string name="Country">País:</string>
     <string name="Birthday">Cumpleaños:</string>
     <string name="City">Ciudad:</string>
@@ -252,7 +252,7 @@
     <string name="About">Información</string>
     <string name="Client">Cliente</string>
     <string name="Home">General</string>
-    <string name="Work">Tranajo</string>
+    <string name="Work">Trabajo</string>
     <string name="Photo">Foto</string>
     <string name="Publish">Publicar</string>
 
