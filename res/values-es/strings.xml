@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources>   
     <string name="Connect">Conectar</string>
     <string name="Disconnect">Desconectar</string>
     <string name="Authentication">Autentificación</string>
@@ -7,7 +7,7 @@
     <string name="Reconnecting">Reconectando...</string>
     <string name="GettingRoster">Obteniendo lista de contactos...</string>
     <string name="Me">Yo</string>
-    <string name="Settings">Preferenciass</string>
+    <string name="Settings">Configuración</string>
     <string name="cancel">Cancelar</string>
     <string name="save">Guardar</string>
     <string name="ok">OK</string>
@@ -42,6 +42,7 @@
     <string name="Chats">Chats</string>
     <string name="To">a</string>
     <string name="MessagesCopied">Mensaje copiado</string>
+    <string name="notes">Notas</string>
 
     <!--  Service Discovery -->
     <string name="Registration">Registro</string>
@@ -60,7 +61,7 @@
     <string name="Notifications">Notificaciones</string>
     <string name="Resource">Recurso</string>
     <string name="Autoconnect">Autoconectar</string>
-    <string name="OfflineContacts">Ocultar contactos desconectados</string>
+    <string name="OfflineContacts">Ocultar desconectados</string>
     <string name="ShowTime">Mostrar hora</string>
     <string name="ShowStatus">Mostrar mensajes de estado</string>
     <string name="InsertNewline">Nueva línea tras apodo</string>
@@ -114,10 +115,15 @@
     <string name="HideKeyboard">Ocultar teclado al enviar</string>
     <string name="MaxMessages">Máximo de mensajes en el historial</string>
     <string name="AddAfterNick">Añadir tras apodo</string>
+    <string name="WordsForHighlight">Palabras a resaltar</string>
+    <string name="HighlightOnlyFullWords">Resaltar sólo palabras enteras</string>
     <string name="NumberOfCharacters">Número de caracteres</string>
     <string name="Columns">Columnas</string>
     <string name="TheNumberColumnsDialog">El número de columnas en el diálogo</string>
     <string name="Locations">Enviar notificación de lugar</string>
+    <string name="WiFiLock">WiFi siempre activa</string>
+    <string name="WakeLock">Bloqueo del modo en espera</string>
+    <string name="SendTunes">Qué estoy escuchando</string>
     <string name="AutostartOnBoot">Iniciar al encender el teléfono</string>
     <string name="CompactMode">Modo compacto</string>
     <string name="UseColors">Usar colores</string>
@@ -126,6 +132,7 @@
     <string name="ShowActiveContacts">Mostrar duplicados de chats activos</string>
     <string name="NoMaxLines">Altura automática del campo de escritura</string>
     <string name="ColorLines">Fondo con líneas</string>
+    <string name="Subscription">Subscripción</string>
     <string name="ColorTheme">Tema</string>
     <string name="DisableSound">Desactivar sonido</string>
     <string name="EnableSound">Activar sonido</string>
@@ -142,7 +149,14 @@
     <string name="Remove">Borrar</string>
     <string name="Reply">Rresponder</string>
     <string name="Clear">Limpiar</string>
-    <string name="Info">Inforomación</string>
+    <string name="ColumnsInRoster">Columnas en la lista de contactos</string>
+    <string name="NeededReconnect">Needed reconnect</string>
+    <string name="inseconds">in seconds</string>
+    <string name="PingToServer">Ping al servidor</string>
+    <string name="PingTimeout">Tiempo del Ping</string>
+    <string name="EnableSIP">Activar SIP</string>
+    <string name="AutoLoadPictures">Cargar imágenes automáticamente</string>
+    <string name="Info">Información</string>
     <string name="SendFile">Enviar archivo</string>
     <string name="MUC">Conferencias</string>
     <string name="ChangeNick">Cambiar apodo</string>
@@ -165,7 +179,7 @@
     <string name="DeleteHistory">Borrar historial</string>
     <string name="SelectText">Seleccionar texto</string>
     <string name="Close">Cerrar</string>
-    <string name="ServiceDiscovery">Descubrir servicios</string>
+    <string name="ServiceDiscovery">Buscar salas públicas</string>
     <string name="PasteSmile">Pegar emoticono</string>
     <string name="PasteNick">Pegar apodo</string>
     <string name="Kick">Patear</string>
@@ -196,7 +210,10 @@
     <string name="ShowOfflineContacts">Mostrar contactos desconectados</string>
     <string name="SelectMessage">Seleccionar mensaje</string>
     <string name="Finish">Terminar</string>
-
+    <string name="SendPhoto">Enviar imagen</string>
+    <string name="Export">Exportar conversación</string>
+    <string name="AddBookmark">Añadir a Marcadores</string>
+    
     <!-- Dialogs -->
     <string name="Room">Sala</string>
     <string name="From">De</string>
@@ -221,9 +238,9 @@
     <string name="MiddleName">Segundo nombre:</string>
     <string name="NickName">Apoco:</string>
     <string name="HomeMail">Email (casa):</string>
-    <string name="WorkMail">Email (tranajo):</string>
+    <string name="WorkMail">Email (trabajo):</string>
     <string name="HomePhone">Teléfono (casa):</string>
-    <string name="WorkPhone">Teleono (trabajo):</string>
+    <string name="WorkPhone">Teléfono (trabajo):</string>
     <string name="Country">País:</string>
     <string name="Birthday">Cumpleaños:</string>
     <string name="City">Ciudad:</string>
@@ -235,7 +252,7 @@
     <string name="About">Información</string>
     <string name="Client">Cliente</string>
     <string name="Home">General</string>
-    <string name="Work">Tranajo</string>
+    <string name="Work">Trabajo</string>
     <string name="Photo">Foto</string>
     <string name="Publish">Publicar</string>
 
