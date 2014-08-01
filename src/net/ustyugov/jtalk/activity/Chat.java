@@ -107,6 +107,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private int unreadMessages = 0;
     private int separatorPosition = 0;
 
+    private BroadcastReceiver changeChatReceiver;
     private BroadcastReceiver textReceiver;
     private BroadcastReceiver finishReceiver;
     private BroadcastReceiver msgReceiver;
@@ -131,12 +132,42 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 
-        chatsSpinnerAdapter = new ChatsSpinnerAdapter(this);
+        Spinner spinner = new Spinner(this);
+        spinner.setBackground(null);
+        chatsSpinnerAdapter = new ChatsSpinnerAdapter(this, spinner);
+        spinner.setAdapter(chatsSpinnerAdapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            boolean init = false;
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                if (!init) {
+                    init = true;
+                    return;
+                }
+                RosterItem item = chatsSpinnerAdapter.getItem(position);
+                String a = item.getAccount();
+                String j = jid;
+                if (item.isEntry() || item.isSelf()) j = item.getEntry().getUser();
+                else if (item.isMuc()) j = item.getName();
+                if (!j.equals(jid)) {
+                    Intent intent = new Intent();
+                    intent.putExtra("jid", j);
+                    intent.putExtra("account", a);
+                    setIntent(intent);
+                    onPause();
+                    onResume();
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) { }
+        });
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        actionBar.setCustomView(spinner);
+        actionBar.setDisplayShowCustomEnabled(true);
 
         setContentView(R.layout.chat);
 
@@ -487,40 +518,15 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
         unreadMessages = service.getMessagesCount(account, jid);
         if (unreadMessages > 0) separatorPosition = 0;
-        updateList();
         if (service.getMessageList(account, jid).isEmpty()) loadStory(false);
         if (account.equals(jid)) {
             service.removeMessagesCountForJid(account, jid);
         }
+
         service.removeMessagesCount(account, jid);
-
-        setNavigationListener();
-    }
-
-    private void setNavigationListener() {
         chatsSpinnerAdapter.update();
-        getActionBar().setListNavigationCallbacks(chatsSpinnerAdapter, new ActionBar.OnNavigationListener() {
-            @Override
-            public boolean onNavigationItemSelected(int position, long itemId) {
-                RosterItem item = chatsSpinnerAdapter.getItem(position);
-                String a = item.getAccount();
-                String j = jid;
-                if (item.isEntry() || item.isSelf()) j = item.getEntry().getUser();
-                else if (item.isMuc()) j = item.getName();
-                if (!j.equals(jid)) {
-                    Intent intent = new Intent();
-                    intent.putExtra("jid", j);
-                    intent.putExtra("account", a);
-                    setIntent(intent);
-                    onPause();
-                    onResume();
-                }
-                return true;
-            }
-        });
 
-        int position = chatsSpinnerAdapter.getPosition(account, jid);
-        getActionBar().setSelectedNavigationItem(position);
+        updateList();
     }
 
     @Override
@@ -735,6 +741,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 break;
             case R.id.history:
                 loadStory(true);
+                updateList();
                 break;
             case R.id.delete_history:
                 service.setMessageList(account, jid, new ArrayList<MessageItem>());
@@ -987,7 +994,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                     updateList();
                     chatsSpinnerAdapter.notifyDataSetChanged();
                 } else {
-                    setNavigationListener();
+                    chatsSpinnerAdapter.update();
                     updateUsers();
                     updateChats();
                 }
@@ -1013,10 +1020,10 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         presenceReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                chatsSpinnerAdapter.notifyDataSetChanged();
                 updateChats();
                 updateUsers();
                 if (!isMuc) {
+                    chatsSpinnerAdapter.notifyDataSetChanged();
                     Bundle extras = intent.getExtras();
                     if (extras != null) {
                         String j = extras.getString("jid");
@@ -1026,6 +1033,22 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                         }
                     }
                 }
+            }
+        };
+
+        changeChatReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent i) {
+                String account = i.getStringExtra("account");
+                String jid = i.getStringExtra("jid");
+                if (account == null || jid == null) return;
+
+                Intent intent = new Intent();
+                intent.putExtra("account", account);
+                intent.putExtra("jid", jid);
+                setIntent(intent);
+                onPause();
+                onResume();
             }
         };
 
@@ -1042,6 +1065,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         registerReceiver(receivedReceiver, new IntentFilter(Constants.RECEIVED));
         registerReceiver(composeReceiver, new IntentFilter(Constants.UPDATE));
         registerReceiver(presenceReceiver, new IntentFilter(Constants.PRESENCE_CHANGED));
+        registerReceiver(changeChatReceiver, new IntentFilter(Constants.CHANGE_CHAT));
     }
 
     private void unregisterReceivers() {
@@ -1052,6 +1076,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             unregisterReceiver(receivedReceiver);
             unregisterReceiver(composeReceiver);
             unregisterReceiver(presenceReceiver);
+            unregisterReceiver(changeChatReceiver);
         } catch (Exception ignored) { }
     }
 
@@ -1111,7 +1136,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             service.setMessageList(account, jid, list);
             cursor.close();
         }
-        updateList();
     }
 
     private void clearChat() {

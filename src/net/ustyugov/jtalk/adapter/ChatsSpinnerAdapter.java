@@ -17,9 +17,18 @@
 
 package net.ustyugov.jtalk.adapter;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
+import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
+import android.os.Environment;
+import android.os.Parcelable;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.widget.*;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.Holders.ItemHolder;
 import net.ustyugov.jtalk.db.AccountDbHelper;
@@ -43,23 +52,21 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.SpinnerAdapter;
-import android.widget.TextView;
 
 import com.jtalk2.R;
 
-public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements SpinnerAdapter {
+public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements SpinnerAdapter, View.OnClickListener {
 	private JTalkService service;
 	private SharedPreferences prefs;
 	private Activity activity;
+    private Spinner spinner;
 	
-	public ChatsSpinnerAdapter(Activity activity) {
+	public ChatsSpinnerAdapter(Activity activity, Spinner spinner) {
 		super(activity, R.id.name);
         this.service = JTalkService.getInstance();
         this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         this.activity = activity;
+        this.spinner = spinner;
     }
 	
 	public void update() {
@@ -105,53 +112,100 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 		}
 		return 0;
 	}
+
+    @Override
+    public void onClick(View view) {
+        spinner.performClick();
+    }
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-        View v = convertView;
-        RosterItem item = getItem(position);
-        String account = item.getAccount();
-        String jid = service.getCurrentJid();
-        String s;
+        List<Page> list = new ArrayList<Page>();
+        int current = 0;
+        int j = 0;
 
-        if (v == null) {
+        for (int i = 0; i < getCount(); i++) {
+            RosterItem item = getItem(i);
+            String account = item.getAccount();
+            String jid;
+            String s;
+
+            if (item.isEntry()) {
+                jid = item.getEntry().getUser();
+            } else jid = item.getName();
+
+            if (jid.equals(service.getCurrentJid())) current = j;
+            else j++;
+
             LayoutInflater vi = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = vi.inflate(R.layout.spinner_item, null);
+            View v = vi.inflate(R.layout.spinner_item, null);
+
+            String name = jid;
+            if (service.getConferencesHash(account).containsKey(jid)) {
+                name = StringUtils.parseName(jid);
+            } else if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
+                name = StringUtils.parseResource(jid);
+            } else {
+                RosterEntry re = item.getEntry();
+                if (re != null) name = re.getName();
+                if (name == null || name.equals("")) name = jid;
+            }
+
+            if (service.getConferencesHash(account).containsKey(jid)) {
+                MultiUserChat muc = service.getConferencesHash(account).get(jid);
+                s = muc.getSubject();
+            } else {
+                if (service.getComposeList().contains(jid)) {
+                    s = activity.getString(R.string.Composes);
+                } else s = service.getStatus(account, jid);
+            }
+
+            TextView title = (TextView) v.findViewById(R.id.title);
+            title.setText(name);
+            if (Colors.isLight) title.setTextColor(Color.BLACK);
+            else title.setTextColor(Color.WHITE);
+
+            TextView status = (TextView) v.findViewById(R.id.subtitle);
+            if (s != null && s.length() > 1) {
+                status.setText(s);
+                status.setVisibility(View.VISIBLE);
+            } else {
+                status.setVisibility(View.GONE);
+            }
+
+            v.setOnClickListener(this);
+            list.add(new Page(account, jid, v));
         }
 
-        String name = jid;
-        if (service.getConferencesHash(account).containsKey(jid)) {
-        	name = StringUtils.parseName(jid);
-        } else if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
-        	name = StringUtils.parseResource(jid);
-        } else {
-        	RosterEntry re = item.getEntry();
-            if (re != null) name = re.getName();
-            if (name == null || name.equals("")) name = jid;
-        }
+        final MyPageAdapter pa = new MyPageAdapter(list);
+        ViewPager vp = new ViewPager(activity);
+        vp.setAdapter(pa);
+        vp.setCurrentItem(current);
+        vp.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i2) {}
 
-        if (service.getConferencesHash(account).containsKey(jid)) {
-            MultiUserChat muc = service.getConferencesHash(account).get(jid);
-            s = muc.getSubject();
-        } else {
-            if (service.getComposeList().contains(jid)) {
-                s = activity.getString(R.string.Composes);
-            } else s = service.getStatus(account, jid);
-        }
+            @Override
+            public void onPageScrollStateChanged(int i) { }
 
-        TextView title = (TextView) v.findViewById(R.id.title);
-        title.setText(name);
-        if (Colors.isLight) title.setTextColor(Color.BLACK);
-        else title.setTextColor(Color.WHITE);
+            @Override
+            public void onPageSelected(final int position) {
+                final String jid = pa.getItem(position).getJid();
+                final String account = pa.getItem(position).getAccount();
+                if (jid == null || account == null || service.getCurrentJid().equals(jid)) return;
 
-        TextView status = (TextView) v.findViewById(R.id.subtitle);
-        if (s != null && s.length() > 1) {
-            status.setText(s);
-            status.setVisibility(View.VISIBLE);
-        } else {
-            status.setVisibility(View.GONE);
-        }
-        return v;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(350);
+                        } catch (Exception ignored) {}
+                        activity.sendBroadcast(new Intent(Constants.CHANGE_CHAT).putExtra("account", account).putExtra("jid", jid));
+                    }
+                }).start();
+            }
+        });
+        return vp;
 	}
 
 	@Override
@@ -160,7 +214,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 		int fontSize = Integer.parseInt(service.getResources().getString(R.string.DefaultFontSize));
 		try {
 			fontSize = Integer.parseInt(prefs.getString("RosterSize", service.getResources().getString(R.string.DefaultFontSize)));
-		} catch (NumberFormatException e) { }
+		} catch (NumberFormatException ignored) { }
 		int statusSize = fontSize - 4;
 		
 		RosterItem item = getItem(position);
@@ -280,4 +334,60 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 		}
 		return null;
 	}
+
+    private class Page {
+        String jid;
+        String account;
+        View view;
+
+        public Page(String account, String jid, View view) {
+            this.account = account;
+            this.jid = jid;
+            this.view = view;
+        }
+
+        public String getAccount() { return account; }
+        public String getJid() { return jid; }
+        public View getView() { return view; }
+    }
+
+    private class MyPageAdapter extends PagerAdapter {
+        List<Page> list = new ArrayList<Page>();
+
+        public MyPageAdapter(List<Page> list) {
+            this.list = list;
+        }
+
+        public Page getItem(int position) { return list.get(position); }
+
+        @Override
+        public Object instantiateItem(View collection, int position){
+            View v = list.get(position).getView();
+            ((ViewPager) collection).addView(v, 0);
+            return v;
+        }
+
+        @Override
+        public void destroyItem(View collection, int position, Object object){
+            ((ViewPager) collection).removeView((View) object);
+        }
+
+        @Override
+        public int getCount() { return list.size(); }
+
+        @Override
+        public boolean isViewFromObject(View view, Object object) { return view.equals(object); }
+
+        @Override
+        public void finishUpdate(View arg0) { }
+
+        @Override
+        public void restoreState(Parcelable arg0, ClassLoader arg1) { }
+
+        @Override
+        public Parcelable saveState() { return null; }
+
+        @Override
+        public void startUpdate(View arg0) { }
+    }
 }

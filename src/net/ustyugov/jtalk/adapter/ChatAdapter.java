@@ -190,6 +190,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> {
                 if (received && prefs.getBoolean("ShowReceivedIcon", true)) {
                     Bitmap b = BitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_delivered);
                     b = Bitmap.createScaledBitmap(b, fontSize + 10, fontSize + 10, true);
+                    ssb.insert(colorLength, " ");
                     ssb.setSpan(new ImageSpan(activity, b, ImageSpan.ALIGN_BOTTOM), colorLength, colorLength+1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                 }
             }
