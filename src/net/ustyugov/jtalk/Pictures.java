@@ -52,7 +52,7 @@ public class Pictures {
                             in.close();
                             fout.close();
 
-                            activity.sendBroadcast(new Intent(Constants.PRESENCE_CHANGED).putExtra("jid", jid));
+                            activity.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", jid));
                         } catch (Exception ignored) { }
                     }
                 }.start();

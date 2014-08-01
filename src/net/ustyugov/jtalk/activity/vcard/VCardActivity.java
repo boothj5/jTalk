@@ -24,7 +24,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Environment;
 import android.view.*;
 import android.widget.*;
@@ -124,10 +127,24 @@ public class VCardActivity extends Activity {
 		phoneWork = (MyTextView) workPage.findViewById(R.id.workphone);
 		
 		av = (ImageView) avatarPage.findViewById(R.id.av);
+        av.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                File file = new File(Constants.PATH + jid.replaceAll("/", "%"));
+                Uri uri = Uri.fromFile(file);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(uri, "image/*");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    startActivity(intent);
+                } catch(ActivityNotFoundException ignored) { }
+            }
+        });
+
         av.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                String fname = Constants.PATH + "/" + jid.replaceAll("/", "%");
+                String fname = Constants.PATH + jid.replaceAll("/", "%");
                 String saveto = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Pictures/Avatars/";
 
                 File folder = new File(saveto);
@@ -249,8 +266,10 @@ public class VCardActivity extends Activity {
 					if (width > metrics.widthPixels)  {
 						double k = (double)width/(double)metrics.widthPixels;
 						int h = (int) (bitmap.getHeight()/k);
-						bitmap = Bitmap.createScaledBitmap(bitmap, metrics.widthPixels, h, true);
-					}
+						bitmap = Bitmap.createBitmap(bitmap, 0, 0, metrics.widthPixels, h, matrix, true);
+					} else {
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                    }
 					
 					try {
 						String fname = jid.replaceAll("/", "%");

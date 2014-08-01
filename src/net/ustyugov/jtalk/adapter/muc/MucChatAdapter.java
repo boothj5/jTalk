@@ -117,8 +117,10 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         int fontSize = Integer.parseInt(activity.getResources().getString(R.string.DefaultFontSize));
+        int timeSize = Integer.parseInt(activity.getResources().getString(R.string.DefaultFontSize));
         try {
             fontSize = Integer.parseInt(prefs.getString("FontSize", activity.getResources().getString(R.string.DefaultFontSize)));
+            timeSize = Integer.parseInt(prefs.getString("TimeSize", activity.getResources().getString(R.string.DefaultFontSize)));
         } catch (NumberFormatException ignored) {	}
 
         Holders.MessageHolder holder = new Holders.MessageHolder();
@@ -162,6 +164,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
 
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         ssb.append(message);
+        if (showtime) ssb.setSpan(new AbsoluteSizeSpan(timeSize+4), 0, time.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         ssb.setSpan(new ForegroundColorSpan(Colors.PRIMARY_TEXT), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         if (type == MessageItem.Type.separator) {
             ssb.clear();
