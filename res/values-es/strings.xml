@@ -150,8 +150,8 @@
     <string name="Reply">Rresponder</string>
     <string name="Clear">Limpiar</string>
     <string name="ColumnsInRoster">Columnas en la lista de contactos</string>
-    <string name="NeededReconnect">Needed reconnect</string>
-    <string name="inseconds">in seconds</string>
+    <string name="NeededReconnect">Se necesita reconectar</string>
+    <string name="inseconds">en segundos</string>
     <string name="PingToServer">Ping al servidor</string>
     <string name="PingTimeout">Tiempo del Ping</string>
     <string name="EnableSIP">Activar SIP</string>
