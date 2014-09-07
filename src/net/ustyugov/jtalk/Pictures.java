@@ -66,7 +66,7 @@ public class Pictures {
                 matrix.postScale(scaleWidth, scaleHeight);
 
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-                int sidebar = prefs.getInt("SideBarSize", 100)+10;
+                int sidebar = prefs.getInt("SideBarSize", 100)+20;
 
                 Bitmap bitmap = BitmapFactory.decodeFile(fname);
                 if (bitmap != null) {
@@ -79,7 +79,7 @@ public class Pictures {
                         bitmap = Bitmap.createScaledBitmap(bitmap, maxWidth, h, true);
                     }
 
-                    ssb.setSpan(new ImageSpan(activity, bitmap, ImageSpan.ALIGN_BASELINE), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.setSpan(new ImageSpan(activity, bitmap, ImageSpan.ALIGN_BASELINE), start, end, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
                     ssb.insert(start, "\n");
                     ssb.insert(end+1, "\n");
                     tv.setText(ssb);

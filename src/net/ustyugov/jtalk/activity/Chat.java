@@ -133,7 +133,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 
         Spinner spinner = new Spinner(this);
-        spinner.setBackground(null);
+//        spinner.setBackground(null);
         chatsSpinnerAdapter = new ChatsSpinnerAdapter(this, spinner);
         spinner.setAdapter(chatsSpinnerAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -394,6 +394,10 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                             lp.width = newSize;
                             sidebar.setLayoutParams(lp);
                             firstX = nowX;
+
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putInt("SideBarSize", sidebar.getLayoutParams().width);
+                            editor.commit();
                         }
                         break;
                 }
