@@ -507,11 +507,15 @@ public class RosterDialogs {
 		         	activity.sendBroadcast(i);
 		 	        break;
 	        	case 7:
-	        		service.setChatState(account, jid, ChatState.gone);
 		        	service.removeActiveChat(account, jid);
                     service.setMessageList(account, jid, new ArrayList<MessageItem>());
 					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
-					else service.sendBroadcast(new Intent(Constants.UPDATE));
+					else {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
+                        if (prefs.getBoolean("SendChatState", true))
+                            service.setChatState(account, jid, ChatState.gone);
+                        service.sendBroadcast(new Intent(Constants.UPDATE));
+                    }
 		        	break;
 		    	}
 			}
@@ -562,7 +566,12 @@ public class RosterDialogs {
                         service.setChatState(account, jid, ChatState.gone);
                         service.removeActiveChat(account, jid);
                         if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
-                        else service.sendBroadcast(new Intent(Constants.UPDATE));
+                        else {
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
+                            if (prefs.getBoolean("SendChatState", true))
+                                service.setChatState(account, jid, ChatState.gone);
+                            service.sendBroadcast(new Intent(Constants.UPDATE));
+                        }
                         break;
                 }
             }
@@ -616,7 +625,12 @@ public class RosterDialogs {
 	        		service.setChatState(account, jid, ChatState.gone);
                     service.removeActiveChat(account, jid);
 					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
-					else service.sendBroadcast(new Intent(Constants.UPDATE));
+					else {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
+                        if (prefs.getBoolean("SendChatState", true))
+                            service.setChatState(account, jid, ChatState.gone);
+                        service.sendBroadcast(new Intent(Constants.UPDATE));
+                    }
 					break;
 		    	}
 			}

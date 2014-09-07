@@ -23,8 +23,6 @@ import java.util.List;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Build;
-import android.os.Environment;
 import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -41,6 +39,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.ChatState;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.app.Activity;
@@ -128,7 +127,6 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
             RosterItem item = getItem(i);
             String account = item.getAccount();
             String jid;
-            String s;
 
             if (item.isEntry()) {
                 jid = item.getEntry().getUser();
@@ -151,27 +149,10 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
                 if (name == null || name.equals("")) name = jid;
             }
 
-            if (service.getConferencesHash(account).containsKey(jid)) {
-                MultiUserChat muc = service.getConferencesHash(account).get(jid);
-                s = muc.getSubject();
-            } else {
-                if (service.getComposeList().contains(jid)) {
-                    s = activity.getString(R.string.Composes);
-                } else s = service.getStatus(account, jid);
-            }
-
             TextView title = (TextView) v.findViewById(R.id.title);
             title.setText(name);
             if (Colors.isLight) title.setTextColor(Color.BLACK);
             else title.setTextColor(Color.WHITE);
-
-            TextView status = (TextView) v.findViewById(R.id.subtitle);
-            if (s != null && s.length() > 1) {
-                status.setText(s);
-                status.setVisibility(View.VISIBLE);
-            } else {
-                status.setVisibility(View.GONE);
-            }
 
             v.setOnClickListener(this);
             list.add(new Page(account, jid, v));
@@ -249,8 +230,9 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 			String jid = item.getEntry().getUser();
 			String status = "";
 			String name = jid;
-			
-			if (service.getComposeList().contains(jid)) status = service.getString(R.string.Composes);
+
+            ChatState state = service.getRoster(account).getChatState(jid);
+            if (state != null && state == ChatState.composing) status = service.getString(R.string.Composes);
 			else status = service.getStatus(account, jid);
 			
 			if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {

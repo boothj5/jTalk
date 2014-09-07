@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">jTalk</string>
     <string name="version">0.49</string>
-    <string name="build">422</string>
+    <string name="build">423</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>
@@ -150,6 +150,8 @@
     <string name="ShowSmilesButton">Show smiles button</string>
     <string name="OnKeyboard">On keyboard</string>
     <string name="AutoLoadAvatars">Auto load avatars</string>
+    <string name="ShowChatState">Show chat state</string>
+    <string name="SendChatState">Send chat state</string>
 
     <!--  Menus -->
     <string name="Update">Update</string>
@@ -307,5 +309,12 @@
     <string name="Completed">Completed</string>
     <string name="Canceled">Canceled</string>
     <string name="Refused">Refused</string>
+
+    <!-- Chat States -->
+    <string name="UserActive">User is active</string>
+    <string name="UserInactive">User is inactive</string>
+    <string name="UserPaused">User paused composing</string>
+    <string name="UserGone">User gone</string>
+    <string name="UserComposing">User is composing message</string>
     
 </resources>

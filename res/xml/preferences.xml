@@ -57,10 +57,18 @@
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Chat">
-        <CheckBoxPreference
-                android:key="ShowTime"
-                android:title="@string/ShowTime"
-                android:defaultValue="false" />
+        <PreferenceScreen android:title="@string/ShowTime">
+            <CheckBoxPreference
+                    android:key="ShowTime"
+                    android:title="@string/ShowTime"
+                    android:defaultValue="false" />
+            <EditTextPreference
+                    android:key="TimeSize"
+                    android:dependency="ShowTime"
+                    android:title="@string/FontSize"
+                    android:defaultValue="@string/DefaultFontSize"
+                    android:numeric="integer"/>
+        </PreferenceScreen>
         <ListPreference
                 android:defaultValue="2"
                 android:entries="@array/StatusMessages"
@@ -71,6 +79,14 @@
                 android:key="StatusInBar"
                 android:title="@string/ShowStatuses"
                 android:summary="On sidebar"
+                android:defaultValue="true" />
+        <CheckBoxPreference
+                android:key="ShowChatState"
+                android:title="@string/ShowChatState"
+                android:defaultValue="true" />
+        <CheckBoxPreference
+                android:key="SendChatState"
+                android:title="@string/SendChatState"
                 android:defaultValue="true" />
         <CheckBoxPreference
                 android:key="AutoScroll"
@@ -92,11 +108,6 @@
         <EditTextPreference
                 android:key="FontSize"
                 android:title="@string/FontSize"
-                android:defaultValue="@string/DefaultFontSize"
-                android:numeric="integer"/>
-        <EditTextPreference
-                android:key="TimeSize"
-                android:title="Time size"
                 android:defaultValue="@string/DefaultFontSize"
                 android:numeric="integer"/>
         <EditTextPreference

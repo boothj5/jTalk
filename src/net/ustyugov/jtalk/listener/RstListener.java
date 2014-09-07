@@ -33,6 +33,7 @@ import org.jivesoftware.smack.util.StringUtils;
 import android.content.Intent;
 
 import com.jtalk2.R;
+import org.jivesoftware.smackx.ChatState;
 
 public class RstListener implements RosterListener {
 	private JTalkService service;
@@ -93,6 +94,7 @@ public class RstListener implements RosterListener {
         }
 		else {
 			item.setBody(statusArray[5] + " " + status);
+            service.getRoster(account).setChatState(jid, ChatState.gone);
 		}
         item.setName(name);
         item.setTime(time);

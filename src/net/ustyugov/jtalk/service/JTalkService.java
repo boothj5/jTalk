@@ -91,7 +91,6 @@ public class JTalkService extends Service {
 	private static JTalkService js = new JTalkService();
     private Smiles smiles;
     private List<String> collapsedGroups = new ArrayList<String>();
-    private List<String> composeList = new ArrayList<String>();
     private Hashtable<String, List<String>> activeChats = new Hashtable<String, List<String>>();
     private Hashtable<String, Integer> msgCounter = new Hashtable<String, Integer>();
     private List<MessageItem> unreadMessages = new ArrayList<MessageItem>();
@@ -329,7 +328,6 @@ public class JTalkService extends Service {
     	else return null;
     }
     public List<String> getCollapsedGroups() { return collapsedGroups; }
-    public List<String> getComposeList() { return composeList; }
 
     public Hashtable<String, Hashtable<String, MultiUserChat>> getConferences() {return conferences;}
     public Hashtable<String, MultiUserChat> getConferencesHash(String account) { 
@@ -1385,7 +1383,6 @@ public class JTalkService extends Service {
         msgCounter.clear();
   		autoStatusTimer.cancel();
         collapsedGroups.clear();
-        composeList.clear();
         unreadMessages.clear();
         conferences.clear();
         joinedConferences.clear();

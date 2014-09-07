@@ -22,6 +22,7 @@ package org.jivesoftware.smack;
 
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.RosterPacket;
+import org.jivesoftware.smackx.ChatState;
 
 import java.util.*;
 
@@ -37,6 +38,7 @@ public class RosterEntry {
     private String name;
     private RosterPacket.ItemType type;
     private RosterPacket.ItemStatus status;
+    private ChatState state;
     final private Roster roster;
     final private Connection connection;
 
@@ -95,6 +97,10 @@ public class RosterEntry {
         connection.sendPacket(packet);
     }
 
+    public void setState(ChatState state) {
+        this.state = state;
+    }
+
     /**
      * Updates the state of the entry with the new values.
      *
@@ -146,6 +152,10 @@ public class RosterEntry {
      */
     public RosterPacket.ItemStatus getStatus() {
         return status;
+    }
+
+    public ChatState getState() {
+        return state;
     }
 
     public String toString() {

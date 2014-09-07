@@ -33,6 +33,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.ChatState;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.app.Activity;
@@ -350,7 +351,11 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 			
 			Presence presence = service.getPresence(ri.getAccount(), jid);
 			String status = service.getStatus(account, jid);
-			if (service.getComposeList().contains(jid)) status = service.getString(R.string.Composes);
+
+            if (service.getRoster(account) != null) {
+                ChatState state = service.getRoster(account).getChatState(jid);
+                if (state != null && state == ChatState.composing) status = service.getString(R.string.Composes);
+            }
 			
 			int count = service.getMessagesCount(account, jid);
 			

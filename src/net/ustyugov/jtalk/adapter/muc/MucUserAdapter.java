@@ -34,6 +34,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.ChatState;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.jivesoftware.smackx.packet.MUCUser;
 
@@ -410,7 +411,8 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			}
 
             String statusText = service.getStatus(account, jid);
-            if (service.getComposeList().contains(jid)) statusText = service.getString(R.string.Composes);
+            ChatState state = service.getRoster(account).getChatState(jid);
+            if (state != null && state == ChatState.composing) statusText = service.getString(R.string.Composes);
             if (prefs.getBoolean("StatusInBar", true)) {
                 holder.status.setVisibility(statusText.length() > 0 ? View.VISIBLE : View.GONE);
                 holder.status.setText(statusText);

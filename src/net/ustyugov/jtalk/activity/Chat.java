@@ -406,6 +406,10 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         };
         chatsList.setOnTouchListener(onTouchListener);
         nickList.setOnTouchListener(onTouchListener);
+
+        TextView chat_state = (TextView) findViewById(R.id.chat_state);
+        chat_state.setBackgroundColor(Colors.GROUP_BACKGROUND);
+        chat_state.setTextColor(Colors.GROUP_FOREGROUND);
     }
 
     @Override
@@ -474,7 +478,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         messageInput.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 if (s != null && s.length() > 0) {
-                    if (!isMuc) {
+                    if (!isMuc && prefs.getBoolean("SendChatState", true)) {
                         if (!compose) {
                             compose = true;
                             service.setChatState(account, jid, ChatState.composing);
@@ -482,7 +486,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                     }
                     sendButton.setEnabled(service.isAuthenticated(account));
                 } else {
-                    if (!isMuc) {
+                    if (!isMuc && prefs.getBoolean("SendChatState", true)) {
                         if (compose) {
                             compose = false;
                             service.setChatState(account, jid, ChatState.active);
@@ -510,7 +514,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         registerReceivers();
         service.resetTimer();
 
-        if (!isMuc) service.setChatState(account, jid, ChatState.active);
         createOptionMenu();
 
         if (searchString.length() > 0) {
@@ -530,7 +533,11 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         service.removeMessagesCount(account, jid);
         chatsSpinnerAdapter.update();
 
+        updateChatState();
         updateList();
+
+        if (!isMuc && prefs.getBoolean("SendChatState", true))
+            service.setChatState(account, jid, ChatState.active);
     }
 
     @Override
@@ -539,7 +546,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         unregisterReceivers();
         compose = false;
         if (!isMuc)  {
-            service.setChatState(account, jid, ChatState.active);
             service.setResource(account, jid, resource);
             if (service.getMessageList(account, jid).isEmpty()) service.removeActiveChat(account, jid);
         }
@@ -556,7 +562,9 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     public void onDestroy() {
         super.onDestroy();
         if (service.getMessageList(account,jid).isEmpty()) {
-            if (!isMuc) service.setChatState(account, jid, ChatState.gone);
+            if (!isMuc && prefs.getBoolean("SendChatState", true)) service.setChatState(account, jid, ChatState.gone);
+        } else {
+            if (!isMuc && prefs.getBoolean("SendChatState", true)) service.setChatState(account, jid, ChatState.inactive);
         }
 //        msgList.clear();
         jid = null;
@@ -1003,6 +1011,8 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                     updateChats();
                 }
                 if (clear) messageInput.setText("");
+
+                updateChatState();
             }
         };
 
@@ -1018,6 +1028,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             public void onReceive(Context context, Intent intent) {
                 updateStatus();
                 updateChats();
+                updateChatState();
             }
         };
 
@@ -1096,6 +1107,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             if (isPrivate) to = jid;
             else if (resource.length() > 0) to = jid + "/" + resource;
             service.sendMessage(account, to, message);
+            if (prefs.getBoolean("SendChatState", true)) service.setChatState(account, jid, ChatState.active);
         }
     }
 
@@ -1151,5 +1163,24 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         clearChat();
         service.removeActiveChat(account, jid);
         finish();
+    }
+
+    private void updateChatState() {
+        TextView chat_state = (TextView) findViewById(R.id.chat_state);
+        ChatState state = service.getRoster(account).getChatState(jid);
+        if (state != null && prefs.getBoolean("ShowChatState", true)) {
+            if (state == ChatState.composing) {
+                chat_state.setText(R.string.UserComposing);
+            } else if (state == ChatState.active) {
+                chat_state.setText(R.string.UserActive);
+            } else if (state == ChatState.inactive) {
+                chat_state.setText(R.string.UserInactive);
+            } else if (state == ChatState.paused) {
+                chat_state.setText(R.string.UserPaused);
+            } else if (state == ChatState.gone) {
+                chat_state.setText(R.string.UserGone);
+            }
+            chat_state.setVisibility(View.VISIBLE);
+        } else chat_state.setVisibility(View.GONE);
     }
 }

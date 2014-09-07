@@ -142,7 +142,9 @@
     <string name="ShowSmilesButton">Показывать клавишу смайлов</string>
     <string name="OnKeyboard">На клавиатуре</string>
     <string name="AutoLoadAvatars">Автозагрузка аватарок</string>
-    
+    <string name="ShowChatState">Показывать состояние чата</string>
+    <string name="SendChatState">Отправлять состояние чата</string>
+
     <!--  Menus -->
     <string name="Update">Обновить</string>
     <string name="ExecuteCommand">Выполнить команду</string>
@@ -298,4 +300,11 @@
     <string name="Completed">Выполнено</string>
     <string name="Canceled">Отменено</string>
     <string name="Refused">Отказано</string>
+
+    <!-- Chat States -->
+    <string name="UserActive">Пользователь активен</string>
+    <string name="UserInactive">Пользователь не активен</string>
+    <string name="UserPaused">Пользователь перестал печатать</string>
+    <string name="UserGone">Пользователь покинул чат</string>
+    <string name="UserComposing">Пользователь печатает сообщение</string>
 </resources>

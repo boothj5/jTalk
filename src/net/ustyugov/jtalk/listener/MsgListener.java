@@ -75,13 +75,23 @@ public class MsgListener implements PacketListener {
         // XEP-0085: Chat State Notifications
         PacketExtension stateExt = msg.getExtension("http://jabber.org/protocol/chatstates");
 		if (stateExt != null && !type.equals("error") && !service.getConferencesHash(account).containsKey(user)) {
-			String state = stateExt.getElementName();
-			if (state.equals(ChatState.composing.name())) { // User is composing a message
-				updateComposeList(user, true, true);
-			} else {
-				if (body != null && body.length() > 0) updateComposeList(user, false, false);
-				else updateComposeList(user, false, true);
-			}
+            try {
+                ChatState state = ChatState.valueOf(stateExt.getElementName());
+                service.getRoster(account).setChatState(user, state);
+                Intent i = new Intent(Constants.UPDATE);
+                context.sendBroadcast(i);
+            } catch (Exception ignored) {}
+
+
+//			String state = stateExt.getElementName();
+//			if (state.equals(ChatState.composing.name())) { // User is composing a message
+//				updateComposeList(user, true, true);
+//			} else {
+//				if (body != null && body.length() > 0) updateComposeList(user, false, false);
+//				else updateComposeList(user, false, true);
+//
+//                updateChatState(user, ChatState.valueOf(state));
+//			}
 		}
 
         // XEP-0184: Message Delivery Receipts
@@ -299,22 +309,8 @@ public class MsgListener implements PacketListener {
                 service.addUnreadMessage(item);
             }
 
-            updateComposeList(user, false, false);
             MessageLog.writeMessage(account, user, item);
             if (delayExt == null) Notify.messageNotify(account, user, Notify.Type.Chat, body);
         }
     }
-	
-	private void updateComposeList(String jid, boolean add, boolean send) {
-		if (add) {
-			service.getComposeList().add(jid);
-		} else {
-			while (service.getComposeList().contains(jid)) service.getComposeList().remove(jid);
-		}
-		
-		if (send) {
-			Intent i = new Intent(Constants.UPDATE);
-			context.sendBroadcast(i);
-		}
-	}
 }
