@@ -1004,7 +1004,7 @@ public class JTalkService extends Service {
                         muc.join(nick, password, h, 10000, presence);
                     } catch (Exception e) {
                         Intent eIntent = new Intent(Constants.ERROR);
-                        eIntent.putExtra("error", "Error: " + e.getLocalizedMessage());
+                        eIntent.putExtra("error", "[" + group + "] " + "Error: " + e.getLocalizedMessage());
                         sendBroadcast(eIntent);
                         return;
                     }
@@ -1661,7 +1661,7 @@ public class JTalkService extends Service {
                 try {
                     if (!connection.isConnected()) connection.connect();
                 } catch (XMPPException xe) {
-                    String error = "Error connecting to " + connection.getServiceName();
+                    String error = "[" + connection.getServiceName() + "] Error: " + xe.getLocalizedMessage();
                     setState(username, error);
                     sendBroadcast(intent);
                     if (!isAuthenticated()) Notify.offlineNotify(JTalkService.this, error);
@@ -1685,7 +1685,7 @@ public class JTalkService extends Service {
                 } catch (Exception e) {
                     setState(username, e.getLocalizedMessage());
                     sendBroadcast(intent);
-                    if (!isAuthenticated()) Notify.offlineNotify(JTalkService.this, "");
+                    if (!isAuthenticated()) Notify.offlineNotify(JTalkService.this, e.getLocalizedMessage());
                     return null;
                 }
             }

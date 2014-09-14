@@ -380,10 +380,17 @@
                 android:title="Build"/>
         <Preference
                 android:title="Web"
-                android:summary="http://jtalk.ustyugov.net">
+                android:summary="http://jtalk.ru">
             <intent
                     android:action="android.intent.action.VIEW"
-                    android:data="http://jtalk.ustyugov.net"/>
+                    android:data="http://jtalk.ru"/>
+        </Preference>
+        <Preference
+                android:title="Support"
+                android:summary="jtalk@conference.jabber.ru">
+            <intent
+                    android:action="android.intent.action.VIEW"
+                    android:data="xmpp:jtalk@conference.jabber.ru?join"/>
         </Preference>
     </PreferenceScreen>
 </PreferenceScreen>

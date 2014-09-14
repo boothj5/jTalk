@@ -301,6 +301,7 @@ public class MucDialogs {
 					service.setPreference("lastGroup", group);
   	  				service.setPreference("lastNick", nick);
   	  				service.joinRoom(account, group, nick, pass);
+                    Toast.makeText(activity, "Attempt joining to " + group, Toast.LENGTH_SHORT).show();
   	  				
 					Intent i = new Intent(Constants.PRESENCE_CHANGED);
 	             	activity.sendBroadcast(i);

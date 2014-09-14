@@ -244,7 +244,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                     String nick = item.getName();
                     String text = messageInput.getText().toString();
                     if (text.length() > 0) {
-                        text += " " + nick + separator;
+                        text += nick;
                     } else {
                         text = nick + separator;
                     }
@@ -981,6 +981,19 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                     setIntent(intent);
                     onPause();
                     onResume();
+                }
+
+                if (isMuc) {
+                    Presence presence = service.getPresence(account, jid+"/"+text);
+                    if (presence == null || presence.getType() == Presence.Type.unavailable) {
+                        Toast.makeText(Chat.this, text + " is offline", Toast.LENGTH_SHORT).show();
+                    }
+
+                    if (messageInput.getText().length() < 1) {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Chat.this);
+                        String separator = prefs.getString("nickSeparator", ", ");
+                        text += separator;
+                    }
                 }
 
                 int pos = messageInput.getSelectionEnd();

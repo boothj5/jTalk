@@ -103,7 +103,10 @@ public class Bookmarks extends Activity {
 						String jid  = bc.getJid();
 						String pass = bc.getPassword();
 						String nick = service.getDerivedNick(service.getConnection(account).getUser(), bc);
-						if (!service.getJoinedConferences().containsKey(jid)) service.joinRoom(account, jid, nick, pass);
+						if (!service.getJoinedConferences().containsKey(jid)) {
+                            Toast.makeText(Bookmarks.this, "Attempt joining to " + jid, Toast.LENGTH_SHORT).show();
+                            service.joinRoom(account, jid, nick, pass);
+                        }
 					}
 				});
 		        

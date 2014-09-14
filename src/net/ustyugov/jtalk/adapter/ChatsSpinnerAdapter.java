@@ -149,6 +149,14 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
                 if (name == null || name.equals("")) name = jid;
             }
 
+            TextView left = (TextView) v.findViewById(R.id.left);
+            if (i == 0) left.setVisibility(View.GONE);
+            else left.setVisibility(View.VISIBLE);
+
+            TextView right = (TextView) v.findViewById(R.id.right);
+            if (i == getCount()-1) right.setVisibility(View.GONE);
+            else right.setVisibility(View.VISIBLE);
+
             TextView title = (TextView) v.findViewById(R.id.title);
             title.setText(name);
             if (Colors.isLight) title.setTextColor(Color.BLACK);
