@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 
 import android.preference.PreferenceManager;
-import android.util.Log;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.service.JTalkService;
 

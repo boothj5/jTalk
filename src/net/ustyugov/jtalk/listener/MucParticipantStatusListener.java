@@ -143,9 +143,19 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 	public void left(String participant) {
 		String nick = StringUtils.parseResource(participant);
         String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new java.util.Date());
+        String jid = "";
+        String stat= "";
+        Presence p = service.getConferencesHash(account).get(g).getOccupantPresence(participant);
+        if (p.getStatus() != null && p.getStatus().length() > 0) stat = ": " + p.getStatus();
+        MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
+        if (mucUser != null) {
+            MUCUser.Item item = mucUser.getItem();
+            String j = item.getJid();
+            if (j != null && j.length() > 3) jid = " (" + j + ")";
+        }
 
     	MessageItem item = new MessageItem(account, participant);
-		item.setBody(service.getString(R.string.UserLeaved));
+		item.setBody(service.getString(R.string.UserLeaved) + stat + jid);
 		item.setType(MessageItem.Type.connectionstatus);
         item.setName(nick);
         item.setTime(time);

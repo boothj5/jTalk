@@ -81,17 +81,6 @@ public class MsgListener implements PacketListener {
                 Intent i = new Intent(Constants.UPDATE);
                 context.sendBroadcast(i);
             } catch (Exception ignored) {}
-
-
-//			String state = stateExt.getElementName();
-//			if (state.equals(ChatState.composing.name())) { // User is composing a message
-//				updateComposeList(user, true, true);
-//			} else {
-//				if (body != null && body.length() > 0) updateComposeList(user, false, false);
-//				else updateComposeList(user, false, true);
-//
-//                updateChatState(user, ChatState.valueOf(state));
-//			}
 		}
 
         // XEP-0184: Message Delivery Receipts

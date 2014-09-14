@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.preference.PreferenceManager;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -14,7 +13,11 @@ import android.util.DisplayMetrics;
 import net.ustyugov.jtalk.view.MyTextView;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +34,15 @@ public class Pictures {
 
             final String url = ssb.subSequence(start, end).toString();
             String file = url.substring(url.lastIndexOf("/")+1, url.length());
+            try {
+                MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+                messageDigest.reset();
+                messageDigest.update(file.getBytes(Charset.forName("UTF8")));
+                byte[] resultByte = messageDigest.digest();
+                BigInteger bigInt = new BigInteger(1,resultByte);
+                file = bigInt.toString(16);
+            } catch (NoSuchAlgorithmException ignored) {}
+
             final String fname = Constants.PATH + "Pictures/" + file;
 
             if (!new File(fname).exists()) {
@@ -59,18 +71,13 @@ public class Pictures {
             } else {
                 DisplayMetrics metrics = new DisplayMetrics();
                 activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-                float scaleWidth = metrics.scaledDensity;
-                float scaleHeight = metrics.scaledDensity;
-
-                Matrix matrix = new Matrix();
-                matrix.postScale(scaleWidth, scaleHeight);
 
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
                 int sidebar = prefs.getInt("SideBarSize", 100)+20;
+                if (!prefs.getBoolean("ShowSidebar", true)) sidebar = 20;
 
                 Bitmap bitmap = BitmapFactory.decodeFile(fname);
                 if (bitmap != null) {
-                    bitmap.setDensity(metrics.densityDpi);
                     int maxWidth = metrics.widthPixels - sidebar;
                     int width = bitmap.getWidth();
                     if (width > maxWidth)  {
@@ -79,7 +86,7 @@ public class Pictures {
                         bitmap = Bitmap.createScaledBitmap(bitmap, maxWidth, h, true);
                     }
 
-                    ssb.setSpan(new ImageSpan(activity, bitmap, ImageSpan.ALIGN_BASELINE), start, end, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+                    ssb.setSpan(new ImageSpan(activity, bitmap, ImageSpan.ALIGN_BASELINE), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     ssb.insert(start, "\n");
                     ssb.insert(end+1, "\n");
                     tv.setText(ssb);
