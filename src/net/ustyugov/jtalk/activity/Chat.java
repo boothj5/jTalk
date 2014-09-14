@@ -49,6 +49,7 @@ import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.smiles.Smiles;
 import net.ustyugov.jtalk.view.MyListView;
 
+import net.ustyugov.jtalk.view.MySpinner;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
@@ -132,25 +133,15 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 
-        Spinner spinner = new Spinner(this);
-//        spinner.setBackground(null);
-        chatsSpinnerAdapter = new ChatsSpinnerAdapter(this, spinner);
-        spinner.setAdapter(chatsSpinnerAdapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            boolean init = false;
-
+        AdapterView.OnItemSelectedListener onItemSelectedListener = new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                if (!init) {
-                    init = true;
-                    return;
-                }
-                RosterItem item = chatsSpinnerAdapter.getItem(position);
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                RosterItem item = chatsSpinnerAdapter.getItem(i);
                 String a = item.getAccount();
-                String j = jid;
+                String j = null;
                 if (item.isEntry() || item.isSelf()) j = item.getEntry().getUser();
                 else if (item.isMuc()) j = item.getName();
-                if (!j.equals(jid)) {
+                if (j != null && !j.equals(jid)) {
                     Intent intent = new Intent();
                     intent.putExtra("jid", j);
                     intent.putExtra("account", a);
@@ -159,9 +150,14 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                     onResume();
                 }
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) { }
-        });
+        };
+        MySpinner spinner = new MySpinner(this);
+        chatsSpinnerAdapter = new ChatsSpinnerAdapter(this, spinner);
+        spinner.setAdapter(chatsSpinnerAdapter);
+        spinner.setOnItemSelectedEvenIfUnchangedListener(onItemSelectedListener);
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
