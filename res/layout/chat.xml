@@ -20,6 +20,7 @@
                       android:singleLine="true"
                       android:gravity="center"
                       android:visibility="gone"
+                      android:textSize="16sp"
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"/>
             <net.ustyugov.jtalk.view.MyListView android:id="@+id/chat_list"

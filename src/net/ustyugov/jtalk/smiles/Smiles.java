@@ -191,7 +191,8 @@ public class Smiles implements DialogInterface.OnClickListener {
 				String smile = table.get(key).get(0);
 
 				Intent intent = new Intent(Constants.PASTE_TEXT);
-				intent.putExtra("text", smile);
+				intent.putExtra("text", " " + smile + " ");
+                intent.putExtra("smile", true);
 				activity.sendBroadcast(intent);
 				dialog.dismiss();
 			}
@@ -204,7 +205,8 @@ public class Smiles implements DialogInterface.OnClickListener {
 		String smile = table.get(key).get(0);
 		
 		Intent intent = new Intent(Constants.PASTE_TEXT);
-		intent.putExtra("text", smile);
+		intent.putExtra("text", " " + smile + " ");
+        intent.putExtra("smile", true);
 		activity.sendBroadcast(intent);
 	}
 }

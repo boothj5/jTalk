@@ -244,7 +244,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                     String nick = item.getName();
                     String text = messageInput.getText().toString();
                     if (text.length() > 0) {
-                        text += nick;
+                        text += " " + nick;
                     } else {
                         text = nick + separator;
                     }
@@ -983,7 +983,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                     onResume();
                 }
 
-                if (isMuc) {
+                if (isMuc && !i.getBooleanExtra("smile", false)) {
                     Presence presence = service.getPresence(account, jid+"/"+text);
                     if (presence == null || presence.getType() == Presence.Type.unavailable) {
                         Toast.makeText(Chat.this, text + " is offline", Toast.LENGTH_SHORT).show();
@@ -998,7 +998,9 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
                 int pos = messageInput.getSelectionEnd();
                 String oldText = messageInput.getText().toString();
-                String newText = oldText.substring(0, pos) + text + oldText.substring(pos);
+                String newText = oldText;
+                if (oldText.length() > 1 && !oldText.substring(pos-1).equals(" ")) newText = oldText.substring(0, pos) + " " + text + " " + oldText.substring(pos);
+                else newText = oldText.substring(0, pos) + text + " " + oldText.substring(pos);
                 messageInput.setText(newText);
                 messageInput.setSelection(messageInput.getText().length());
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
