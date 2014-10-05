@@ -367,6 +367,10 @@
                 android:title="@string/AutoLoadPictures"
                 android:key="LoadPictures"
                 android:defaultValue="false"/>
+        <CheckBoxPreference
+                android:title="XML Console"
+                android:key="XMLConsole"
+                android:defaultValue="false"/>
     </PreferenceScreen>
     <PreferenceScreen android:title="@string/Info">
         <Preference

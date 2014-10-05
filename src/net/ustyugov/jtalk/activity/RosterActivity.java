@@ -401,6 +401,9 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
             case R.id.notes:
                 startActivity(new Intent(this, NotesActivity.class));
                 break;
+            case R.id.xml:
+                startActivity(new Intent(this, XMLConsole.class));
+                break;
             case R.id.notify:
                 if (prefs.getBoolean("soundDisabled", false)) service.setPreference("soundDisabled", false);
                 else service.setPreference("soundDisabled", true);

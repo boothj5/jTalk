@@ -111,6 +111,7 @@ public class JTalkService extends Service {
     private Hashtable<String, ConnectionTask> connectionTasks = new Hashtable<String, ConnectionTask>();
     private Hashtable<String, Timer> pingTimers = new Hashtable<String, Timer>();
     private Hashtable<String, SipManager> sipManagers = new Hashtable<String, SipManager>();
+    private Hashtable<String, XmlListener> XmlListeners = new Hashtable<String, XmlListener>();
     private String currentJid = "me";
     private String sidebarMode = "users";
     private String globalState = "";
@@ -159,6 +160,12 @@ public class JTalkService extends Service {
 
         hash.put(jid, list);
         messages.put(account, hash);
+    }
+
+    public XmlListener getXmlListener(String account) {
+        if (XmlListeners.containsKey(account)) {
+            return XmlListeners.get(account);
+        } else return null;
     }
     
     private void removeConnectionListener(String account) {
@@ -1657,6 +1664,8 @@ public class JTalkService extends Service {
                 connection.addFeature("urn:xmpp:time");
                 connection.addFeature(ReplaceExtension.NAMESPACE);
                 connection.addFeature(Notes.NAMESPACE);
+
+                XmlListeners.put(username, new XmlListener(connection));
 
                 try {
                     if (!connection.isConnected()) connection.connect();

@@ -54,6 +54,7 @@
         <activity android:name="net.ustyugov.jtalk.activity.note.TemplatesActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.note.NotesActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.CallActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="net.ustyugov.jtalk.activity.XMLConsole"/>
         <activity android:name="net.ustyugov.jtalk.activity.filetransfer.ReceiveFileActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.filetransfer.SendToActivity" android:label="@string/app_name" android:configChanges="keyboard|keyboardHidden|orientation">
         <intent-filter>

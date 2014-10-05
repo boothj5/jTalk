@@ -44,7 +44,6 @@ import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.db.MessageDbHelper;
 import net.ustyugov.jtalk.dialog.*;
 import net.ustyugov.jtalk.imgur.ImgurUploadTask;
-import net.ustyugov.jtalk.listener.DragAndDropListener;
 import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.smiles.Smiles;
 import net.ustyugov.jtalk.view.MyListView;
@@ -230,7 +229,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         listView.setOnScrollListener(this);
         listView.setDividerHeight(0);
         listView.setAdapter(listAdapter);
-        listView.setOnItemLongClickListener(new DragAndDropListener(this));
 
         nickList = (ListView) findViewById(R.id.muc_user_list);
         nickList.setCacheColorHint(0x00000000);
