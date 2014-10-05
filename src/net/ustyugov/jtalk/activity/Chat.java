@@ -902,6 +902,12 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
         try {
             if (unreadMessages > 0 && separatorPosition == 0) {
+                for (int i = 1; i <= unreadMessages; i++) {
+                    MessageItem item = (MessageItem) listView.getAdapter().getItem(listView.getCount() - i);
+                    if (item.getType() == MessageItem.Type.connectionstatus || item.getType() == MessageItem.Type.status) {
+                        unreadMessages++;
+                    }
+                }
                 separatorPosition = listView.getCount() - unreadMessages;
             }
 
@@ -1179,19 +1185,23 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private void updateChatState() {
         TextView chat_state = (TextView) findViewById(R.id.chat_state);
         ChatState state = service.getRoster(account).getChatState(jid);
-        if (state != null && prefs.getBoolean("ShowChatState", true)) {
-            if (state == ChatState.composing) {
-                chat_state.setText(R.string.UserComposing);
-            } else if (state == ChatState.active) {
-                chat_state.setText(R.string.UserActive);
-            } else if (state == ChatState.inactive) {
-                chat_state.setText(R.string.UserInactive);
-            } else if (state == ChatState.paused) {
-                chat_state.setText(R.string.UserPaused);
-            } else if (state == ChatState.gone) {
-                chat_state.setText(R.string.UserGone);
-            }
-            chat_state.setVisibility(View.VISIBLE);
-        } else chat_state.setVisibility(View.GONE);
+        try {
+            if (state != null && prefs.getBoolean("ShowChatState", true)) {
+                if (state == ChatState.composing) {
+                    chat_state.setText(R.string.UserComposing);
+                } else if (state == ChatState.active) {
+                    chat_state.setText(R.string.UserActive);
+                } else if (state == ChatState.inactive) {
+                    chat_state.setText(R.string.UserInactive);
+                } else if (state == ChatState.paused) {
+                    chat_state.setText(R.string.UserPaused);
+                } else if (state == ChatState.gone) {
+                    chat_state.setText(R.string.UserGone);
+                }
+                chat_state.setVisibility(View.VISIBLE);
+            } else chat_state.setVisibility(View.GONE);
+        } catch (Exception e) {
+            chat_state.setVisibility(View.GONE);
+        }
     }
 }

@@ -44,6 +44,7 @@ public class ConListener implements ConnectionListener {
 
 	public void connectionClosedOnError(Exception e) {
         Log.e("ConListener", "connectionClosedOnError");
+        if (e == null) e = new Exception("Unknown error");
         if (!service.isAuthenticated()) Notify.offlineNotify(context, "Connection closed " + e.getLocalizedMessage());
         if (!isStarted) {
             isStarted = true;

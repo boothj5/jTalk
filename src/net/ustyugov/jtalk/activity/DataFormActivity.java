@@ -444,16 +444,18 @@ public class DataFormActivity extends Activity implements OnClickListener {
 			reg.setTo(jid);
 
             XMPPConnection connection = service.getConnection(account);
-			PacketCollector collector = connection.createPacketCollector(new PacketIDFilter(id));
-			connection.sendPacket(reg);
-			
-			IQ result = (IQ) collector.nextResult(5000);
-			try {
-				if (result != null && result.getType() == IQ.Type.RESULT) {
-					form = (DataForm) result.getExtension("jabber:x:data");
-					bob = (BobExtension) result.getExtension("data","urn:xmpp:bob");
-				}
-			} catch (ClassCastException ignored) { }
+            if (connection != null) {
+                PacketCollector collector = connection.createPacketCollector(new PacketIDFilter(id));
+                connection.sendPacket(reg);
+
+                IQ result = (IQ) collector.nextResult(5000);
+                try {
+                    if (result != null && result.getType() == IQ.Type.RESULT) {
+                        form = (DataForm) result.getExtension("jabber:x:data");
+                        bob = (BobExtension) result.getExtension("data","urn:xmpp:bob");
+                    }
+                } catch (ClassCastException ignored) { }
+            }
 			createForm();
 			return null;
 		}
