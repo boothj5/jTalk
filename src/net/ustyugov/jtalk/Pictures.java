@@ -37,7 +37,7 @@ public class Pictures {
             try {
                 MessageDigest messageDigest = MessageDigest.getInstance("MD5");
                 messageDigest.reset();
-                messageDigest.update(file.getBytes(Charset.forName("UTF8")));
+                messageDigest.update(url.getBytes(Charset.forName("UTF8")));
                 byte[] resultByte = messageDigest.digest();
                 BigInteger bigInt = new BigInteger(1,resultByte);
                 file = bigInt.toString(16);
@@ -76,9 +76,16 @@ public class Pictures {
                 int sidebar = prefs.getInt("SideBarSize", 100)+20;
                 if (!prefs.getBoolean("ShowSidebar", true)) sidebar = 20;
 
-                Bitmap bitmap = BitmapFactory.decodeFile(fname);
+                int maxWidth = metrics.widthPixels - sidebar;
+                int maxHeight = metrics.heightPixels;
+
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                options.inSampleSize = calculateInSampleSize(options, maxWidth, maxHeight);
+                options.inJustDecodeBounds = false;
+
+                Bitmap bitmap = BitmapFactory.decodeFile(fname, options);
                 if (bitmap != null) {
-                    int maxWidth = metrics.widthPixels - sidebar;
                     int width = bitmap.getWidth();
                     if (width > maxWidth)  {
                         double k = (double)width/(double)maxWidth;
@@ -96,5 +103,22 @@ public class Pictures {
                 }
             }
         }
+    }
+
+    public static int calculateInSampleSize(BitmapFactory.Options options, int maxWidth, int maxHeight) {
+        final int width = options.outWidth;
+        final int height = options.outHeight;
+        int inSampleSize = 1;
+
+        if (width > maxWidth || height > maxHeight) {
+            final int halfWidth = width / 2;
+            final int halfHeight = height / 2;
+
+            while (((halfWidth / inSampleSize) > maxWidth) || ((halfHeight / inSampleSize) > maxHeight)) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
 }

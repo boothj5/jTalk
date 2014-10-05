@@ -999,8 +999,8 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 int pos = messageInput.getSelectionEnd();
                 String oldText = messageInput.getText().toString();
                 String newText = oldText;
-                if (oldText.length() > 1 && !oldText.substring(pos-1).equals(" ")) newText = oldText.substring(0, pos) + " " + text + " " + oldText.substring(pos);
-                else newText = oldText.substring(0, pos) + text + " " + oldText.substring(pos);
+                if (pos > 0 && oldText.length() > 1 && !oldText.substring(pos-1).equals(" ")) newText = oldText.substring(0, pos) + " " + text + oldText.substring(pos);
+                else newText = oldText.substring(0, pos) + text + oldText.substring(pos);
                 messageInput.setText(newText);
                 messageInput.setSelection(messageInput.getText().length());
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
