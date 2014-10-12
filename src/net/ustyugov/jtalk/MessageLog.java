@@ -32,7 +32,7 @@ public class MessageLog {
 	public static void writeMessage(String account, String jid, MessageItem message) {
         JTalkService service = JTalkService.getInstance();
         List<MessageItem> list = service.getMessageList(account, jid);
-        if (message.getType() == MessageItem.Type.status) {
+        if (message.getType() == MessageItem.Type.status || message.getType() == MessageItem.Type.connectionstatus) {
             if (service.getActiveChats(account).contains(jid)) list.add(message);
         } else {
             if (!service.getActiveChats(account).contains(jid)) service.addActiveChat(account, jid);
@@ -76,7 +76,6 @@ public class MessageLog {
         service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
 
         service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", group));
-        service.sendBroadcast(new Intent(Constants.PRESENCE_CHANGED).putExtra("jid", group));
 	}
 	
 	public static void editMessage(final String account, final String jid, final String rid, final String text) {

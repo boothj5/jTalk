@@ -21,7 +21,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.*;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.text.Layout;
 import android.text.Spanned;
 import android.text.style.*;
@@ -29,6 +32,7 @@ import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Holders;
 import net.ustyugov.jtalk.MessageItem;
+import net.ustyugov.jtalk.Pictures;
 import net.ustyugov.jtalk.adapter.ChatAdapter;
 import net.ustyugov.jtalk.listener.MyTextLinkClickListener;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -48,7 +52,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
     private String searchString = "";
     private String[] highArray;
 
-    private Context context;
+    private Activity activity;
     private Smiles smiles;
     private String account;
     private String nick;
@@ -58,11 +62,11 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
 
     private SharedPreferences prefs;
 
-    public MucChatAdapter(Context context, Smiles smiles) {
-        super(context, R.id.chat1);
-        this.context = context;
+    public MucChatAdapter(Activity activity, Smiles smiles) {
+        super(activity, R.id.chat1);
+        this.activity = activity;
         this.smiles = smiles;
-        this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         this.showtime = prefs.getBoolean("ShowTime", false);
 
         String highString = prefs.getString("Highlights", "");
@@ -80,7 +84,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
         this.searchString = searchString;
         clear();
 
-        boolean showStatuses = prefs.getBoolean("ShowStatus", false);
+        String showStatusMode = prefs.getString("StatusMessagesMode", "2");
         List<MessageItem> messages = JTalkService.getInstance().getMessageList(account, group);
         for (int i = 0; i < messages.size(); i++) {
             MessageItem item = messages.get(i);
@@ -89,7 +93,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                 String name = item.getName();
                 String body = item.getBody();
                 String time = createTimeString(item.getTime());
-                if (type == MessageItem.Type.status) {
+                if (type == MessageItem.Type.status || type == MessageItem.Type.connectionstatus) {
                     if (showtime) body = time + "  " + body;
                 } else {
                     if (showtime) body = time + " " + name + ": " + body;
@@ -97,19 +101,26 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                 }
 
                 if (body.toLowerCase().contains(searchString.toLowerCase())) {
-                    if (showStatuses || type != MessageItem.Type.status) add(item);
+                    add(item);
                 }
             } else {
-                if (showStatuses || type != MessageItem.Type.status) add(item);
+                if (showStatusMode.equals("0")) {
+                    if (type != MessageItem.Type.status && type != MessageItem.Type.connectionstatus) add(item);
+                } else if (showStatusMode.equals("1")) add(item);
+                else {
+                    if (type != MessageItem.Type.status) add(item);
+                }
             }
         }
     }
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        int fontSize = Integer.parseInt(context.getResources().getString(R.string.DefaultFontSize));
+        int fontSize = Integer.parseInt(activity.getResources().getString(R.string.DefaultFontSize));
+        int timeSize = Integer.parseInt(activity.getResources().getString(R.string.DefaultFontSize));
         try {
-            fontSize = Integer.parseInt(prefs.getString("FontSize", context.getResources().getString(R.string.DefaultFontSize)));
+            fontSize = Integer.parseInt(prefs.getString("FontSize", activity.getResources().getString(R.string.DefaultFontSize)));
+            timeSize = Integer.parseInt(prefs.getString("TimeSize", activity.getResources().getString(R.string.DefaultFontSize)));
         } catch (NumberFormatException ignored) {	}
 
         Holders.MessageHolder holder = new Holders.MessageHolder();
@@ -121,7 +132,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
             holder.linear.setMinimumHeight(Integer.parseInt(prefs.getString("SmilesSize", "24")));
             holder.check = (CheckBox) convertView.findViewById(R.id.check);
             holder.text = (MyTextView) convertView.findViewById(R.id.chat1);
-            holder.text.setOnTextLinkClickListener(new MyTextLinkClickListener(context, group));
+            holder.text.setOnTextLinkClickListener(new MyTextLinkClickListener(activity, group));
             holder.text.setTextSize(fontSize);
 
             convertView.setBackgroundColor(0X00000000);
@@ -153,6 +164,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
 
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         ssb.append(message);
+        if (showtime) ssb.setSpan(new AbsoluteSizeSpan(timeSize+4), 0, time.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         ssb.setSpan(new ForegroundColorSpan(Colors.PRIMARY_TEXT), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         if (type == MessageItem.Type.separator) {
             ssb.clear();
@@ -161,7 +173,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
             ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             holder.text.setText(ssb);
         }
-        else if (type == MessageItem.Type.status) {
+        else if (type == MessageItem.Type.status || type == MessageItem.Type.connectionstatus) {
             ssb.setSpan(new ForegroundColorSpan(Colors.STATUS_MESSAGE), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {
             if (showtime && time.length() > 2) {
@@ -173,11 +185,10 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                 ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
                 boolean highlight = false;
-                if (nick != null && message.contains(nick)) highlight = true;
+                if (nick != null && item.contains(nick, prefs.getBoolean("HighlightFullWord", false))) highlight = true;
                 else {
                     for (String light : highArray) {
-                        String searchString = body.toLowerCase();
-                        if (!light.isEmpty() && searchString.contains(light.toLowerCase())) highlight = true;
+                        if (!light.isEmpty() && item.contains(light, prefs.getBoolean("HighlightFullWord", false))) highlight = true;
                     }
                 }
                 if (highlight) {
@@ -193,8 +204,10 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
             }
 
             if (item.isEdited()) {
+                Bitmap b = BitmapFactory.decodeResource(activity.getResources(), R.drawable.ic_edited);
+                b = Bitmap.createScaledBitmap(b, fontSize + 10, fontSize + 10, true);
                 ssb.append(" ");
-                ssb.setSpan(new ImageSpan(context, R.drawable.ic_edited), ssb.length()-1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.setSpan(new ImageSpan(activity, b), ssb.length()-1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
 
@@ -221,13 +234,15 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
                 }
             });
 
+            if (prefs.getBoolean("LoadPictures", false)) Pictures.loadPicture(activity, group, ssb, holder.text);
+
             if (prefs.getBoolean("ShowSmiles", true)) {
                 int startPosition = message.length() - body.length();
                 ssb = smiles.parseSmiles(holder.text, ssb, startPosition, account, group);
             }
+
             holder.text.setTextWithLinks(ssb, n);
         }
-
         return convertView;
     }
 
@@ -244,7 +259,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
     public void copySelectedMessages() {
         String text = "";
         for(int i = 0; i < getCount(); i++) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
             boolean showtime = prefs.getBoolean("ShowTime", false);
 
             MessageItem message = getItem(i);
@@ -263,8 +278,8 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> {
         String[] mimes = {"text/plain"};
         ClipData copyData = new ClipData(text, mimes, item);
 
-        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
         clipboard.setPrimaryClip(copyData);
-        Toast.makeText(context, R.string.MessagesCopied, Toast.LENGTH_SHORT).show();
+        Toast.makeText(activity, R.string.MessagesCopied, Toast.LENGTH_SHORT).show();
     }
 }

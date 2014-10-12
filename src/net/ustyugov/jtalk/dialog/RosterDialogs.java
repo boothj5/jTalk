@@ -377,7 +377,37 @@ public class RosterDialogs {
         });
         builder.create().show();
 	}
-	
+
+    public static void subscribtionRequestDialog(Activity activity, final String account, final String jid) {
+        final JTalkService service = JTalkService.getInstance();
+
+        final Presence presence = new Presence(Presence.Type.subscribed);
+        presence.setTo(jid);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(R.string.Subscribtion);
+        builder.setMessage("Request from " + jid);
+        builder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                presence.setType(Presence.Type.subscribed);
+                if (service.isAuthenticated(account)) {
+                    service.sendPacket(account, presence);
+                }
+            }
+        });
+        builder.setNegativeButton("Reject", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                presence.setType(Presence.Type.unsubscribed);
+                if (service.isAuthenticated(account)) {
+                    service.sendPacket(account, presence);
+                }
+            }
+        });
+        builder.create().show();
+    }
+
 	public static void resourceDialog(final Activity activity, final String account, final String jid) {
 		JTalkService service = JTalkService.getInstance();
 		final List<String> list = new ArrayList<String>();
@@ -477,11 +507,15 @@ public class RosterDialogs {
 		         	activity.sendBroadcast(i);
 		 	        break;
 	        	case 7:
-	        		service.setChatState(account, jid, ChatState.gone);
 		        	service.removeActiveChat(account, jid);
                     service.setMessageList(account, jid, new ArrayList<MessageItem>());
 					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
-					else service.sendBroadcast(new Intent(Constants.UPDATE));
+					else {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
+                        if (prefs.getBoolean("SendChatState", true))
+                            service.setChatState(account, jid, ChatState.gone);
+                        service.sendBroadcast(new Intent(Constants.UPDATE));
+                    }
 		        	break;
 		    	}
 			}
@@ -532,7 +566,12 @@ public class RosterDialogs {
                         service.setChatState(account, jid, ChatState.gone);
                         service.removeActiveChat(account, jid);
                         if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
-                        else service.sendBroadcast(new Intent(Constants.UPDATE));
+                        else {
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
+                            if (prefs.getBoolean("SendChatState", true))
+                                service.setChatState(account, jid, ChatState.gone);
+                            service.sendBroadcast(new Intent(Constants.UPDATE));
+                        }
                         break;
                 }
             }
@@ -586,7 +625,12 @@ public class RosterDialogs {
 	        		service.setChatState(account, jid, ChatState.gone);
                     service.removeActiveChat(account, jid);
 					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
-					else service.sendBroadcast(new Intent(Constants.UPDATE));
+					else {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
+                        if (prefs.getBoolean("SendChatState", true))
+                            service.setChatState(account, jid, ChatState.gone);
+                        service.sendBroadcast(new Intent(Constants.UPDATE));
+                    }
 					break;
 		    	}
 			}

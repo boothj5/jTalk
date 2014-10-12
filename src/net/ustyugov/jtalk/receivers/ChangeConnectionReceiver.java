@@ -44,7 +44,7 @@ public class ChangeConnectionReceiver extends BroadcastReceiver {
                 do {
                     String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
                     ConListener listener = service.getConnectionListener(account);
-                    if (listener != null) listener.connectionClosedOnError(null);
+                    if (listener != null) listener.connectionClosedOnError(new Exception("Network down!"));
                 } while(cursor.moveToNext());
                 cursor.close();
             }

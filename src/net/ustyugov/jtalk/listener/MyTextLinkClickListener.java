@@ -35,11 +35,8 @@ public class MyTextLinkClickListener implements TextLinkClickListener {
                         context.startActivity(intent);
                     }
                 } else {
-                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-                    String separator = prefs.getString("nickSeparator", ", ");
-
                     Intent intent = new Intent(Constants.PASTE_TEXT);
-                    intent.putExtra("text", clickedString + separator);
+                    intent.putExtra("text", clickedString);
                     context.sendBroadcast(intent);
                 }
             }

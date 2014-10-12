@@ -35,6 +35,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.ChatState;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.app.Activity;
@@ -243,7 +244,8 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 			
 			ItemHolder holder = (ItemHolder) convertView.getTag();
 			holder.name.setText(name);
-			if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
+            ChatState state = service.getRoster(account).getChatState(jid);
+            if (state != null && state == ChatState.composing) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
 			else holder.name.setTextColor(Colors.ENTRY_FOREGROUND);
 			
 			if (service.getActiveChats(account).contains(jid)) {

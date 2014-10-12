@@ -37,6 +37,7 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.bookmark.BookmarkedConference;
 import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.muc.Occupant;
 import org.jivesoftware.smackx.packet.DiscoverItems;
 
 import android.app.Activity;
@@ -57,14 +58,30 @@ import com.jtalk2.R;
 public class MucDialogs {
 
 	public static void roomMenu(final Activity activity, final String account, final String group) {
-		CharSequence[] items = new CharSequence[6];
+        String affil = "none";
+        try {
+            JTalkService service = JTalkService.getInstance();
+            MultiUserChat muc = service.getConferencesHash(account).get(group);
+            Occupant occupant = muc.getOccupant(muc.getRoom() + "/" + muc.getNickname());
+            affil = occupant.getAffiliation();
+        } catch (Exception ignored) { }
+
+		CharSequence[] items;
+        if (affil.equals("owner")) items = new CharSequence[6];
+        else if (affil.equals("admin")) items = new CharSequence[5];
+        else items = new CharSequence[4];
+
         items[0] = activity.getString(R.string.Open);
         items[1] = activity.getString(R.string.ChangeNick);
         items[2] = activity.getString(R.string.SendStatus);
-        items[3] = activity.getString(R.string.Users);
-        items[4] = activity.getString(R.string.Configuration);
-        items[5] = activity.getString(R.string.Leave);
-        
+        items[3] = activity.getString(R.string.Leave);
+        if (affil.equals("owner")) {
+            items[4] = activity.getString(R.string.Users);
+            items[5] = activity.getString(R.string.Configuration);
+        } else if (affil.equals("admin")) {
+            items[4] = activity.getString(R.string.Users);
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(group);
         builder.setItems(items, new OnClickListener() {
@@ -84,22 +101,22 @@ public class MucDialogs {
 		        	case 2:
 		        		RosterDialogs.changeStatusDialog(activity, account, group);
 		        		break;
-		        	case 3:
-		        		Intent uIntent = new Intent(activity, MucUsers.class);
+                    case 3:
+                        JTalkService.getInstance().leaveRoom(account, group);
+                        activity.sendBroadcast(new Intent(Constants.UPDATE));
+                        break;
+                    case 4:
+                        Intent uIntent = new Intent(activity, MucUsers.class);
                         uIntent.putExtra("account", account);
-		           	 	uIntent.putExtra("group", group);
-		           	 	activity.startActivity(uIntent);
-		        		break;
-		        	case 4:
+                        uIntent.putExtra("group", group);
+                        activity.startActivity(uIntent);
+                        break;
+		        	case 5:
 		        		Intent cIntent = new Intent(activity, DataFormActivity.class);
                         cIntent.putExtra("account", account);
 		           	 	cIntent.putExtra("group", group);
 		           	 	cIntent.putExtra("muc", true);
 		           	 	activity.startActivity(cIntent);
-		        		break;
-		        	case 5:
-		        		JTalkService.getInstance().leaveRoom(account, group);
-		        		activity.sendBroadcast(new Intent(Constants.UPDATE));
 		        		break;
 		        }
 			}
@@ -108,13 +125,43 @@ public class MucDialogs {
 	}
 	
 	public static void userMenu(final Activity activity, final String account, final String group, final String nick) {
-		CharSequence[] items = new CharSequence[5];
+        boolean isAccountModerator = false;
+        boolean isUserModerator = false;
+        String accountAffil = "none";
+        String userAffil = "none";
+
+        final JTalkService service = JTalkService.getInstance();
+        try {
+            MultiUserChat muc = service.getConferencesHash(account).get(group);
+            Occupant occupant = muc.getOccupant(muc.getRoom() + "/" + muc.getNickname());
+            if (occupant.getRole().equals("moderator")) isAccountModerator = true;
+            accountAffil = occupant.getAffiliation();
+
+            occupant = muc.getOccupant(group + "/" + nick);
+            if (occupant.getRole().equals("moderator")) isUserModerator = true;
+            userAffil = occupant.getAffiliation();
+        } catch (Exception ignored) { }
+
+		CharSequence[] items;
+        if (accountAffil.equals("owner")) items = new CharSequence[7];
+        else if (accountAffil.equals("admin") && !userAffil.equals("admin") && !userAffil.equals("owner")) items = new CharSequence[7];
+        else {
+            if (isAccountModerator && !isUserModerator) items = new CharSequence[6];
+            else items = new CharSequence[4];
+        }
+
         items[0] = activity.getString(R.string.Chat);
         items[1] = activity.getString(R.string.Info);
         items[2] = activity.getString(R.string.AddInIgnoreList);
         items[3] = activity.getString(R.string.ExecuteCommand);
-        items[4] = activity.getString(R.string.Actions);
-        
+        if (accountAffil.equals("owner") || (accountAffil.equals("admin") && !userAffil.equals("admin") && !userAffil.equals("owner"))) {
+            items[4] = activity.getString(R.string.Actions);
+            items[5] = activity.getString(R.string.Kick);
+            items[6] = activity.getString(R.string.Ban);
+        } else if (isAccountModerator && !isUserModerator) {
+            items[4] = activity.getString(R.string.Actions);
+            items[5] = activity.getString(R.string.Kick);
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(group);
         builder.setItems(items, new OnClickListener() {
@@ -143,13 +190,24 @@ public class MucDialogs {
 		    			cintent.putExtra("jid", group + "/" + nick);
 		    	        activity.startActivity(cintent);
 		        		break;
+                    case 5:
+                        if (service.getConferencesHash(account).containsKey(group)) {
+                            MultiUserChat muc = service.getConferencesHash(account).get(group);
+                            kickDialog(activity, muc, nick);
+                        }
+                        break;
+                    case 6:
+                        if (service.getConferencesHash(account).containsKey(group)) {
+                            MultiUserChat muc = service.getConferencesHash(account).get(group);
+                            String jid = muc.getOccupant(group + "/" + nick).getJid();
+                            if (jid != null) banDialog(activity, muc, jid);
+                        }
+                        break;
 		        	case 4:
-		        		JTalkService service = JTalkService.getInstance();
 		        		if (service.getConferencesHash(account).containsKey(group)) {
 		        			MultiUserChat muc = service.getConferencesHash(account).get(group);
 			        		new MucAdminMenu(activity, muc, nick).show();
 		        		}
-		        		
 		        		break;
 		        }
 			}
@@ -171,7 +229,9 @@ public class MucDialogs {
 				try {
 					String reason = et.getText().toString();
 					muc.kickParticipant(nick, reason);
-				} catch (XMPPException e) {	}
+				} catch (XMPPException e) {
+                    Toast.makeText(activity, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                }
 			}
 		});
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -196,7 +256,9 @@ public class MucDialogs {
 					try {
 						String reason = et.getText().toString();
 						muc.banUser(jid, reason);
-					} catch (XMPPException e) {	}
+					} catch (XMPPException e) {
+                        Toast.makeText(activity, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                    }
 			}
 		});
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -239,6 +301,7 @@ public class MucDialogs {
 					service.setPreference("lastGroup", group);
   	  				service.setPreference("lastNick", nick);
   	  				service.joinRoom(account, group, nick, pass);
+                    Toast.makeText(activity, "Attempt joining to " + group, Toast.LENGTH_SHORT).show();
   	  				
 					Intent i = new Intent(Constants.PRESENCE_CHANGED);
 	             	activity.sendBroadcast(i);

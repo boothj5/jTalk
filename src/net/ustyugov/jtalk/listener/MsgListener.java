@@ -75,13 +75,12 @@ public class MsgListener implements PacketListener {
         // XEP-0085: Chat State Notifications
         PacketExtension stateExt = msg.getExtension("http://jabber.org/protocol/chatstates");
 		if (stateExt != null && !type.equals("error") && !service.getConferencesHash(account).containsKey(user)) {
-			String state = stateExt.getElementName();
-			if (state.equals(ChatState.composing.name())) { // User is composing a message
-				updateComposeList(user, true, true);
-			} else {
-				if (body != null && body.length() > 0) updateComposeList(user, false, false);
-				else updateComposeList(user, false, true);
-			}
+            try {
+                ChatState state = ChatState.valueOf(stateExt.getElementName());
+                service.getRoster(account).setChatState(user, state);
+                Intent i = new Intent(Constants.UPDATE);
+                context.sendBroadcast(i);
+            } catch (Exception ignored) {}
 		}
 
         // XEP-0184: Message Delivery Receipts
@@ -155,16 +154,6 @@ public class MsgListener implements PacketListener {
         String mynick = context.getResources().getString(R.string.Me);
         if (service.getConferencesHash(account).containsKey(group)) mynick = service.getConferencesHash(account).get(group).getNickname();
 
-        boolean highlight = false;
-        if (body.contains(mynick)) highlight = true;
-        else {
-            String highString = prefs.getString("Highlights", "");
-            String[] highArray = highString.split(" ");
-            for (String light : highArray) {
-                if (!light.isEmpty() && body.toLowerCase().contains(light.toLowerCase())) highlight = true;
-            }
-        }
-
         ReplaceExtension replace = (ReplaceExtension) msg.getExtension(ReplaceExtension.NAMESPACE);
         if (replace != null && replace.getId() != null) {
             String rid = replace.getId();
@@ -187,12 +176,22 @@ public class MsgListener implements PacketListener {
                 service.addMessagesCount(account, group);
             }
 
+            boolean highlight = false;
+            if (item.contains(mynick, prefs.getBoolean("HighlightFullWord", false))) highlight = true;
+            else {
+                String highString = prefs.getString("Highlights", "");
+                String[] highArray = highString.split(" ");
+                for (String light : highArray) {
+                    if (!light.isEmpty() && item.contains(light, prefs.getBoolean("HighlightFullWord", false))) highlight = true;
+                }
+            }
+
             if (highlight) {
                 if (!service.getCurrentJid().equals(group)) {
                     item.setJid(group);
                     service.addHighlight(account, group);
                     service.addUnreadMessage(item);
-                    Notify.messageNotify(account, from, Notify.Type.Direct, body);
+                    if (delayExt == null) Notify.messageNotify(account, from, Notify.Type.Direct, body);
                 }
             } else {
                 if (delayExt == null) Notify.messageNotify(account, group, Notify.Type.Conference, body);
@@ -299,22 +298,8 @@ public class MsgListener implements PacketListener {
                 service.addUnreadMessage(item);
             }
 
-            updateComposeList(user, false, false);
             MessageLog.writeMessage(account, user, item);
             if (delayExt == null) Notify.messageNotify(account, user, Notify.Type.Chat, body);
         }
     }
-	
-	private void updateComposeList(String jid, boolean add, boolean send) {
-		if (add) {
-			service.getComposeList().add(jid);
-		} else {
-			while (service.getComposeList().contains(jid)) service.getComposeList().remove(jid);
-		}
-		
-		if (send) {
-			Intent i = new Intent(Constants.UPDATE);
-			context.sendBroadcast(i);
-		}
-	}
 }

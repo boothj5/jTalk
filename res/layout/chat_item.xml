@@ -27,6 +27,7 @@
 		android:layout_width="fill_parent" 
 		android:layout_marginRight="3dip" 
 		android:layout_marginLeft="3dip" 
-		android:linksClickable="true" 
+		android:linksClickable="true"
+        android:textIsSelectable="true"
 		android:layout_gravity="center_vertical"/>
 </LinearLayout>

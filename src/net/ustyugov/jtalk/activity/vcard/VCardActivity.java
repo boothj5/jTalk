@@ -20,10 +20,14 @@ package net.ustyugov.jtalk.activity.vcard;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Environment;
 import android.view.*;
 import android.widget.*;
@@ -41,6 +45,7 @@ import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.LastActivityManager;
 import org.jivesoftware.smackx.packet.*;
 
 import android.content.Context;
@@ -122,10 +127,24 @@ public class VCardActivity extends Activity {
 		phoneWork = (MyTextView) workPage.findViewById(R.id.workphone);
 		
 		av = (ImageView) avatarPage.findViewById(R.id.av);
+        av.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                File file = new File(Constants.PATH + jid.replaceAll("/", "%"));
+                Uri uri = Uri.fromFile(file);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(uri, "image/*");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    startActivity(intent);
+                } catch(ActivityNotFoundException ignored) { }
+            }
+        });
+
         av.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                String fname = Constants.PATH + "/" + jid.replaceAll("/", "%");
+                String fname = Constants.PATH + jid.replaceAll("/", "%");
                 String saveto = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Pictures/Avatars/";
 
                 File folder = new File(saveto);
@@ -242,16 +261,15 @@ public class VCardActivity extends Activity {
 					matrix.postScale(scaleWidth, scaleHeight);
 					
 					bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
+                    bitmap.setDensity(metrics.densityDpi);
 					int width = bitmap.getWidth();
 					if (width > metrics.widthPixels)  {
 						double k = (double)width/(double)metrics.widthPixels;
-						int h = (int) (bitmap.getWidth()/k);
+						int h = (int) (bitmap.getHeight()/k);
 						bitmap = Bitmap.createBitmap(bitmap, 0, 0, metrics.widthPixels, h, matrix, true);
-						bitmap.setDensity(metrics.densityDpi);
 					} else {
-						bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-						bitmap.setDensity(metrics.densityDpi);
-					}
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                    }
 					
 					try {
 						String fname = jid.replaceAll("/", "%");
@@ -267,7 +285,6 @@ public class VCardActivity extends Activity {
     		// Load info
     		try {
     			re = service.getRoster(account).getEntry(jid);
-    			// Load Version
     			if (!jid.contains("/")) {
     				Iterator<Presence> it =  service.getRoster(account).getPresences(jid);
     				int i = 0;
@@ -275,6 +292,20 @@ public class VCardActivity extends Activity {
     					i++;
     					Presence p = it.next();
     					if (p.getType() != Presence.Type.unavailable) {
+                            String lastString = "";
+                            try {
+                                LastActivity activity = LastActivityManager.getLastActivity(service.getConnection(account), p.getFrom());
+                                if (activity != null) {
+                                    long idle = activity.getIdleTime() * 1000;
+
+                                    Date date = new Date();
+                                    date.setTime(System.currentTimeMillis()-idle);
+                                    String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
+
+                                    if (idle != 0) lastString = getString(R.string.LastActivity) + ": " + time + "\n";
+                                }
+                            } catch (Exception ignored) { }
+
     						String vstr = "";
     						Version versionRequest = new Version();
     						versionRequest.setPacketID(System.currentTimeMillis()+i+"");
@@ -298,12 +329,42 @@ public class VCardActivity extends Activity {
     						if (p.getStatus() != null) {
     							str += getString(R.string.Status) + ": " + p.getStatus() + "\n";
     						}
+                            str += lastString;
     						str += getString(R.string.Client) + ": " + vstr;
 
     						strings.put(StringUtils.parseResource(p.getFrom()) + " (" + p.getPriority() + ")", str);
-    					}
+    					} else {
+                            LastActivity activity = LastActivityManager.getLastActivity(service.getConnection(account), jid);
+                            if (activity != null) {
+                                long idle = activity.getIdleTime() * 1000;
+                                String lastStatus = activity.getStatusMessage();
+                                if (lastStatus == null) lastStatus = "";
+
+                                Date date = new Date();
+                                date.setTime(System.currentTimeMillis()-idle);
+                                String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
+
+                                strings.put(getString(R.string.LastActivity), time + " " + lastStatus);
+                            }
+                        }
     				}
     			} else {
+                    String lastActivity = "";
+                    try {
+                        LastActivity activity = LastActivityManager.getLastActivity(service.getConnection(account), jid);
+                        if (activity != null) {
+                            long idle = activity.getIdleTime() * 1000;
+                            String lastStatus = activity.getStatusMessage();
+                            if (lastStatus == null) lastStatus = "";
+
+                            Date date = new Date();
+                            date.setTime(System.currentTimeMillis()-idle);
+                            String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
+
+                            lastActivity = getString(R.string.LastActivity) + ": " + time + "\n";
+                        }
+                    } catch (Exception ignored) { }
+
     				Version request = new Version();
     				request.setPacketID(System.currentTimeMillis()+"");
     				request.setType(IQ.Type.GET);
@@ -325,6 +386,7 @@ public class VCardActivity extends Activity {
 
                     String key = StringUtils.parseResource(jid);
     				String value = getString(R.string.Status) + ": " + service.getStatus(account, jid) + "\n"
+                            + lastActivity
     						+ getString(R.string.Client) + ": " + vstr;
 
                     if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
@@ -466,7 +528,7 @@ public class VCardActivity extends Activity {
 						value.setText(re.getType().name());
 						adapter.add(linear);
 	    			}
-					
+
 					Enumeration<String> keys = strings.keys();
 					while (keys.hasMoreElements()) {
 						String key = keys.nextElement();

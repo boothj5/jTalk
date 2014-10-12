@@ -24,6 +24,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 import android.view.ViewGroup;
+import com.jtalk2.R;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
@@ -75,10 +76,11 @@ public class Avatars {
                             if (image != null) {
                                 int value = (int) (42 * activity.getResources().getDisplayMetrics().density);
                                 ViewGroup.LayoutParams lp = image.getLayoutParams();
-                                lp.width = 1;
+                                lp.width = value;
                                 lp.height = value;
                                 image.setLayoutParams(lp);
-                                image.setVisibility(View.INVISIBLE);
+                                image.setImageResource(R.drawable.avatar);
+                                image.setVisibility(View.VISIBLE);
                             }
                         }
 					}

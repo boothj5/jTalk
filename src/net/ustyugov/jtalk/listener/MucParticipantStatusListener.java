@@ -74,7 +74,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 		item.setBody(service.getResources().getString(R.string.ChangedNicknameTo) + " " + newNick);
 		item.setName(nick);
 		item.setTime(time);
-		item.setType(MessageItem.Type.status);
+		item.setType(MessageItem.Type.connectionstatus);
 		
         try {
         	File oldFile = new File(Constants.PATH + "/" + p.replaceAll("/", "%"));
@@ -93,7 +93,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         
     	MessageItem item = new MessageItem(account, p);
 		item.setBody("banned (" + reason + ")");
-		item.setType(MessageItem.Type.status);
+		item.setType(MessageItem.Type.connectionstatus);
         item.setName(nick);
         item.setTime(time);
         
@@ -109,7 +109,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 		item.setReceived(false);
         item.setName(nick);
         item.setTime(time);
-        item.setType(MessageItem.Type.status);
+        item.setType(MessageItem.Type.connectionstatus);
         
         MessageLog.writeMucMessage(account, g, nick, item);
 	}
@@ -133,7 +133,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 
     	MessageItem item = new MessageItem(account, participant);
 		item.setBody(service.getResources().getString(R.string.UserJoined) + stat + jid);
-		item.setType(MessageItem.Type.status);
+		item.setType(MessageItem.Type.connectionstatus);
         item.setName(nick);
         item.setTime(time);
         
@@ -146,7 +146,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 
     	MessageItem item = new MessageItem(account, participant);
 		item.setBody(service.getString(R.string.UserLeaved));
-		item.setType(MessageItem.Type.status);
+		item.setType(MessageItem.Type.connectionstatus);
         item.setName(nick);
         item.setTime(time);
         
@@ -184,7 +184,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 	        
 	    	MessageItem item = new MessageItem(account, participant);
 			item.setBody(role + " & " + affiliation);
-			item.setType(MessageItem.Type.status);
+			item.setType(MessageItem.Type.connectionstatus);
 	        item.setName(nick);
 	        item.setTime(time);
 	        

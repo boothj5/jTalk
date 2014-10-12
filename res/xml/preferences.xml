@@ -51,21 +51,42 @@
                 android:key="ColorLines"
                 android:title="@string/ColorLines"
                 android:defaultValue="false" />
+        <ListPreference
+                android:key="SubscriptionMode"
+                android:title="@string/Subscription"/>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Chat">
-        <CheckBoxPreference
-                android:key="ShowTime"
-                android:title="@string/ShowTime"
-                android:defaultValue="false" />
-        <CheckBoxPreference
-                android:key="ShowStatus"
-                android:title="@string/ShowStatus"
-                android:defaultValue="true" />
+        <PreferenceScreen android:title="@string/ShowTime">
+            <CheckBoxPreference
+                    android:key="ShowTime"
+                    android:title="@string/ShowTime"
+                    android:defaultValue="false" />
+            <EditTextPreference
+                    android:key="TimeSize"
+                    android:dependency="ShowTime"
+                    android:title="@string/FontSize"
+                    android:defaultValue="@string/DefaultFontSize"
+                    android:numeric="integer"/>
+        </PreferenceScreen>
+        <ListPreference
+                android:defaultValue="2"
+                android:entries="@array/StatusMessages"
+                android:entryValues="@array/StatusMessagesValues"
+                android:key="StatusMessagesMode"
+                android:title="@string/ShowStatus"/>
         <CheckBoxPreference
                 android:key="StatusInBar"
                 android:title="@string/ShowStatuses"
                 android:summary="On sidebar"
+                android:defaultValue="true" />
+        <CheckBoxPreference
+                android:key="ShowChatState"
+                android:title="@string/ShowChatState"
+                android:defaultValue="true" />
+        <CheckBoxPreference
+                android:key="SendChatState"
+                android:title="@string/SendChatState"
                 android:defaultValue="true" />
         <CheckBoxPreference
                 android:key="AutoScroll"
@@ -98,9 +119,21 @@
                 android:key="NoMaxLines"
                 android:title="@string/NoMaxLines"
                 android:defaultValue="true" />
+        <CheckBoxPreference
+                android:title="@string/ShowDeliveryNotifications"
+                android:key="ShowReceivedIcon"
+                android:defaultValue="true"/>
+        <CheckBoxPreference
+                android:title="@string/ShowHintsOnInputPanel"
+                android:key="ShowInputHints"
+                android:defaultValue="true"/>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/MUC">
+        <CheckBoxPreference
+                android:key="EnableAutojoin"
+                android:title="@string/AutoJoin"
+                android:defaultValue="true" />
         <EditTextPreference
                 android:key="MucHistorySize"
                 android:title="@string/MucHistorySize"
@@ -112,8 +145,12 @@
                 android:defaultValue=", " />
         <EditTextPreference
                 android:key="Highlights"
-                android:title="Words for highlight"
+                android:title="@string/WordsForHighlight"
                 android:defaultValue="" />
+        <CheckBoxPreference
+                android:key="HighlightFullWord"
+                android:title="@string/HighlightOnlyFullWords"
+                android:defaultValue="false" />
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Notifications">
@@ -153,6 +190,10 @@
                 android:entryValues="@array/vibrationValues"
                 android:key="vibrationMode"
                 android:title="@string/Vibration"/>
+        <CheckBoxPreference
+                android:key="LoadNotifyAvatar"
+                android:title="@string/LoadAvatars"
+                android:defaultValue="true" />
         <CheckBoxPreference
                 android:title="@string/MessageInNotification"
                 android:key="MessageInNotification"
@@ -273,7 +314,7 @@
                 android:key="AUTOSTART"
                 android:defaultValue="false"/>
         <CheckBoxPreference
-                android:title="Auto load avatars"
+                android:title="@string/AutoLoadAvatars"
                 android:key="LoadAllAvatars"
                 android:defaultValue="false"/>
         <CheckBoxPreference
@@ -281,11 +322,15 @@
                 android:key="DeleteHistory"
                 android:defaultValue="false"/>
         <CheckBoxPreference
-                android:title="Wi-Fi Lock"
+                android:title="@string/WiFiLock"
                 android:key="WifiLock"
                 android:defaultValue="false"/>
         <CheckBoxPreference
-                android:title="Send Tunes"
+                android:title="@string/WakeLock"
+                android:key="WakeLock"
+                android:defaultValue="false"/>
+        <CheckBoxPreference
+                android:title="@string/SendTunes"
                 android:key="PlayingNow"
                 android:defaultValue="false"/>
         <CheckBoxPreference
@@ -294,29 +339,37 @@
                 android:defaultValue="false"/>
     </PreferenceScreen>
 
-    <PreferenceScreen android:title="Experimental">
+    <PreferenceScreen android:title="@string/Experimental">
         <EditTextPreference
                 android:key="RosterColumns"
-                android:title="Columns in roster"
+                android:title="@string/ColumnsInRoster"
                 android:summary="Only if 'Show groups' is off"
                 android:defaultValue="1"
                 android:numeric="integer"/>
         <CheckBoxPreference
-                android:title="Ping to server"
-                android:summary="Needed reconnect"
+                android:title="@string/PingToServer"
+                android:summary="@string/NeededReconnect"
                 android:key="Ping"
                 android:defaultValue="false"/>
         <EditTextPreference
                 android:dependency="Ping"
                 android:key="PingTimeout"
-                android:title="Ping timeout"
-                android:summary="in seconds"
+                android:title="@string/PingTimeout"
+                android:summary="@string/inseconds"
                 android:defaultValue="60"
                 android:numeric="integer"/>
         <CheckBoxPreference
-                android:title="Enable SIP"
-                android:summary="Needed reconnect"
+                android:title="@string/EnableSIP"
+                android:summary="@string/NeededReconnect"
                 android:key="EnableSIP"
+                android:defaultValue="false"/>
+        <CheckBoxPreference
+                android:title="@string/AutoLoadPictures"
+                android:key="LoadPictures"
+                android:defaultValue="false"/>
+        <CheckBoxPreference
+                android:title="XML Console"
+                android:key="XMLConsole"
                 android:defaultValue="false"/>
     </PreferenceScreen>
     <PreferenceScreen android:title="@string/Info">
@@ -325,16 +378,23 @@
                 android:summary="@string/app_name"/>
         <Preference
                 android:key="version"
-                android:title="Version"/>
+                android:title="@string/Version"/>
         <Preference
                 android:key="build"
                 android:title="Build"/>
         <Preference
                 android:title="Web"
-                android:summary="http://jtalk.ustyugov.net">
+                android:summary="http://jtalk.ru">
             <intent
                     android:action="android.intent.action.VIEW"
-                    android:data="http://jtalk.ustyugov.net"/>
+                    android:data="http://jtalk.ru"/>
+        </Preference>
+        <Preference
+                android:title="Support"
+                android:summary="jtalk@conference.jabber.ru">
+            <intent
+                    android:action="android.intent.action.VIEW"
+                    android:data="xmpp:jtalk@conference.jabber.ru?join"/>
         </Preference>
     </PreferenceScreen>
 </PreferenceScreen>

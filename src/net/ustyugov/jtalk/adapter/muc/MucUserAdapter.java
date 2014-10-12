@@ -34,6 +34,8 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.ChatState;
+import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.jivesoftware.smackx.packet.MUCUser;
 
 import android.app.Activity;
@@ -98,57 +100,59 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 		clear();
 
 		if (group != null && service.getConferencesHash(account).containsKey(group)) {
-			Iterator<Presence> it = service.getRoster(account).getPresences(group);
+            MultiUserChat muc = service.getConferencesHash(account).get(group);
+            Iterator<String> it = muc.getOccupants();
 			while (it.hasNext()) {
-				Presence p = it.next();
-                if (p.getType() == Presence.Type.unavailable) continue;
-				Presence.Mode m = p.getMode();
-				if (m == null) m = Presence.Mode.available;
-				String role = "visitor";
-				String jid = p.getFrom();
-	    		MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
-	    		if (mucUser != null) {
-	    			role = mucUser.getItem().getRole();
-	    			if (role.equals("visitor")) {
-	    				if (m == Presence.Mode.chat) vChat.add(jid);
-	    				else if (m == Presence.Mode.away) vAway.add(jid);
-	    				else if (m == Presence.Mode.xa) vXa.add(jid);
-	    				else if (m == Presence.Mode.dnd) vDnd.add(jid);
-	    				else if (m == Presence.Mode.available) vOnline.add(jid);
+				Presence p = muc.getOccupantPresence(it.next());
+                if (p.isAvailable()) {
+                    Presence.Mode m = p.getMode();
+                    if (m == null) m = Presence.Mode.available;
+                    String role = "visitor";
+                    String jid = p.getFrom();
+                    MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
+                    if (mucUser != null) {
+                        role = mucUser.getItem().getRole();
+                        if (role.equals("visitor")) {
+                            if (m == Presence.Mode.chat) vChat.add(jid);
+                            else if (m == Presence.Mode.away) vAway.add(jid);
+                            else if (m == Presence.Mode.xa) vXa.add(jid);
+                            else if (m == Presence.Mode.dnd) vDnd.add(jid);
+                            else if (m == Presence.Mode.available) vOnline.add(jid);
 
-                        Collections.sort(vChat, new SortList.StringComparator());
-                        Collections.sort(vAway, new SortList.StringComparator());
-                        Collections.sort(vXa, new SortList.StringComparator());
-                        Collections.sort(vDnd, new SortList.StringComparator());
-                        Collections.sort(vOnline, new SortList.StringComparator());
-	    			}
-	    			else if (role.equals("participant")) {
-	    				if (m == Presence.Mode.chat) pChat.add(jid);
-	    				else if (m == Presence.Mode.away) pAway.add(jid);
-	    				else if (m == Presence.Mode.xa) pXa.add(jid);
-	    				else if (m == Presence.Mode.dnd) pDnd.add(jid);
-	    				else if (m == Presence.Mode.available) pOnline.add(jid);
+                            Collections.sort(vChat, new SortList.StringComparator());
+                            Collections.sort(vAway, new SortList.StringComparator());
+                            Collections.sort(vXa, new SortList.StringComparator());
+                            Collections.sort(vDnd, new SortList.StringComparator());
+                            Collections.sort(vOnline, new SortList.StringComparator());
+                        }
+                        else if (role.equals("participant")) {
+                            if (m == Presence.Mode.chat) pChat.add(jid);
+                            else if (m == Presence.Mode.away) pAway.add(jid);
+                            else if (m == Presence.Mode.xa) pXa.add(jid);
+                            else if (m == Presence.Mode.dnd) pDnd.add(jid);
+                            else if (m == Presence.Mode.available) pOnline.add(jid);
 
-                        Collections.sort(pChat, new SortList.StringComparator());
-                        Collections.sort(pAway, new SortList.StringComparator());
-                        Collections.sort(pXa, new SortList.StringComparator());
-                        Collections.sort(pDnd, new SortList.StringComparator());
-                        Collections.sort(pOnline, new SortList.StringComparator());
-	    			}
-	    			else if (role.equals("moderator")) {
-	    				if (m == Presence.Mode.chat) mChat.add(jid);
-	    				else if (m == Presence.Mode.away) mAway.add(jid);
-	    				else if (m == Presence.Mode.xa) mXa.add(jid);
-	    				else if (m == Presence.Mode.dnd) mDnd.add(jid);
-	    				else if (m == Presence.Mode.available) mOnline.add(jid);
+                            Collections.sort(pChat, new SortList.StringComparator());
+                            Collections.sort(pAway, new SortList.StringComparator());
+                            Collections.sort(pXa, new SortList.StringComparator());
+                            Collections.sort(pDnd, new SortList.StringComparator());
+                            Collections.sort(pOnline, new SortList.StringComparator());
+                        }
+                        else if (role.equals("moderator")) {
+                            if (m == Presence.Mode.chat) mChat.add(jid);
+                            else if (m == Presence.Mode.away) mAway.add(jid);
+                            else if (m == Presence.Mode.xa) mXa.add(jid);
+                            else if (m == Presence.Mode.dnd) mDnd.add(jid);
+                            else if (m == Presence.Mode.available) mOnline.add(jid);
 
-                        Collections.sort(mChat, new SortList.StringComparator());
-                        Collections.sort(mAway, new SortList.StringComparator());
-                        Collections.sort(mXa, new SortList.StringComparator());
-                        Collections.sort(mDnd, new SortList.StringComparator());
-                        Collections.sort(mOnline, new SortList.StringComparator());
-	    			}
-	    		}
+                            Collections.sort(mChat, new SortList.StringComparator());
+                            Collections.sort(mAway, new SortList.StringComparator());
+                            Collections.sort(mXa, new SortList.StringComparator());
+                            Collections.sort(mDnd, new SortList.StringComparator());
+                            Collections.sort(mOnline, new SortList.StringComparator());
+                        }
+                    }
+                }
 			}
 			
 			int mCount = mOnline.size() + mAway.size() + mXa.size() + mDnd.size() + mChat.size();
@@ -407,7 +411,8 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			}
 
             String statusText = service.getStatus(account, jid);
-            if (service.getComposeList().contains(jid)) statusText = service.getString(R.string.Composes);
+            ChatState state = service.getRoster(account).getChatState(jid);
+            if (state != null && state == ChatState.composing) statusText = service.getString(R.string.Composes);
             if (prefs.getBoolean("StatusInBar", true)) {
                 holder.status.setVisibility(statusText.length() > 0 ? View.VISIBLE : View.GONE);
                 holder.status.setText(statusText);

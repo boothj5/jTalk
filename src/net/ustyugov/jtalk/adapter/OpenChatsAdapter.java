@@ -44,6 +44,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import org.jivesoftware.smackx.ChatState;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
@@ -178,7 +179,8 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
             }
 
             holder.name.setText(nick);
-            if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
+            ChatState state = service.getRoster(account).getChatState(jid);
+            if (state != null && state == ChatState.composing) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
             else if (service.isHighlight(account, jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
             else holder.name.setTextColor(Colors.ENTRY_FOREGROUND);
 

@@ -31,6 +31,9 @@
     <item android:id="@+id/notes"
           android:showAsAction="never"
           android:title="@string/notes"/>
+    <item android:id="@+id/xml"
+          android:showAsAction="never"
+          android:title="XML Console"/>
     <item android:id="@+id/prefs"
         android:showAsAction="never"
         android:title="@string/Settings"/>

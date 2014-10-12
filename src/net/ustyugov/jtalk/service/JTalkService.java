@@ -25,6 +25,7 @@ import java.util.*;
 
 import android.app.Activity;
 import android.net.sip.*;
+import android.os.PowerManager;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
@@ -90,7 +91,6 @@ public class JTalkService extends Service {
 	private static JTalkService js = new JTalkService();
     private Smiles smiles;
     private List<String> collapsedGroups = new ArrayList<String>();
-    private List<String> composeList = new ArrayList<String>();
     private Hashtable<String, List<String>> activeChats = new Hashtable<String, List<String>>();
     private Hashtable<String, Integer> msgCounter = new Hashtable<String, Integer>();
     private List<MessageItem> unreadMessages = new ArrayList<MessageItem>();
@@ -111,6 +111,7 @@ public class JTalkService extends Service {
     private Hashtable<String, ConnectionTask> connectionTasks = new Hashtable<String, ConnectionTask>();
     private Hashtable<String, Timer> pingTimers = new Hashtable<String, Timer>();
     private Hashtable<String, SipManager> sipManagers = new Hashtable<String, SipManager>();
+    private Hashtable<String, XmlListener> XmlListeners = new Hashtable<String, XmlListener>();
     private String currentJid = "me";
     private String sidebarMode = "users";
     private String globalState = "";
@@ -126,6 +127,7 @@ public class JTalkService extends Service {
     private SipAudioCall call = null;
 
     private WifiManager.WifiLock wifiLock;
+    private PowerManager.WakeLock wakeLock;
     
     private IconPicker iconPicker;
 
@@ -158,6 +160,12 @@ public class JTalkService extends Service {
 
         hash.put(jid, list);
         messages.put(account, hash);
+    }
+
+    public XmlListener getXmlListener(String account) {
+        if (XmlListeners.containsKey(account)) {
+            return XmlListeners.get(account);
+        } else return null;
     }
     
     private void removeConnectionListener(String account) {
@@ -327,7 +335,6 @@ public class JTalkService extends Service {
     	else return null;
     }
     public List<String> getCollapsedGroups() { return collapsedGroups; }
-    public List<String> getComposeList() { return composeList; }
 
     public Hashtable<String, Hashtable<String, MultiUserChat>> getConferences() {return conferences;}
     public Hashtable<String, MultiUserChat> getConferencesHash(String account) { 
@@ -529,12 +536,9 @@ public class JTalkService extends Service {
     				else return Presence.Type.unavailable;
     			}
     		} else {
-    	    	Iterator<Presence> it = getRoster(account).getPresences(user);
-    	    	if(it.hasNext()) {
-    	    		return it.next().getType();
-    	    	} else {
-    	    		return Presence.Type.unavailable;
-    	    	}
+    	    	Presence p = getRoster(account).getPresence(user);
+    	    	if (p != null) return p.getType();
+                else return Presence.Type.unavailable;
     		}
     	}
 		return Presence.Type.unavailable;
@@ -736,6 +740,8 @@ public class JTalkService extends Service {
 
         WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 		wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "jTalk");
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "jTalk");
 
         started = true;
 
@@ -770,6 +776,7 @@ public class JTalkService extends Service {
     public void disconnect() {
         if (!started) return;
         if (wifiLock != null && wifiLock.isHeld()) wifiLock.release();
+        if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
     	Collection<XMPPConnection> con = getAllConnections();
 		for (XMPPConnection connection: con) {
 			String account = StringUtils.parseBareAddress(connection.getUser());
@@ -862,6 +869,7 @@ public class JTalkService extends Service {
     public void connect() {
         if (!started) return;
     	if (prefs.getBoolean("WifiLock", false)) wifiLock.acquire();
+        if (prefs.getBoolean("WakeLock", false)) wakeLock.acquire();
     	
 //		String text  = prefs.getString("currentStatus", "");
 		String mode  = prefs.getString("currentMode", "available");
@@ -1003,7 +1011,7 @@ public class JTalkService extends Service {
                         muc.join(nick, password, h, 10000, presence);
                     } catch (Exception e) {
                         Intent eIntent = new Intent(Constants.ERROR);
-                        eIntent.putExtra("error", "Error: " + e.getLocalizedMessage());
+                        eIntent.putExtra("error", "[" + group + "] " + "Error: " + e.getLocalizedMessage());
                         sendBroadcast(eIntent);
                         return;
                     }
@@ -1066,8 +1074,16 @@ public class JTalkService extends Service {
 
     public void addContact(String account, String jid, String name, String group) {
 	    try {
-		    final String[] groups = { group };
-		    getRoster(account).createEntry(jid, name, groups);
+            Roster roster = getRoster(account);
+            if (roster != null) {
+                String[] groups = { group };
+                roster.createEntry(jid, name, groups);
+                if (roster.getSubscriptionMode() == Roster.SubscriptionMode.manual) {
+                    Presence presence = new Presence(Presence.Type.subscribe);
+                    presence.setTo(jid);
+                    sendPacket(account, presence);
+                }
+            }
 	    } catch (XMPPException ignored) {    }
     }
   
@@ -1374,7 +1390,6 @@ public class JTalkService extends Service {
         msgCounter.clear();
   		autoStatusTimer.cancel();
         collapsedGroups.clear();
-        composeList.clear();
         unreadMessages.clear();
         conferences.clear();
         joinedConferences.clear();
@@ -1497,7 +1512,7 @@ public class JTalkService extends Service {
             Log.d("SIP", "user: " + user + "; host: " + host + "; port: " + port);
 
             try {
-                SipProfile.Builder builder = new SipProfile.Builder(user, host);
+                SipProfile.Builder builder = new SipProfile.Builder("sip:"+username);
                 builder.setDisplayName(username);
                 builder.setProfileName(username);
                 builder.setAutoRegistration(true);
@@ -1516,6 +1531,7 @@ public class JTalkService extends Service {
                 intent.setAction(Constants.INCOMING_CALL);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(JTalkService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 if (!manager.isOpened(profile.getUriString())) manager.open(profile, pendingIntent, null);
+                Thread.sleep(4000);
                 manager.setRegistrationListener(profile.getUriString(), new SipRegistrationListener() {
                     @Override
                     public void onRegistering(String localProfileUri) {
@@ -1535,7 +1551,7 @@ public class JTalkService extends Service {
                 Log.e("CreateSipProfile", pe.getLocalizedMessage());
             } catch (SipException se) {
                 Log.e("SIPExtension", se.getLocalizedMessage());
-            }
+            } catch (InterruptedException ignored) { }
         }
     }
     
@@ -1649,10 +1665,12 @@ public class JTalkService extends Service {
                 connection.addFeature(ReplaceExtension.NAMESPACE);
                 connection.addFeature(Notes.NAMESPACE);
 
+                XmlListeners.put(username, new XmlListener(connection));
+
                 try {
                     if (!connection.isConnected()) connection.connect();
                 } catch (XMPPException xe) {
-                    String error = "Error connecting to " + connection.getServiceName();
+                    String error = "[" + connection.getServiceName() + "] Error: " + xe.getLocalizedMessage();
                     setState(username, error);
                     sendBroadcast(intent);
                     if (!isAuthenticated()) Notify.offlineNotify(JTalkService.this, error);
@@ -1667,7 +1685,7 @@ public class JTalkService extends Service {
                         addConnectionListener(username, connection);
 
                         Roster roster = connection.getRoster();
-                        roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
+                        roster.setSubscriptionMode(Roster.SubscriptionMode.valueOf(prefs.getString("SubscriptionMode", Roster.SubscriptionMode.accept_all.name())));
                         roster.addRosterListener(new RstListener(username));
 
                         connections.put(username, connection);
@@ -1676,7 +1694,7 @@ public class JTalkService extends Service {
                 } catch (Exception e) {
                     setState(username, e.getLocalizedMessage());
                     sendBroadcast(intent);
-                    if (!isAuthenticated()) Notify.offlineNotify(JTalkService.this, "");
+                    if (!isAuthenticated()) Notify.offlineNotify(JTalkService.this, e.getLocalizedMessage());
                     return null;
                 }
             }
@@ -1721,16 +1739,18 @@ public class JTalkService extends Service {
                                 joinRoom(username, conf.getName(), conf.getNick(), conf.getPassword());
                             }
                         } else {
-                            try {
-                                BookmarkManager bm = BookmarkManager.getBookmarkManager(connection);
-                                Collection<BookmarkedConference> bookmarks = bm.getBookmarkedConferences();
-                                for(BookmarkedConference bc : bookmarks) {
-                                    if (bc.isAutoJoin()) {
-	                                	String nick = getDerivedNick(username, bc);
-	                                	joinRoom(username, bc.getJid(), nick, bc.getPassword());
+                            if (prefs.getBoolean("EnableAutojoin", true)) {
+                                try {
+                                    BookmarkManager bm = BookmarkManager.getBookmarkManager(connection);
+                                    Collection<BookmarkedConference> bookmarks = bm.getBookmarkedConferences();
+                                    for(BookmarkedConference bc : bookmarks) {
+                                        if (bc.isAutoJoin()) {
+                                            String nick = getDerivedNick(username, bc);
+                                            joinRoom(username, bc.getJid(), nick, bc.getPassword());
+                                        }
                                     }
-                                }
-                            } catch (XMPPException ignored) { }
+                                } catch (XMPPException ignored) { }
+                            }
                         }
                     }
                 }.start();

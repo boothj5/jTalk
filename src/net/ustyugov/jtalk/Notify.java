@@ -259,12 +259,21 @@ public class Notify {
             PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Bitmap largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.stat_msg);
-            String filePath = Constants.PATH + fullJid.replaceAll("/", "%");
-            File a = new File(filePath);
-            if (a.exists()) largeIcon = BitmapFactory.decodeFile(filePath);
+            if (type == Type.Direct) largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.icon_muc);
             else {
-                if (type == Type.Direct) {
-                    largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.icon_muc);
+                if (prefs.getBoolean("LoadNotifyAvatar", true)) {
+                    String filePath = Constants.PATH + fullJid.replaceAll("/", "%");
+                    File a = new File(filePath);
+                    if (a.exists()) {
+                        largeIcon = BitmapFactory.decodeFile(filePath);
+
+                        int width = largeIcon.getWidth();
+                        if (width > 96)  {
+                            double k = (double)width/(double)96;
+                            int h = (int) (largeIcon.getHeight()/k);
+                            largeIcon = Bitmap.createScaledBitmap(largeIcon, 96, h, true);
+                        }
+                    }
                 }
             }
 
@@ -511,7 +520,7 @@ public class Notify {
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         i.putExtra("password", true);
         i.putExtra("account", account);
-        PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
         String str = "Enter password!";
 
@@ -526,6 +535,41 @@ public class Notify {
         mBuilder.setContentIntent(contentIntent);
 
         NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
+        mng.notify(Integer.parseInt((System.currentTimeMillis()+"").substring(7)), mBuilder.build());
+    }
+
+    public static void subscribtionNotify(Context context, String account, String from) {
+        String soundPath = "";
+
+        Intent i = new Intent(context, RosterActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        i.putExtra("subscribtion", true);
+        i.putExtra("account", account);
+        i.putExtra("jid", from);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String vibration = prefs.getString("vibrationMode", "1");
+        if (!prefs.getBoolean("soundDisabled", false)) {
+            if (vibration.equals("1") || vibration.equals("2") || vibration.equals("3")) {
+                Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+                vibrator.vibrate(200);
+            }
+            soundPath = prefs.getString("ringtone", "");
+        }
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
+        mBuilder.setAutoCancel(true);
+        mBuilder.setOngoing(false);
+        mBuilder.setSmallIcon(R.drawable.noface);
+        mBuilder.setLights(0xFF0000FF, 2000, 3000);
+        mBuilder.setContentTitle(from);
+        mBuilder.setContentText("Subscription request");
+        mBuilder.setContentIntent(contentIntent);
+        mBuilder.setTicker("Subscription request from " + from);
+        if (!soundPath.isEmpty()) mBuilder.setSound(Uri.parse(soundPath));
+
+        NotificationManager mng = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(Integer.parseInt((System.currentTimeMillis()+"").substring(7)), mBuilder.build());
     }
 

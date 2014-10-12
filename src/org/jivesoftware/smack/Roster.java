@@ -28,6 +28,7 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.ChatState;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -163,6 +164,20 @@ public class Roster {
      */
     public SubscriptionMode getSubscriptionMode() {
         return subscriptionMode;
+    }
+
+    public ChatState getChatState(String user) {
+        if (user == null || !entries.containsKey(user.toLowerCase())) {
+            return null;
+        }
+        return entries.get(user.toLowerCase()).getState();
+    }
+
+    public void setChatState(String user, ChatState state) {
+        if (user == null || !entries.containsKey(user.toLowerCase())) {
+            return;
+        }
+        entries.get(user.toLowerCase()).setState(state);
     }
 
     /**
@@ -909,8 +924,9 @@ public class Roster {
                     Presence response = new Presence(Presence.Type.unsubscribed);
                     response.setTo(presence.getFrom());
                     connection.sendPacket(response);
+                } else {
+                    fireRosterPresenceEvent(presence);
                 }
-                // Otherwise, in manual mode so ignore.
             }
             else if (presence.getType() == Presence.Type.unsubscribe) {
                 if (subscriptionMode != SubscriptionMode.manual) {
@@ -920,8 +936,9 @@ public class Roster {
                     Presence response = new Presence(Presence.Type.unsubscribed);
                     response.setTo(presence.getFrom());
                     connection.sendPacket(response);
+                } else {
+                    fireRosterPresenceEvent(presence);
                 }
-                // Otherwise, in manual mode so ignore.
             }
             // Error presence packets from a bare JID mean we invalidate all existing
             // presence info for the user.

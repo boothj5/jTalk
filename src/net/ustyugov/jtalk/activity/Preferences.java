@@ -21,10 +21,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.database.Cursor;
 import android.preference.*;
 import android.view.MenuItem;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.IconPicker;
+import net.ustyugov.jtalk.db.AccountDbHelper;
+import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import com.jtalk2.R;
@@ -34,21 +37,18 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
+import org.jivesoftware.smack.Roster;
 
 public class Preferences extends PreferenceActivity implements OnSharedPreferenceChangeListener {
-//	private CheckBoxPreference compression;
 	private ListPreference smilespack;
-    private ListPreference colortheme;
-	private ListPreference iconspack;
-	private SharedPreferences  prefs;
-	
+
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
         getActionBar().setDisplayHomeAsUpEnabled(true);
 		CharSequence[] smiles = new CharSequence[1];
         CharSequence[] colors;
-		prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		addPreferencesFromResource(R.xml.preferences);  // TODO!
 		
 		File file = new File(Constants.PATH_SMILES);
@@ -94,24 +94,35 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 				}
 			}
 		}
+
+        CharSequence[] subscriptionEntries = new CharSequence[3];
+        subscriptionEntries[0] = getString(R.string.AcceptAll);
+        subscriptionEntries[1] = getString(R.string.Manual);
+        subscriptionEntries[2] = getString(R.string.RejectAll);
+
+        CharSequence[] subscriptionValues = new CharSequence[3];
+        subscriptionValues[0] = Roster.SubscriptionMode.accept_all.name();
+        subscriptionValues[1] = Roster.SubscriptionMode.manual.name();
+        subscriptionValues[2] = Roster.SubscriptionMode.reject_all.name();
+
+        ListPreference subscription = (ListPreference) getPreferenceScreen().findPreference("SubscriptionMode");
+        subscription.setEntries(subscriptionEntries);
+        subscription.setEntryValues(subscriptionValues);
 		
-//		compression  = (CheckBoxPreference) getPreferenceScreen().findPreference("UseCompression");
 		smilespack = (ListPreference) getPreferenceScreen().findPreference("SmilesPack");
 		smilespack.setEntries(smiles);
 		smilespack.setEntryValues(smiles);
 
-        colortheme = (ListPreference) getPreferenceScreen().findPreference("ColorTheme");
+        ListPreference colortheme = (ListPreference) getPreferenceScreen().findPreference("ColorTheme");
         colortheme.setEntries(colors);
         colortheme.setEntryValues(colors);
         if (colors.length == 1) colortheme.setValue("Light");
 		
-		iconspack = (ListPreference) getPreferenceScreen().findPreference("IconPack");
+		ListPreference iconspack = (ListPreference) getPreferenceScreen().findPreference("IconPack");
 		iconspack.setEntries(names.toArray(new CharSequence[1]));
 		iconspack.setEntryValues(icons.toArray(new CharSequence[1]));
 		if (icons.size() == 1) iconspack.setValue("default");
 		
-//		compression.setEnabled(prefs.getBoolean("EnableTls", true) ? true : false);
-
 		if (smiles.length > 0) {
 			smilespack.setEnabled(prefs.getBoolean("ShowSmiles", true));
 		} else smilespack.setEnabled(false);
@@ -157,5 +168,20 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		IconPicker ip = JTalkService.getInstance().getIconPicker();
 		if (ip != null && !iconPack.equals(ip.getPackName())) ip.loadIconPack();
 		setResult(RESULT_OK);
+
+        JTalkService service = JTalkService.getInstance();
+        Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            do {
+                String acc = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
+                if (service.isAuthenticated(acc)) {
+                    String mode = prefs.getString("SubscriptionMode", Roster.SubscriptionMode.accept_all.name());
+                    Roster roster = service.getRoster(acc);
+                    if (roster != null) roster.setSubscriptionMode(Roster.SubscriptionMode.valueOf(mode));
+                }
+            } while(cursor.moveToNext());
+            cursor.close();
+        }
 	}
 }

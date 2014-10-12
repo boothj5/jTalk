@@ -21,12 +21,8 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 
 import android.preference.PreferenceManager;
-import net.ustyugov.jtalk.Avatars;
-import net.ustyugov.jtalk.MessageItem;
-import net.ustyugov.jtalk.MessageLog;
+import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.service.JTalkService;
-
-import net.ustyugov.jtalk.Constants;
 
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
@@ -36,6 +32,7 @@ import org.jivesoftware.smack.util.StringUtils;
 import android.content.Intent;
 
 import com.jtalk2.R;
+import org.jivesoftware.smackx.ChatState;
 
 public class RstListener implements RosterListener {
 	private JTalkService service;
@@ -66,6 +63,11 @@ public class RstListener implements RosterListener {
 
     @Override
     public void presenceChanged(Presence presence) {
+        if (presence.getType() == Presence.Type.subscribe) {
+            Notify.subscribtionNotify(service, account, presence.getFrom());
+            return;
+        }
+
     	String[] statusArray = service.getResources().getStringArray(R.array.statusArray);
     	String jid  = StringUtils.parseBareAddress(presence.getFrom());
         String name = jid;
@@ -91,6 +93,7 @@ public class RstListener implements RosterListener {
         }
 		else {
 			item.setBody(statusArray[5] + " " + status);
+            service.getRoster(account).setChatState(jid, ChatState.gone);
 		}
         item.setName(name);
         item.setTime(time);

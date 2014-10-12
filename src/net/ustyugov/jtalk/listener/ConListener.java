@@ -39,12 +39,13 @@ public class ConListener implements ConnectionListener {
 	}
 
 	public void connectionClosed() {
-        connectionClosedOnError(null);
+        connectionClosedOnError(new Exception(""));
 	}
 
 	public void connectionClosedOnError(Exception e) {
         Log.e("ConListener", "connectionClosedOnError");
-        if (!service.isAuthenticated()) Notify.offlineNotify(context, "Connection closed");
+        if (e == null) e = new Exception("Unknown error");
+        if (!service.isAuthenticated()) Notify.offlineNotify(context, "Connection closed " + e.getLocalizedMessage());
         if (!isStarted) {
             isStarted = true;
             context.sendBroadcast(new Intent(Constants.UPDATE));

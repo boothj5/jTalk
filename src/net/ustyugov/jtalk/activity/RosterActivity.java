@@ -128,6 +128,12 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
             RosterDialogs.passwordDialog(this, account);
         }
 
+        if (getIntent().getBooleanExtra("subscribtion", false)) {
+            String account = getIntent().getStringExtra("account");
+            String jid = getIntent().getStringExtra("jid");
+            RosterDialogs.subscribtionRequestDialog(this, account, jid);
+        }
+
         File table = new File(Constants.PATH_SMILES + "/default/table.xml");
         if (!table.exists()) {
             new CreateDefaultSmiles().execute();
@@ -394,6 +400,9 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
   	    		break;
             case R.id.notes:
                 startActivity(new Intent(this, NotesActivity.class));
+                break;
+            case R.id.xml:
+                startActivity(new Intent(this, XMLConsole.class));
                 break;
             case R.id.notify:
                 if (prefs.getBoolean("soundDisabled", false)) service.setPreference("soundDisabled", false);

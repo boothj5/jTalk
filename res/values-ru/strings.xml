@@ -104,17 +104,22 @@
     <string name="ActivateIgnoreListOnStart">Активировать игнорлист при запуске</string>
     <string name="Default">По умолчанию</string>
     <string name="IgnoreListDefaultList">Сделать игнорлист списком по умолчанию</string>
-    <string name="Experimental">Тонкие настройки</string>
+    <string name="Experimental">Экспериментальное</string>
     <string name="ShowMucGroup">Всегда показывать группу Конференции</string>
     <string name="SortByStatuses">Сортировать по статусам</string>
     <string name="ShowSelfResources">Показывать свои ресурсы</string>
     <string name="HideKeyboard">Прятать клавиатуру при отправке</string>
     <string name="MaxMessages">Число сообщений в логе</string>
     <string name="AddAfterNick">Добавлять после ника</string>
+    <string name="WordsForHighlight">Слова для подсветки</string>
+    <string name="HighlightOnlyFullWords">Подсвечивать только полные слова</string>
     <string name="NumberOfCharacters">Число символов</string>
     <string name="Columns">Число колонок</string>
     <string name="TheNumberColumnsDialog">Число колонок в диалоговом окне</string>
     <string name="Locations">Отправлять информацию о местоположении</string>
+    <string name="WiFiLock">Wi-Fi блокировка</string>
+    <string name="WakeLock">Блокировка спящего режима</string>
+    <string name="SendTunes">Показывать инфо о музыке</string>
     <string name="AutostartOnBoot">Запуск при загрузке устройства</string>
     <string name="CompactMode">Компактный режим</string>
     <string name="UseColors">Использовать цвета</string>
@@ -122,7 +127,10 @@
     <string name="ShowActiveChatsGroup">Группа \"Открытые чаты\"</string>
     <string name="ShowActiveContacts">Дублировать открытые чаты</string>
     <string name="NoMaxLines">Автовысота поля ввода</string>
+    <string name="ShowDeliveryNotifications">Показать уведомления о доставке</string>
+    <string name="ShowHintsOnInputPanel">Показывать намеки в поле ввода</string>
     <string name="ColorLines">Чередующийся фон</string>
+    <string name="Subscription">Подписка</string>
     <string name="ColorTheme">Цветовая схема</string>
     <string name="DisableSound">Отключить звук</string>
     <string name="EnableSound">Включить звук</string>
@@ -133,7 +141,10 @@
     <string name="SendOnEnter">Отправка по Enter</string>
     <string name="ShowSmilesButton">Показывать клавишу смайлов</string>
     <string name="OnKeyboard">На клавиатуре</string>
-    
+    <string name="AutoLoadAvatars">Автозагрузка аватарок</string>
+    <string name="ShowChatState">Показывать состояние чата</string>
+    <string name="SendChatState">Отправлять состояние чата</string>
+
     <!--  Menus -->
     <string name="Update">Обновить</string>
     <string name="ExecuteCommand">Выполнить команду</string>
@@ -142,6 +153,13 @@
     <string name="Remove">Удалить</string>
     <string name="Reply">Ответить</string>
     <string name="Clear">Очистить</string>
+    <string name="ColumnsInRoster">Колонок в ростере</string>
+    <string name="NeededReconnect">Необходимо переподключение</string>
+    <string name="inseconds">в секундах</string>
+    <string name="PingToServer">Пинговать сервер</string>
+    <string name="PingTimeout">Пинг тайм-аут</string>
+    <string name="EnableSIP">Включить SIP</string>
+    <string name="AutoLoadPictures">Авто загрузка изображений</string>
     <string name="Info">Информация</string>
     <string name="SendFile">Отправить файл</string>
     <string name="MUC">Конференции</string>
@@ -218,7 +236,12 @@
     <string name="AcceptFile">Принять файл?</string>
     <string name="Reason">Причина</string>
     <string name="SavePassword">Сохранить пароль</string>
-    
+    <string name="Enable">Включить</string>
+    <string name="AcceptAll">Принимать все</string>
+    <string name="Manual">Вручную</string>
+    <string name="RejectAll">Отклонять все</string>
+    <string name="Options">Опции</string>
+
     <!-- vCard -->
     <string name="FullName">Полное имя:</string>
     <string name="FirstName">Имя:</string>
@@ -243,6 +266,7 @@
     <string name="Work">Работа</string>
     <string name="Photo">Фотография</string>
     <string name="Publish">Опубликовать</string>
+    <string name="LastActivity">Последний статус</string>
     
     <!-- MUC -->
     <string name="Join">Войти</string>
@@ -276,4 +300,11 @@
     <string name="Completed">Выполнено</string>
     <string name="Canceled">Отменено</string>
     <string name="Refused">Отказано</string>
+
+    <!-- Chat States -->
+    <string name="UserActive">Пользователь активен</string>
+    <string name="UserInactive">Пользователь не активен</string>
+    <string name="UserPaused">Пользователь перестал печатать</string>
+    <string name="UserGone">Пользователь покинул чат</string>
+    <string name="UserComposing">Пользователь печатает сообщение</string>
 </resources>

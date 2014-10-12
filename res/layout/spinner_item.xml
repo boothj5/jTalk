@@ -1,20 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:orientation="horizontal"
+              android:layout_gravity="center_vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
     <TextView android:textSize="18sp"
+              android:gravity="center_vertical"
+              android:id="@+id/left"
+              android:singleLine="true"
+              android:layout_width="wrap_content"
+              android:layout_height="fill_parent"
+              android:textColor="#aaa"
+              android:layout_marginRight="10px"
+              android:text="&lt;"/>
+    <TextView android:textSize="18sp"
+              android:gravity="center_vertical"
               android:id="@+id/title"
               android:singleLine="true"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:text="test"
+              android:layout_weight="1"
               android:ellipsize="marquee" />
-    <TextView android:textSize="12sp"
-              android:textColor="#696969"
-              android:id="@+id/subtitle"
+    <TextView android:textSize="18sp"
+              android:gravity="center_vertical"
+              android:id="@+id/right"
               android:singleLine="true"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:ellipsize="marquee" />
+              android:layout_width="wrap_content"
+              android:layout_height="fill_parent"
+              android:textColor="#aaa"
+              android:text="&gt;"/>
 </LinearLayout>
